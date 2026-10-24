@@ -1,14 +1,16 @@
 # Pharmacy Claims Operations Analytics
 
-**A PBM portfolio project combining synthetic claims modeling, real public CMS aggregate-data analysis, and a locally tested HTTP monitoring service.** Python + SQL + scikit-learn, temporal model validation, batch scoring, an offline interactive dashboard, and simulated monitoring.
+**A PBM portfolio project combining synthetic claims modeling, real public CMS aggregate-data analysis, real de-identified MIMIC medication-workflow analysis, and an AWS-deployed HTTP monitoring service.** Python + SQL + scikit-learn, temporal model validation, batch scoring, an offline interactive dashboard, and simulated monitoring.
 
 ## The operational question
 
 At the moment a synthetic pharmacy claim is initially rejected, which cases should an operations team review first because no paid resolution is likely within seven days?
 
-This project demonstrates a workflow relevant to Pharmacy Benefit Manager (PBM) operations. It is **not professional PBM experience**, not a production deployment, not clinical decision support, and not affiliated with CVS Health or Caremark. The claims model uses simulated records and relationships. A separate CMS analysis uses real public provider-drug aggregates; these are not patient-level claims. Rejection is not automatically a final coverage denial, abandonment, or harm to a member.
+This project demonstrates a workflow relevant to Pharmacy Benefit Manager (PBM) operations. It is **not professional PBM experience**, not a real-user production workload, not clinical decision support, and not affiliated with CVS Health or Caremark. The claims model uses simulated records and relationships. A separate CMS analysis uses real public provider-drug aggregates. The MIMIC module analyzes real de-identified patient-level medication records; neither dataset supplies PBM rejection labels. Rejection is not automatically a final coverage denial, abandonment, or harm to a member.
 
 ## Added: real healthcare data and measured service telemetry
+
+- [MIMIC medication workflow analysis](MIMIC_WORKFLOW.md): 18,087 prescription-component rows from 100 de-identified patients; SQL join validation and timestamp/documentation quality checks. [Measured output](reports/mimic_workflow.json).
 
 - [CMS spending analysis](REAL_DATA.md): 5,000 real public aggregate rows covering $36.7M in recorded drug spending. Separate from synthetic model training.
 - [HTTP scoring and monitoring service](SERVICE.md): actual request telemetry, model fingerprints, rolling latency/failure/PSI metrics, persisted alerts, and Prometheus-compatible output. Verified using 145 HTTP requests and 7,000 synthetic episode scores.
@@ -92,7 +94,7 @@ The simulator produces measurable differences across rejection categories. This 
 
 > Implemented a Python/SQL pharmacy claims analytics project on 60,000 synthetic episodes; achieved 0.665 test ROC-AUC and captured 32.4% of seven-day unresolved cases at 20% review capacity versus 29.7% for a reason-based baseline, with an interactive dashboard and simulated drift alerts.
 
-Use under **Projects**, with “synthetic” and “simulated” retained. Do not claim production deployment, healthcare employment, actual cost savings, or clinical impact from this project.
+Use under **Projects**. Keep the synthetic-model and synthetic-test-traffic labels. AWS deployment and observed CloudWatch alarm behavior are supported by the cloud evidence; real patient-level data experience is supported by the separate MIMIC analysis. Do not claim real-user production traffic, healthcare employment, actual cost savings, or clinical impact.
 
 ## Domain and methodology references
 
@@ -104,4 +106,4 @@ These sources explain context; **none supplied the generated data or simulation 
 
 ## Verification
 
-The full pipeline, batch scoring, and **18 Python tests passed** (10 pipeline, 8 service). Optional dashboard interaction tests (`npm install && npm test`, Node 22+) passed in jsdom. Browser visual verification was blocked by a failed Chromium download; see [verification record](reports/VALIDATION.md). This is a local runnable project, not a hosted application.
+The full pipeline, batch scoring, and **18 Python tests passed** (10 pipeline, 8 service). Optional dashboard interaction tests (`npm install && npm test`, Node 22+) passed in jsdom. Browser visual verification was blocked by a failed Chromium download; see [verification record](reports/VALIDATION.md). The project also has an active AWS Lambda deployment. Cloud validation used synthetic traffic; GCP deployment scripts have not been executed.

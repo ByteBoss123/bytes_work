@@ -1,0 +1,60 @@
+{
+  "dataset": "MIMIC-IV Clinical Database Demo v2.2",
+  "data_type": "Real de-identified patient-level EHR, open demo; not PBM claims",
+  "source_doi": "https://doi.org/10.13026/dp1f-ex47",
+  "license": "ODbL-1.0",
+  "prescription_rows": 18087,
+  "pharmacy_rows": 15306,
+  "admission_rows": 275,
+  "patients": 100,
+  "admissions_with_prescriptions": 250,
+  "unique_pharmacy_orders_in_prescriptions": 15225,
+  "pharmacy_linked_rows": 18087,
+  "admission_linked_rows": 18087,
+  "join_preserved_row_count": true,
+  "exact_duplicate_prescription_rows": 0,
+  "missing_fields": {
+    "drug": 0,
+    "route": 6,
+    "dose_val_rx": 9,
+    "dose_unit_rx": 9
+  },
+  "stop_precedes_start_rows": 753,
+  "prescription_rows_per_admission_quantiles": {
+    "0.25": 29.0,
+    "0.5": 53.0,
+    "0.75": 100.0,
+    "0.9": 146.2
+  },
+  "verification_hours": {
+    "denominator_all_pharmacy_rows": 15306,
+    "missing_pairs": 6,
+    "negative_intervals_flagged": 0,
+    "nonnegative_pairs": 15300,
+    "median_nonnegative": 0.0,
+    "p90_nonnegative": 0.0
+  },
+  "business_use": "Assess medication-order reconciliation workload, join coverage and documentation completeness before operational reporting.",
+  "limitations": [
+    "No clinical recommendations, intervention outcomes, costs or rejection labels.",
+    "Missing or negative fields are data-quality signals, not proof of clinical errors.",
+    "Prescription components are not independent prescriptions; row count is not unique order count.",
+    "Dates are shifted per patient; do not infer calendar trends or compare absolute dates across patients.",
+    "100-patient demo is small and not representative of PBM members."
+  ],
+  "provenance": {
+    "prescriptions": {
+      "source": "https://physionet.org/files/mimic-iv-demo/2.2/hosp/prescriptions.csv.gz",
+      "sha256": "33c392ba5b9299b08eca0a61911ba106f0aebdba26ed31b856bb9ffd49fe3654"
+    },
+    "pharmacy": {
+      "source": "https://physionet.org/files/mimic-iv-demo/2.2/hosp/pharmacy.csv.gz",
+      "sha256": "3403865a279464b14d038a66b30ba3d609933f517262ea0402fef020046bd197"
+    },
+    "admissions": {
+      "source": "https://physionet.org/files/mimic-iv-demo/2.2/hosp/admissions.csv.gz",
+      "sha256": "910b9f160ffdf1e08ea673585393f347c773ccc87d66875c627584a903ae8493"
+    }
+  },
+  "sql": "SELECT rx.*, CASE WHEN ph.pharmacy_id IS NULL THEN 0 ELSE 1 END AS pharmacy_match,\n            CASE WHEN ad.hadm_id IS NULL THEN 0 ELSE 1 END AS admission_match\n            FROM rx LEFT JOIN ph ON rx.subject_id=ph.subject_id AND rx.hadm_id=ph.hadm_id AND rx.pharmacy_id=ph.pharmacy_id\n            LEFT JOIN ad ON rx.subject_id=ad.subject_id AND rx.hadm_id=ad.hadm_id"
+}
