@@ -1,0 +1,256 @@
+{
+  "synthetic_only": true,
+  "seed": 42,
+  "episodes": 60000,
+  "initial_rejected": 13870,
+  "initial_rejection_rate": 0.23116666666666666,
+  "snapshot_at": "2025-08-29 00:00:00",
+  "splits": {
+    "train": {
+      "n": 7569,
+      "start": "2025-01-01 00:00:00",
+      "end": "2025-05-10 23:00:00",
+      "unresolved_rate": 0.34958382877526756
+    },
+    "validation": {
+      "n": 2091,
+      "start": "2025-05-18 00:00:00",
+      "end": "2025-06-22 23:00:00",
+      "unresolved_rate": 0.33381157340985174
+    },
+    "test": {
+      "n": 2958,
+      "start": "2025-06-30 00:00:00",
+      "end": "2025-08-20 23:00:00",
+      "unresolved_rate": 0.35192697768762676
+    }
+  },
+  "selected_model": "logistic_regression",
+  "selection": "Highest validation average precision; test untouched until final evaluation",
+  "validation": {
+    "logistic_regression": {
+      "roc_auc": 0.6412691784752662,
+      "average_precision": 0.4718219531240406,
+      "brier_score": 0.21038524333035416,
+      "review_20pct": {
+        "reviewed": 419,
+        "captured": 223,
+        "total_unresolved": 698,
+        "precision": 0.5322195704057279,
+        "recall": 0.3194842406876791
+      }
+    },
+    "hist_gradient_boosting": {
+      "roc_auc": 0.6230723819671422,
+      "average_precision": 0.4447905818823859,
+      "brier_score": 0.2153674000034017,
+      "review_20pct": {
+        "reviewed": 419,
+        "captured": 210,
+        "total_unresolved": 698,
+        "precision": 0.5011933174224343,
+        "recall": 0.3008595988538682
+      }
+    }
+  },
+  "test": {
+    "selected_model": {
+      "roc_auc": 0.664718377508084,
+      "average_precision": 0.5128572591840321,
+      "brier_score": 0.21031309119664315,
+      "review_20pct": {
+        "reviewed": 592,
+        "captured": 337,
+        "total_unresolved": 1041,
+        "precision": 0.5692567567567568,
+        "recall": 0.32372718539865514
+      }
+    },
+    "reason_rate_baseline": {
+      "roc_auc": 0.6417553243465489,
+      "average_precision": 0.45557724345106737,
+      "brier_score": 0.21389994586002045,
+      "review_20pct": {
+        "reviewed": 592,
+        "captured": 309,
+        "total_unresolved": 1041,
+        "precision": 0.5219594594594594,
+        "recall": 0.2968299711815562
+      }
+    },
+    "constant_prevalence_baseline": {
+      "roc_auc": 0.5,
+      "average_precision": 0.35192697768762676,
+      "brier_score": 0.22807987041010494,
+      "review_20pct": {
+        "reviewed": 592,
+        "captured": 196,
+        "total_unresolved": 1041,
+        "precision": 0.3310810810810811,
+        "recall": 0.1882804995196926
+      }
+    }
+  },
+  "test_roc_auc_bootstrap_95ci": [
+    0.6443058394539771,
+    0.6852277490118781
+  ],
+  "bootstrap_note": "300 claim-level bootstrap samples; single-seed synthetic uncertainty only",
+  "monitoring": {
+    "type": "offline simulation",
+    "reference": "validation score distribution",
+    "psi_alert_threshold": 0.2,
+    "test_score_psi": 0.0015568327153397286,
+    "stress_score_psi": 8.683946039249886,
+    "test_alert": false,
+    "stress_alert": true,
+    "stress_scenario": "Add 4 prior rejections and set reason to authorization_required; labels are not re-evaluated."
+  },
+  "segments": [
+    {
+      "reason": "coverage_check",
+      "n": 871,
+      "prevalence": 0.3742824339839265,
+      "brier": 0.22998894890328614
+    },
+    {
+      "reason": "authorization_required",
+      "n": 745,
+      "prevalence": 0.5315436241610738,
+      "brier": 0.24266134555989383
+    },
+    {
+      "reason": "refill_timing",
+      "n": 767,
+      "prevalence": 0.24771838331160365,
+      "brier": 0.1855041305282448
+    },
+    {
+      "reason": "submission_error",
+      "n": 575,
+      "prevalence": 0.22434782608695653,
+      "brier": 0.17168935427412813
+    }
+  ],
+  "capacity": [
+    {
+      "fraction": 0.05,
+      "model": {
+        "reviewed": 148,
+        "captured": 98,
+        "total_unresolved": 1041,
+        "precision": 0.6621621621621622,
+        "recall": 0.0941402497598463
+      },
+      "reason_baseline": {
+        "reviewed": 148,
+        "captured": 71,
+        "total_unresolved": 1041,
+        "precision": 0.4797297297297297,
+        "recall": 0.06820365033621517
+      }
+    },
+    {
+      "fraction": 0.1,
+      "model": {
+        "reviewed": 296,
+        "captured": 185,
+        "total_unresolved": 1041,
+        "precision": 0.625,
+        "recall": 0.1777137367915466
+      },
+      "reason_baseline": {
+        "reviewed": 296,
+        "captured": 155,
+        "total_unresolved": 1041,
+        "precision": 0.5236486486486487,
+        "recall": 0.148895292987512
+      }
+    },
+    {
+      "fraction": 0.2,
+      "model": {
+        "reviewed": 592,
+        "captured": 337,
+        "total_unresolved": 1041,
+        "precision": 0.5692567567567568,
+        "recall": 0.32372718539865514
+      },
+      "reason_baseline": {
+        "reviewed": 592,
+        "captured": 309,
+        "total_unresolved": 1041,
+        "precision": 0.5219594594594594,
+        "recall": 0.2968299711815562
+      }
+    },
+    {
+      "fraction": 0.3,
+      "model": {
+        "reviewed": 888,
+        "captured": 466,
+        "total_unresolved": 1041,
+        "precision": 0.5247747747747747,
+        "recall": 0.44764649375600385
+      },
+      "reason_baseline": {
+        "reviewed": 888,
+        "captured": 446,
+        "total_unresolved": 1041,
+        "precision": 0.5022522522522522,
+        "recall": 0.42843419788664744
+      }
+    },
+    {
+      "fraction": 0.5,
+      "model": {
+        "reviewed": 1479,
+        "captured": 680,
+        "total_unresolved": 1041,
+        "precision": 0.45977011494252873,
+        "recall": 0.6532180595581172
+      },
+      "reason_baseline": {
+        "reviewed": 1479,
+        "captured": 676,
+        "total_unresolved": 1041,
+        "precision": 0.4570655848546315,
+        "recall": 0.6493756003842459
+      }
+    }
+  ],
+  "operations": [
+    {
+      "reject_reason": "coverage_check",
+      "rejected_episodes": 4139,
+      "mature_episodes": 4007,
+      "unresolved_7d_rate": 0.3678562515597704,
+      "resolved_by_snapshot": 2621,
+      "mean_hours_among_resolved": 48.68447157570887
+    },
+    {
+      "reject_reason": "refill_timing",
+      "rejected_episodes": 3564,
+      "mature_episodes": 3453,
+      "unresolved_7d_rate": 0.24500434404865334,
+      "resolved_by_snapshot": 2683,
+      "mean_hours_among_resolved": 47.370108088000116
+    },
+    {
+      "reject_reason": "authorization_required",
+      "rejected_episodes": 3452,
+      "mature_episodes": 3350,
+      "unresolved_7d_rate": 0.5182089552238806,
+      "resolved_by_snapshot": 1866,
+      "mean_hours_among_resolved": 91.78242229368429
+    },
+    {
+      "reject_reason": "submission_error",
+      "rejected_episodes": 2715,
+      "mature_episodes": 2634,
+      "unresolved_7d_rate": 0.2395596051632498,
+      "resolved_by_snapshot": 2063,
+      "mean_hours_among_resolved": 48.40087251574473
+    }
+  ]
+}

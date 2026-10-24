@@ -1,0 +1,51 @@
+{
+  "selected_model": "logistic_regression",
+  "test": {
+    "selected_model": {
+      "roc_auc": 0.664718377508084,
+      "average_precision": 0.5128572591840321,
+      "brier_score": 0.21031309119664315,
+      "review_20pct": {
+        "reviewed": 592,
+        "captured": 337,
+        "total_unresolved": 1041,
+        "precision": 0.5692567567567568,
+        "recall": 0.32372718539865514
+      }
+    },
+    "reason_rate_baseline": {
+      "roc_auc": 0.6417553243465489,
+      "average_precision": 0.45557724345106737,
+      "brier_score": 0.21389994586002045,
+      "review_20pct": {
+        "reviewed": 592,
+        "captured": 309,
+        "total_unresolved": 1041,
+        "precision": 0.5219594594594594,
+        "recall": 0.2968299711815562
+      }
+    },
+    "constant_prevalence_baseline": {
+      "roc_auc": 0.5,
+      "average_precision": 0.35192697768762676,
+      "brier_score": 0.22807987041010494,
+      "review_20pct": {
+        "reviewed": 592,
+        "captured": 196,
+        "total_unresolved": 1041,
+        "precision": 0.3310810810810811,
+        "recall": 0.1882804995196926
+      }
+    }
+  },
+  "monitoring": {
+    "type": "offline simulation",
+    "reference": "validation score distribution",
+    "psi_alert_threshold": 0.2,
+    "test_score_psi": 0.0015568327153397286,
+    "stress_score_psi": 8.683946039249886,
+    "test_alert": false,
+    "stress_alert": true,
+    "stress_scenario": "Add 4 prior rejections and set reason to authorization_required; labels are not re-evaluated."
+  }
+}

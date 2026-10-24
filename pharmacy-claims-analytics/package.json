@@ -1,0 +1,7 @@
+{
+  "name": "pharmacy-claims-dashboard-checks",
+  "private": true,
+  "scripts": {"test": "node tests/dashboard.cjs"},
+  "devDependencies": {"jsdom": "30.1.3"},
+  "engines": {"node": ">=22"}
+}

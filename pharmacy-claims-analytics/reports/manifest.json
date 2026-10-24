@@ -1,0 +1,12 @@
+{
+  "python": "3.12.14",
+  "numpy": "2.3.5",
+  "pandas": "2.2.3",
+  "sklearn": "1.8.0",
+  "seed": 42,
+  "source_sha256": {
+    "pbm/pipeline.py": "d56f0f3b33be7b594dba9cddbcc1b639d83737ff07926d734e2d6c1d50c5bf6e",
+    "sql/curate.sql": "45a8310f4946d56ae3b4db675ab1c25eb54390d1306f657a0a9f69f5cb0d286c",
+    "sql/operations.sql": "3a401b41a49f35d7d6f6d9f875aa54e146d7233ddfa69f2ce1fff63e9ac88fa9"
+  }
+}
