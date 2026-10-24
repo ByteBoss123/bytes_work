@@ -13,6 +13,7 @@ import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from urllib.parse import urlsplit
 import joblib
 import numpy as np
 import pandas as pd
@@ -102,7 +103,7 @@ class ScoringService:
                                 (time.time(), name, int(active), metric, self.model_sha))
                     log_event('pbm_alert_transition', 'WARNING' if active else 'INFO', alert=name,
                               active=bool(active), value=metric, model_sha256=self.model_sha)
-            return {'deployment':'local HTTP service; synthetic test traffic', 'model_sha256':self.model_sha,
+            return {'deployment':'HTTP scoring service; synthetic test traffic', 'model_sha256':self.model_sha,
                     'requests_total':total, 'request_window':len(rows), 'score_window':len(p),
                     'request_failure_rate':error_rate, 'latency_p95_ms':p95, 'score_psi':value,
                     'alerts':{k:bool(v[0]) for k,v in alerts.items()},
@@ -124,11 +125,12 @@ def make_server(service, port=8765, host='127.0.0.1'):
             self.end_headers()
             self.wfile.write(payload)
         def do_GET(self):
-            if self.path == '/health':
+            path = urlsplit(self.path).path  # ignore query strings (Lambda URLs send '?')
+            if path == '/health':
                 return self.send(200, {'status':'ready', 'model_sha256':service.model_sha})
-            if self.path == '/monitoring':
+            if path == '/monitoring':
                 return self.send(200,service.monitor())
-            if self.path == '/metrics':
+            if path == '/metrics':
                 m=service.monitor()
                 lines=['# TYPE pbm_requests_total counter',f'pbm_requests_total {m["requests_total"]}']
                 for key in ['request_failure_rate','latency_p95_ms','score_psi']:
@@ -139,7 +141,7 @@ def make_server(service, port=8765, host='127.0.0.1'):
                 return self.send(200,'\n'.join(lines)+'\n','text/plain; version=0.0.4')
             return self.send(404,{'error':'not found'})
         def do_POST(self):
-            if self.path != '/predict':
+            if urlsplit(self.path).path != '/predict':
                 return self.send(404, {'error':'not found'})
             start=time.perf_counter(); status=200; scores=[]
             try:

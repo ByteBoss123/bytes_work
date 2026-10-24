@@ -11,7 +11,7 @@ python -m pbm.pipeline
 python -m pbm.service --reports reports --port 8765
 ```
 
-By default the server binds only to `127.0.0.1`. It has no credentials, TLS, or hosted persistence of its own. For a hosted run, `deploy/` builds a container that binds `0.0.0.0` behind Cloud Run's IAM-authenticated HTTPS ingress, and emits alert transitions as structured JSON logs for Cloud Monitoring. See [deploy/README.md](deploy/README.md). Python's built-in HTTP server is suitable for this controlled demonstration, not public production serving.
+By default the server binds only to `127.0.0.1`. It has no credentials, TLS, or hosted persistence of its own. For a hosted run, `deploy/` builds a container that binds `0.0.0.0` behind Cloud Run's IAM-authenticated HTTPS ingress, and emits alert transitions as structured JSON logs for Cloud Monitoring. See [aws/README.md](aws/README.md) for the AWS Lambda deployment that was run, and [deploy/README.md](deploy/README.md) for the unexecuted Cloud Run kit. Python's built-in HTTP server is suitable for this controlled demonstration, not public production serving.
 
 - GET `/health`: model readiness and model SHA-256.
 - POST `/predict`: 1–100 rejected episodes, submission-time features only.

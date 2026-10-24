@@ -31,7 +31,8 @@ class ServiceChecks(unittest.TestCase):
         self.assertIsNone(m['score_psi'])
         self.assertFalse(m['alerts']['score_drift'])
     def test_alert_transition_emits_structured_log(self):
-        import contextlib, io
+        import contextlib
+        import io
         buf=io.StringIO()
         with contextlib.redirect_stdout(buf):
             for _ in range(20):self.s.record(400,5,[])
@@ -41,6 +42,19 @@ class ServiceChecks(unittest.TestCase):
         self.assertEqual(raised[0]['severity'],'WARNING')
         self.assertEqual(raised[0]['event'],'pbm_alert_transition')
         self.assertNotIn('episodes',buf.getvalue())
+    def test_routes_ignore_query_string(self):
+        # Lambda Function URLs (via the Web Adapter) forward '/health?' even with no query.
+        import threading
+        from urllib.request import Request, urlopen
+        from pbm.service import make_server
+        server=make_server(self.s,0)
+        t=threading.Thread(target=server.serve_forever,daemon=True);t.start()
+        base=f'http://127.0.0.1:{server.server_port}'
+        try:
+            with urlopen(base+'/health?',timeout=10) as r:self.assertEqual(r.status,200)
+            req=Request(base+'/predict?x=1',json.dumps({'episodes':[self.row]}).encode(),headers={'Content-Type':'application/json'})
+            with urlopen(req,timeout=10) as r:self.assertEqual(r.status,200)
+        finally:server.shutdown();server.server_close();t.join()
     def test_reference_version_mismatch(self):
         p=Path(self.tmp.name)/'wrong.json'
         p.write_text(json.dumps({'model_sha256':'wrong','validation_scores':[.5]}))

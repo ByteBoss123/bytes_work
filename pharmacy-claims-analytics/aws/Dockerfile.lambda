@@ -1,0 +1,24 @@
+# AWS Lambda image for the scoring service.
+# The AWS Lambda Web Adapter extension runs the unchanged HTTP server inside Lambda and
+# translates Function URL / Invoke events into HTTP requests on localhost:8080.
+# Base images come from ECR Public (CodeBuild pulls from Docker Hub are rate-limited).
+FROM public.ecr.aws/docker/library/python:3.12-slim
+COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.8.4 /lambda-adapter /opt/extensions/lambda-adapter
+
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 \
+    PORT=8080 AWS_LWA_PORT=8080 AWS_LWA_READINESS_CHECK_PATH=/health
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY pbm ./pbm
+COPY sql ./sql
+# Same seed-42 model as the committed run; model and monitoring reference are written together.
+RUN python -m pbm.pipeline --n 60000 --seed 42 --out reports \
+    && rm -f reports/claims.sqlite reports/test_predictions.csv \
+    && chmod -R a+rX /app
+
+# Lambda's filesystem is read-only except /tmp, so telemetry lives there. It persists while
+# an execution environment stays warm and resets when Lambda replaces it.
+CMD ["python", "-m", "pbm.service", "--host", "0.0.0.0", "--port", "8080", "--telemetry", "/tmp/telemetry.sqlite"]

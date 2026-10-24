@@ -13,7 +13,8 @@ This project demonstrates a workflow relevant to Pharmacy Benefit Manager (PBM) 
 - [CMS spending analysis](REAL_DATA.md): 5,000 real public aggregate rows covering $36.7M in recorded drug spending. Separate from synthetic model training.
 - [HTTP scoring and monitoring service](SERVICE.md): actual request telemetry, model fingerprints, rolling latency/failure/PSI metrics, persisted alerts, and Prometheus-compatible output. Verified using 145 HTTP requests and 7,000 synthetic episode scores.
 - Live integration evidence: [service_validation.json](reports/service_validation.json). Local test deployment only; no real-user production or patient-data deployment is claimed.
-- [Cloud Run deployment kit](deploy/README.md): Cloud Build image, IAM-authenticated Cloud Run service, log-based Cloud Monitoring alert policies, and a remote validation script. Evidence of a hosted run lives in `reports/cloud_run_validation.json` once `deploy/validate.sh` has been run.
+- [AWS Lambda deployment](aws/README.md): container image on Lambda behind an IAM-authenticated Function URL, CloudWatch alarms driven by the service's own alert logs, and a once-a-minute synthetic canary. Validated with 150 synthetic requests; both service alarms fired in CloudWatch after a controlled injection. Evidence: [aws_lambda_validation.json](reports/aws_lambda_validation.json).
+- [Cloud Run deployment kit](deploy/README.md): equivalent GCP scripts (Cloud Build, Cloud Run, Cloud Monitoring). Written and dry-run tested only; not executed against GCP.
 
 ## Measured result — seed 42
 
@@ -103,4 +104,4 @@ These sources explain context; **none supplied the generated data or simulation 
 
 ## Verification
 
-The full pipeline, batch scoring, and **17 Python tests passed** (10 pipeline, 7 service). Optional dashboard interaction tests (`npm install && npm test`, Node 22+) passed in jsdom. Browser visual verification was blocked by a failed Chromium download; see [verification record](reports/VALIDATION.md). This is a local runnable project, not a hosted application.
+The full pipeline, batch scoring, and **18 Python tests passed** (10 pipeline, 8 service). Optional dashboard interaction tests (`npm install && npm test`, Node 22+) passed in jsdom. Browser visual verification was blocked by a failed Chromium download; see [verification record](reports/VALIDATION.md). This is a local runnable project, not a hosted application.
