@@ -1,10 +1,13 @@
-"""Loopback-only HTTP inference with real request telemetry and persisted alerts.
+"""HTTP inference with real request telemetry and persisted alerts.
 
-Local deployment demonstration, not a hardened public production server.
+Binds to loopback by default. Container mode (--host 0.0.0.0) is intended only
+behind an authenticated ingress such as Cloud Run with IAM invocation; see
+deploy/README.md. Demonstration service, not a hardened public production server.
 """
 import argparse
 import hashlib
 import json
+import os
 import sqlite3
 import threading
 import time
@@ -14,6 +17,14 @@ import joblib
 import numpy as np
 import pandas as pd
 from pbm.pipeline import FEATURES, NUMERIC, CATEGORICAL, psi
+
+
+def log_event(event, severity, **fields):
+    """One JSON line on stdout. Cloud Logging parses it into jsonPayload with this severity.
+
+    Never includes request payloads or identifiers.
+    """
+    print(json.dumps({'severity': severity, 'event': event, **fields}), flush=True)
 
 
 class ScoringService:
@@ -89,6 +100,8 @@ class ScoringService:
                 if previous is None or bool(previous[0]) != bool(active):
                     con.execute('INSERT INTO alerts(timestamp,name,active,value,model_sha) VALUES(?,?,?,?,?)',
                                 (time.time(), name, int(active), metric, self.model_sha))
+                    log_event('pbm_alert_transition', 'WARNING' if active else 'INFO', alert=name,
+                              active=bool(active), value=metric, model_sha256=self.model_sha)
             return {'deployment':'local HTTP service; synthetic test traffic', 'model_sha256':self.model_sha,
                     'requests_total':total, 'request_window':len(rows), 'score_window':len(p),
                     'request_failure_rate':error_rate, 'latency_p95_ms':p95, 'score_psi':value,
@@ -99,7 +112,7 @@ class ScoringService:
                     'alert_delivery':'Persisted SQLite transitions and HTTP endpoint; no external paging'}
 
 
-def make_server(service, port=8765):
+def make_server(service, port=8765, host='127.0.0.1'):
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *_):
             pass  # Do not log payloads or identifiers.
@@ -143,16 +156,19 @@ def make_server(service, port=8765):
                 status=500; response={'error':'internal scoring failure'}
             service.record(status,(time.perf_counter()-start)*1000,scores)
             self.send(status,response)
-    return ThreadingHTTPServer(('127.0.0.1',port),Handler)
+    return ThreadingHTTPServer((host,port),Handler)
 
 if __name__=='__main__':
     ap=argparse.ArgumentParser()
     ap.add_argument('--reports',type=Path,default=Path('reports'))
-    ap.add_argument('--port',type=int,default=8765)
+    ap.add_argument('--host',default='127.0.0.1',help='Use 0.0.0.0 only behind authenticated ingress')
+    ap.add_argument('--port',type=int,default=int(os.environ.get('PORT','8765')))
+    ap.add_argument('--telemetry',type=Path,default=None,help='SQLite path (default: <reports>/telemetry.sqlite)')
     args=ap.parse_args()
-    s=ScoringService(args.reports/'model.joblib',args.reports/'monitoring_reference.json',args.reports/'telemetry.sqlite')
-    server=make_server(s,args.port)
-    print(f'Local scoring service: http://127.0.0.1:{server.server_port}',flush=True)
+    s=ScoringService(args.reports/'model.joblib',args.reports/'monitoring_reference.json',
+                     args.telemetry or args.reports/'telemetry.sqlite')
+    server=make_server(s,args.port,args.host)
+    log_event('pbm_service_started','INFO',host=args.host,port=server.server_port,model_sha256=s.model_sha)
     try: server.serve_forever()
     except KeyboardInterrupt: pass
     finally: server.server_close()

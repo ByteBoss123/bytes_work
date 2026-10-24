@@ -30,6 +30,17 @@ class ServiceChecks(unittest.TestCase):
         self.assertEqual(m['requests_total'],1)
         self.assertIsNone(m['score_psi'])
         self.assertFalse(m['alerts']['score_drift'])
+    def test_alert_transition_emits_structured_log(self):
+        import contextlib, io
+        buf=io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            for _ in range(20):self.s.record(400,5,[])
+        events=[json.loads(line) for line in buf.getvalue().splitlines()]
+        raised=[e for e in events if e['alert']=='request_failure_rate' and e['active']]
+        self.assertEqual(len(raised),1)
+        self.assertEqual(raised[0]['severity'],'WARNING')
+        self.assertEqual(raised[0]['event'],'pbm_alert_transition')
+        self.assertNotIn('episodes',buf.getvalue())
     def test_reference_version_mismatch(self):
         p=Path(self.tmp.name)/'wrong.json'
         p.write_text(json.dumps({'model_sha256':'wrong','validation_scores':[.5]}))
