@@ -4,3 +4,4 @@ reports/*.sqlite
 reports/*.joblib
 reports/test_predictions.csv
 node_modules/
+reports/monitoring_reference.json

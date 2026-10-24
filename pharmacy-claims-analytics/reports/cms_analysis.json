@@ -1,0 +1,97 @@
+{
+  "source_url": "https://data.cms.gov/data-api/v1/dataset/9552739e-3d05-4c1b-8eff-ecabf391e2e5/data?size=5000&offset=0",
+  "retrieved_at_utc": "2026-10-24T01:43:15.054315+00:00",
+  "raw_response_sha256": "b15cc4a9145274dad95bd525f513af8730778fddb1eee74ef0719ae08b670198",
+  "source_rows": 5000,
+  "unique_generic_names": 553,
+  "claim_count": 286832,
+  "total_drug_cost": 36679472.47,
+  "top10_spend_share": 0.4408659760094963,
+  "query": "SELECT Gnrc_Name AS generic_name, COUNT(*) AS source_rows,\n          SUM(Tot_Clms) AS claims, SUM(Tot_30day_Fills) AS fills_30day,\n          ROUND(SUM(Tot_Drug_Cst),2) AS drug_cost,\n          SUM(Tot_Drug_Cst)/NULLIF(SUM(Tot_30day_Fills),0) AS cost_per_30day_fill\n          FROM cms GROUP BY Gnrc_Name ORDER BY drug_cost DESC",
+  "top10": [
+    {
+      "generic_name": "Apixaban",
+      "source_rows": 46,
+      "claims": 4680,
+      "fills_30day": 7379.2,
+      "drug_cost": 4048341.38,
+      "cost_per_30day_fill": 548.6152130312229
+    },
+    {
+      "generic_name": "Semaglutide",
+      "source_rows": 38,
+      "claims": 2289,
+      "fills_30day": 3564.0,
+      "drug_cost": 3242826.57,
+      "cost_per_30day_fill": 909.8839983164983
+    },
+    {
+      "generic_name": "Empagliflozin",
+      "source_rows": 34,
+      "claims": 1623,
+      "fills_30day": 3102.4,
+      "drug_cost": 1673515.3,
+      "cost_per_30day_fill": 539.4260250128932
+    },
+    {
+      "generic_name": "Tirzepatide",
+      "source_rows": 20,
+      "claims": 1126,
+      "fills_30day": 1330.0,
+      "drug_cost": 1379434.8,
+      "cost_per_30day_fill": 1037.169022556391
+    },
+    {
+      "generic_name": "Lipase/Protease/Amylase",
+      "source_rows": 8,
+      "claims": 338,
+      "fills_30day": 372.8,
+      "drug_cost": 1234156.25,
+      "cost_per_30day_fill": 3310.504962446352
+    },
+    {
+      "generic_name": "Rivaroxaban",
+      "source_rows": 25,
+      "claims": 1246,
+      "fills_30day": 2006.4,
+      "drug_cost": 1087514.49,
+      "cost_per_30day_fill": 542.0227721291866
+    },
+    {
+      "generic_name": "Immun Glob G(Igg)/Pro/Iga 0-50",
+      "source_rows": 1,
+      "claims": 47,
+      "fills_30day": 47.0,
+      "drug_cost": 1049501.77,
+      "cost_per_30day_fill": 22329.82489361702
+    },
+    {
+      "generic_name": "Fluticasone/Umeclidin/Vilanter",
+      "source_rows": 17,
+      "claims": 895,
+      "fills_30day": 1338.0,
+      "drug_cost": 837251.69,
+      "cost_per_30day_fill": 625.7486472346786
+    },
+    {
+      "generic_name": "Sacubitril/Valsartan",
+      "source_rows": 14,
+      "claims": 872,
+      "fills_30day": 1351.4,
+      "drug_cost": 825986.0,
+      "cost_per_30day_fill": 611.207636525085
+    },
+    {
+      "generic_name": "Dulaglutide",
+      "source_rows": 13,
+      "claims": 543,
+      "fills_30day": 834.6999999999999,
+      "drug_cost": 792203.18,
+      "cost_per_30day_fill": 949.0873128069967
+    }
+  ],
+  "scope": "First 5000 API rows in source ordering; convenience extract, not random or representative. Not national or Virginia totals.",
+  "data_type": "Real public provider-drug aggregates; no patient-level records or rejection outcomes.",
+  "business_use": "Identify high-spend drug groups within this extract for analyst review; no savings, prescribing changes, or appropriateness claims.",
+  "limitations": "Source suppression and selection affect coverage. Beneficiary counts are not summed. Drug cost is not net PBM cost after rebates. Cost variation is not evidence of inappropriate care. No labels for unresolved claims."
+}

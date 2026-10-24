@@ -8,8 +8,14 @@ test_reruns_do_not_duplicate (test_pipeline.PipelineTests.test_reruns_do_not_dup
 test_resolution_before_submission_rejected (test_pipeline.PipelineTests.test_resolution_before_submission_rejected) ... ok
 test_seed_reproduces_data (test_pipeline.PipelineTests.test_seed_reproduces_data) ... ok
 test_time_embargo_and_no_feature_leakage (test_pipeline.PipelineTests.test_time_embargo_and_no_feature_leakage) ... ok
+test_monitor_warmup_and_restart_persistence (test_service.ServiceChecks.test_monitor_warmup_and_restart_persistence) ... ok
+test_reference_version_mismatch (test_service.ServiceChecks.test_reference_version_mismatch) ... ok
+test_reject_future_information (test_service.ServiceChecks.test_reject_future_information) ... ok
+test_reject_nonfinite (test_service.ServiceChecks.test_reject_nonfinite) ... ok
+test_reject_oversized_batch (test_service.ServiceChecks.test_reject_oversized_batch) ... ok
+test_reject_unseen_category (test_service.ServiceChecks.test_reject_unseen_category) ... ok
 
 ----------------------------------------------------------------------
-Ran 10 tests in 0.555s
+Ran 16 tests in 0.403s
 
 OK

@@ -9,3 +9,9 @@
 
 Reproduce Python checks: `python -m unittest discover -s tests -v`.
 Optional dashboard logic checks (Node 22+): `npm install` then `npm test`.
+
+## Monitoring and real-data extension
+
+- 16 Python tests passed after adding service validation, model/reference fingerprint checks, insufficient-sample behavior, and restart persistence checks.
+- Actual HTTP integration: 145 requests; 7,000 scored synthetic episodes; drift/failure alerts and recovery verified. See service_validation.json.
+- CMS API retrieval succeeded for 5,000 real provider-drug aggregate rows; source grain and numeric validation passed. These aggregates do not train the unresolved-claim model.

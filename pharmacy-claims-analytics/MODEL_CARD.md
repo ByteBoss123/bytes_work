@@ -23,4 +23,8 @@ Reference: validation predicted-risk histogram with fixed [0,1] bins and count s
 Labels arrive after seven days. A real monitoring service would also track schema/data quality, delayed labeled performance, missingness, operational backlog, and workflow harms. This implementation runs offline, has no live paging integration, and does not automatically retrain.
 
 ## Limitations and release status
-Local batch inference and offline dashboard only. No GCP/AWS deployment, LLM component, live PBM integration, clinical notes, real NCPDP codes, formulary rules, reversals, or actual intervention experiment. Requirements are pinned to the tested environment. Full data and model artifacts are generated locally rather than committed. No PHI is generated or used.
+Local batch inference, a loopback HTTP scoring/monitoring service, and an offline dashboard. No GCP/AWS deployment, LLM component, live PBM integration, clinical notes, real NCPDP codes, formulary rules, reversals, or actual intervention experiment. Requirements are pinned to the tested environment. Full data and model artifacts are generated locally rather than committed. No PHI is generated or used.
+
+
+## Service extension
+The HTTP service measures actual processing latency, request failures, and score drift during integration traffic, with persisted alert transitions. Traffic remains synthetic; thresholds are illustrative. See SERVICE.md for scope. The separate real CMS aggregate analysis is not a model-training source and supplies no clinical outcome labels.

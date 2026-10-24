@@ -197,6 +197,7 @@ def run(out, n=60000, seed=42):
               'operations': operations.to_dict(orient='records')}
     (out / 'metrics.json').write_text(json.dumps(result, indent=2, allow_nan=False))
     joblib.dump(model, out / 'model.joblib')
+    (out / 'monitoring_reference.json').write_text(json.dumps({'model_sha256': hashlib.sha256((out / 'model.joblib').read_bytes()).hexdigest(), 'validation_scores': v.tolist()}, indent=2))
     manifest = {'python': platform.python_version(), 'numpy': np.__version__, 'pandas': pd.__version__,
                 'sklearn': sklearn.__version__, 'seed': seed,
                 'source_sha256': {str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()

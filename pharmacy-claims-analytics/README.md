@@ -1,12 +1,18 @@
 # Pharmacy Claims Operations Analytics
 
-**A reproducible, synthetic-data PBM portfolio project.** Python + SQL + scikit-learn, temporal model validation, batch scoring, an offline interactive dashboard, and simulated monitoring.
+**A PBM portfolio project combining synthetic claims modeling, real public CMS aggregate-data analysis, and a locally tested HTTP monitoring service.** Python + SQL + scikit-learn, temporal model validation, batch scoring, an offline interactive dashboard, and simulated monitoring.
 
 ## The operational question
 
 At the moment a synthetic pharmacy claim is initially rejected, which cases should an operations team review first because no paid resolution is likely within seven days?
 
-This project demonstrates a workflow relevant to Pharmacy Benefit Manager (PBM) operations. It is **not professional PBM experience**, not a production deployment, not clinical decision support, and not affiliated with CVS Health or Caremark. All records and relationships are simulated. Rejection is not automatically a final coverage denial, abandonment, or harm to a member.
+This project demonstrates a workflow relevant to Pharmacy Benefit Manager (PBM) operations. It is **not professional PBM experience**, not a production deployment, not clinical decision support, and not affiliated with CVS Health or Caremark. The claims model uses simulated records and relationships. A separate CMS analysis uses real public provider-drug aggregates; these are not patient-level claims. Rejection is not automatically a final coverage denial, abandonment, or harm to a member.
+
+## Added: real healthcare data and measured service telemetry
+
+- [CMS spending analysis](REAL_DATA.md): 5,000 real public aggregate rows covering $36.7M in recorded drug spending. Separate from synthetic model training.
+- [HTTP scoring and monitoring service](SERVICE.md): actual request telemetry, model fingerprints, rolling latency/failure/PSI metrics, persisted alerts, and Prometheus-compatible output. Verified using 145 HTTP requests and 7,000 synthetic episode scores.
+- Live integration evidence: [service_validation.json](reports/service_validation.json). Local test deployment only; no real-user production or patient-data deployment is claimed.
 
 ## Measured result — seed 42
 
