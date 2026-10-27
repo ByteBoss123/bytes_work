@@ -1,0 +1,56 @@
+# RAG over real FDA drug labels (openFDA) + CY2026 Part D coverage summaries; closed-book vs RAG
+# with an open LLM on CPU. Commits metrics, predictions and the fetched label cache.
+name: drug-rag
+on:
+  workflow_dispatch:
+  push:
+    branches: [pharmacy-claims-analytics]
+    paths:
+      - pharmacy-claims-analytics/pbm/drug_rag.py
+      - .github/workflows/drug-rag.yml
+permissions:
+  contents: write
+concurrency:
+  group: drug-rag
+  cancel-in-progress: false
+env:
+  MODEL_REPO: bartowski/Qwen2.5-7B-Instruct-GGUF
+  MODEL_FILE: Qwen2.5-7B-Instruct-Q4_K_M.gguf
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    defaults:
+      run:
+        working-directory: pharmacy-claims-analytics
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install
+        run: |
+          python -m pip install -r requirements.txt huggingface_hub
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+          python -m pip install sentence-transformers
+          python -m pip install "llama-cpp-python>=0.3.2,<0.4" --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
+          python -c "from huggingface_hub import hf_hub_download as d; import os; print(d(os.environ['MODEL_REPO'], os.environ['MODEL_FILE'], local_dir=os.environ['RUNNER_TEMP']))"
+      - name: Unit tests
+        run: python -m unittest tests.test_drug_rag -v 2>&1 | tee reports/drug_rag_tests.log
+      - name: RAG run
+        timeout-minutes: 320
+        run: |
+          set -o pipefail
+          { nproc; python -c "import llama_cpp, sentence_transformers; print('llama-cpp-python', llama_cpp.__version__, 'sentence-transformers', sentence_transformers.__version__)"; } | tee reports/drug_rag_run.log
+          python -m pbm.drug_rag --out reports --raw "$RUNNER_TEMP/cms" --model "$RUNNER_TEMP/$MODEL_FILE" \
+            --labels-cache reports/drug_rag_labels.json 2>&1 | tee -a reports/drug_rag_run.log
+      - name: Commit outputs (always)
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898315+github-actions[bot]@users.noreply.github.com"
+          for f in drug_rag.json drug_rag_predictions.jsonl drug_rag_labels.json drug_rag_run.log drug_rag_tests.log; do
+            [ -f "reports/$f" ] && git add -f "reports/$f"
+          done
+          git commit -m "CI: drug-label RAG outputs (run ${GITHUB_RUN_ID}, ${{ job.status }})" || echo "nothing to commit"
+          for i in 1 2 3; do git pull --rebase origin pharmacy-claims-analytics && git push origin HEAD:pharmacy-claims-analytics && break; sleep 5; done
