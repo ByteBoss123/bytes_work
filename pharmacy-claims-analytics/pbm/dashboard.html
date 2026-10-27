@@ -84,9 +84,12 @@ async function refresh() {
       (on === null ? '' : `<div class="state ${on ? 'alert' : 'ok'}">${on ? 'ALERT' : 'OK'} · ${rule}</div>`) + `</div>`).join('');
     line(document.getElementById('psi'), h.snapshots.map(s => s.score_psi), t.psi, 0.3);
     line(document.getElementById('fail'), h.snapshots.map(s => s.failure_rate), t.failure_rate, 0.1);
-    document.getElementById('alerts').innerHTML = h.alert_transitions.slice().reverse().map(e =>
+    const seen = new Set();
+    const rows = h.alert_transitions.map(e => { const first = !seen.has(e.name); seen.add(e.name);
+      return {...e, label: e.active ? 'raised' : (first ? 'initial OK' : 'cleared')}; });
+    document.getElementById('alerts').innerHTML = rows.reverse().map(e =>
       `<tr><td class="time">${new Date(e.timestamp * 1000).toISOString().slice(11, 19)}</td><td>${e.name}</td>` +
-      `<td class="state ${e.active ? 'alert' : 'ok'}">${e.active ? 'raised' : 'cleared'}</td><td>${fmt(e.value)}</td></tr>`).join('') ||
+      `<td class="state ${e.active ? 'alert' : 'ok'}">${e.label}</td><td>${fmt(e.value)}</td></tr>`).join('') ||
       '<tr><td colspan="4">No transitions yet</td></tr>';
   } catch (err) {
     document.getElementById('sub').textContent = 'Could not reach the service: ' + err;
