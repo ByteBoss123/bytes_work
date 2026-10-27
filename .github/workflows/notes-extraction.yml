@@ -1,0 +1,60 @@
+# Medication extraction from real de-identified clinical notes (OHSU Glaucoma Medication Dataset),
+# lexicon baseline vs an open LLM, plus the RxNorm -> CY2026 Part D formulary link.
+# Commits metrics and test-set predictions back to the branch (the dataset itself is not copied).
+name: notes-extraction
+on:
+  workflow_dispatch:
+  push:
+    branches: [pharmacy-claims-analytics]
+    paths:
+      - pharmacy-claims-analytics/pbm/notes_extraction.py
+      - .github/workflows/notes-extraction.yml
+permissions:
+  contents: write
+concurrency:
+  group: notes-extraction
+  cancel-in-progress: false
+env:
+  DATA_COMMIT: 15e67ea86ed0678425ec0948032f3fe9f77f30db
+  MODEL_REPO: bartowski/Qwen2.5-7B-Instruct-GGUF
+  MODEL_FILE: Qwen2.5-7B-Instruct-Q4_K_M.gguf
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    defaults:
+      run:
+        working-directory: pharmacy-claims-analytics
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install
+        run: |
+          python -m pip install -r requirements.txt huggingface_hub
+          python -m pip install "llama-cpp-python>=0.3.2,<0.4" --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu
+      - name: Fetch dataset (pinned commit) and model
+        run: |
+          git clone https://github.com/jche253/Glaucoma_Med_Dataset "$RUNNER_TEMP/glaucoma"
+          git -C "$RUNNER_TEMP/glaucoma" checkout "$DATA_COMMIT"
+          python -c "from huggingface_hub import hf_hub_download as d; import os; print(d(os.environ['MODEL_REPO'], os.environ['MODEL_FILE'], local_dir=os.environ['RUNNER_TEMP']))"
+      - name: Unit tests
+        run: python -m unittest tests.test_notes_extraction -v 2>&1 | tee reports/notes_tests.log
+      - name: Extraction run
+        timeout-minutes: 320
+        run: |
+          set -o pipefail
+          { nproc; python -c "import llama_cpp; print('llama-cpp-python', llama_cpp.__version__)"; echo "model $MODEL_REPO/$MODEL_FILE"; } | tee reports/notes_run.log
+          python -m pbm.notes_extraction --data "$RUNNER_TEMP/glaucoma" --out reports \
+            --model "$RUNNER_TEMP/$MODEL_FILE" --raw "$RUNNER_TEMP/cms" 2>&1 | tee -a reports/notes_run.log
+      - name: Commit outputs (always, so failures are visible)
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898315+github-actions[bot]@users.noreply.github.com"
+          for f in notes_run.log notes_tests.log notes_extraction.json notes_test_predictions.jsonl; do
+            [ -f "reports/$f" ] && git add -f "reports/$f"
+          done
+          git commit -m "CI: clinical-notes medication extraction outputs (run ${GITHUB_RUN_ID}, ${{ job.status }})" || echo "nothing to commit"
+          git pull --rebase origin pharmacy-claims-analytics && git push origin HEAD:pharmacy-claims-analytics
