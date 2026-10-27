@@ -1,0 +1,302 @@
+{
+  "data": {
+    "drug_selection": "top generic names by recorded drug cost in reports/cms_spend_by_generic.csv (real CMS Part D prescriber extract)",
+    "drugs_requested": 80,
+    "labels_found": 59,
+    "labels_not_found": [
+      "immun glob g(igg)/pro/iga 0-50",
+      "fluticasone/umeclidin/vilanter",
+      "bictegrav/emtricit/tenofov ala",
+      "evolocumab",
+      "mavacamten",
+      "immun glob g(igg)/gly/iga ov50",
+      "linaclotide",
+      "rimegepant sulfate",
+      "immune globul g/gly/iga avg 46",
+      "deutetrabenazine",
+      "tiotropium bromide",
+      "ubrogepant",
+      "budesonide/glycopyr/formoterol",
+      "mepolizumab",
+      "dapaglifloz propaned/metformin",
+      "atorvastatin calcium",
+      "budesonide/formoterol fumarate",
+      "dolutegravir sodium",
+      "insulin pump cart",
+      "pen needle",
+      "secukinumab"
+    ],
+    "label_source": "openFDA drug label API (FDA SPL prescribing information)",
+    "labels_sha256": "53faf1a29181b39c649014f8a6596d4628baafa00ba7bc1220a8d608f0765d08",
+    "coverage_source": "CMS CY2026 Part D formulary file via RxNorm (NLM RxNav)",
+    "coverage_meta": {
+      "formularies_2026": 331,
+      "source_sha256": "9d8d60ca09e4a72ca8329a75228cfb36613131053af4dd67b667087d80837088"
+    },
+    "drugs_with_coverage": 55,
+    "corpus_chunks": 775,
+    "questions": 173,
+    "section_words_cap": 600,
+    "chunk_words": 180,
+    "overlap": 30
+  },
+  "gold_answers": "route = openFDA route metadata; boxed = presence of a boxed-warning section; pa_share = formulary-file share (+/-0.5 points)",
+  "retrieval_hit_at_5": {
+    "bm25": {
+      "route": {
+        "n": 59,
+        "accuracy": 1.0
+      },
+      "boxed": {
+        "n": 59,
+        "accuracy": 1.0
+      },
+      "pa_share": {
+        "n": 55,
+        "accuracy": 1.0
+      },
+      "ALL": {
+        "n": 173,
+        "accuracy": 1.0
+      }
+    },
+    "dense": {
+      "route": {
+        "n": 59,
+        "accuracy": 1.0
+      },
+      "boxed": {
+        "n": 59,
+        "accuracy": 1.0
+      },
+      "pa_share": {
+        "n": 55,
+        "accuracy": 1.0
+      },
+      "ALL": {
+        "n": 173,
+        "accuracy": 1.0
+      }
+    },
+    "hybrid": {
+      "route": {
+        "n": 59,
+        "accuracy": 1.0
+      },
+      "boxed": {
+        "n": 59,
+        "accuracy": 1.0
+      },
+      "pa_share": {
+        "n": 55,
+        "accuracy": 1.0
+      },
+      "ALL": {
+        "n": 173,
+        "accuracy": 1.0
+      }
+    },
+    "hybrid_drug_filter": {
+      "route": {
+        "n": 59,
+        "accuracy": 1.0
+      },
+      "boxed": {
+        "n": 59,
+        "accuracy": 1.0
+      },
+      "pa_share": {
+        "n": 55,
+        "accuracy": 1.0
+      },
+      "ALL": {
+        "n": 173,
+        "accuracy": 1.0
+      }
+    }
+  },
+  "answer_accuracy": {
+    "closed_book": {
+      "route": {
+        "n": 59,
+        "accuracy": 0.8305084745762712,
+        "abstained": 0,
+        "invalid_json": 0,
+        "text_fallback": 1
+      },
+      "boxed": {
+        "n": 59,
+        "accuracy": 0.4576271186440678,
+        "abstained": 0,
+        "invalid_json": 0,
+        "text_fallback": 0
+      },
+      "pa_share": {
+        "n": 55,
+        "accuracy": 0.0,
+        "abstained": 55,
+        "invalid_json": 0,
+        "text_fallback": 0
+      },
+      "ALL": {
+        "n": 173,
+        "accuracy": 0.4393063583815029,
+        "abstained": 55,
+        "invalid_json": 0,
+        "text_fallback": 1
+      }
+    },
+    "rag_hybrid_drug_filter": {
+      "route": {
+        "n": 59,
+        "accuracy": 0.711864406779661,
+        "abstained": 8,
+        "invalid_json": 0,
+        "text_fallback": 46
+      },
+      "boxed": {
+        "n": 59,
+        "accuracy": 0.8983050847457628,
+        "abstained": 2,
+        "invalid_json": 0,
+        "text_fallback": 6
+      },
+      "pa_share": {
+        "n": 55,
+        "accuracy": 1.0,
+        "abstained": 0,
+        "invalid_json": 0,
+        "text_fallback": 20
+      },
+      "ALL": {
+        "n": 173,
+        "accuracy": 0.8670520231213873,
+        "abstained": 10,
+        "invalid_json": 0,
+        "text_fallback": 72
+      }
+    }
+  },
+  "boxed_warning_ablation": {
+    "questions": 59,
+    "drugs_without_boxed_warning": 32,
+    "filtered": {
+      "accuracy": 0.8983050847457628,
+      "false_yes_on_no_boxed_drugs": 1
+    },
+    "unfiltered": {
+      "accuracy": 0.847457627118644,
+      "false_yes_on_no_boxed_drugs": 1
+    },
+    "filtered_minus_unfiltered": {
+      "point": 0.05084745762711873,
+      "ci95": [
+        0.0,
+        0.11864406779661019
+      ]
+    }
+  },
+  "robustness": {
+    "questions": 222,
+    "construction": "misspelled brand (3rd/4th letters swapped) and generic name in place of brand",
+    "misspelled_brand": {
+      "n": 116,
+      "resolution": {
+        "fuzzy": 100,
+        "unfiltered": 8,
+        "inferred": 8
+      },
+      "hit_at_5_hybrid": 0.5344827586206896,
+      "other_drug_boxed_in_top5_hybrid": 0.9032258064516129,
+      "hit_at_5_hybrid_drug_filter": 0.9655172413793104,
+      "other_drug_boxed_in_top5_hybrid_drug_filter": 0.06451612903225806
+    },
+    "generic_name": {
+      "n": 106,
+      "resolution": {
+        "exact": 106
+      },
+      "hit_at_5_hybrid": 0.9811320754716981,
+      "other_drug_boxed_in_top5_hybrid": 0.6428571428571429,
+      "hit_at_5_hybrid_drug_filter": 1.0,
+      "other_drug_boxed_in_top5_hybrid_drug_filter": 0.0
+    },
+    "misspelled_boxed_answers": {
+      "questions": 58,
+      "drugs_without_boxed_warning": 31,
+      "filtered": {
+        "accuracy": 0.8103448275862069,
+        "false_yes_on_no_boxed_drugs": 3
+      },
+      "unfiltered": {
+        "accuracy": 0.6896551724137931,
+        "false_yes_on_no_boxed_drugs": 1
+      },
+      "filtered_minus_unfiltered": {
+        "point": 0.1206896551724137,
+        "ci95": [
+          -0.017241379310344862,
+          0.2586206896551724
+        ]
+      }
+    }
+  },
+  "rag_minus_closed_book": {
+    "route": {
+      "point": -0.11864406779661019,
+      "ci95": [
+        -0.2542372881355932,
+        0.016949152542372947
+      ]
+    },
+    "boxed": {
+      "point": 0.44067796610169496,
+      "ci95": [
+        0.3220338983050847,
+        0.576271186440678
+      ]
+    },
+    "pa_share": {
+      "point": 1.0,
+      "ci95": [
+        1.0,
+        1.0
+      ]
+    },
+    "ALL": {
+      "point": 0.4277456647398844,
+      "ci95": [
+        0.3620689655172414,
+        0.49707602339181284
+      ]
+    }
+  },
+  "citations": {
+    "rag_answers": 163,
+    "with_valid_citation": 162,
+    "citation_precision": 1.0,
+    "answers_citing_unknown_ids": 0
+  },
+  "base_rates": {
+    "boxed_true_share": 0.4576271186440678
+  },
+  "generator": {
+    "model_file": "qwen.qwen3-32b-v1:0",
+    "backend": "Amazon Bedrock Converse (forced tool call)",
+    "decoding": "temperature 0, JSON-schema constrained",
+    "top_k": 5,
+    "rag_retrieval": "hybrid (BM25 + bge-small, RRF) restricted to drugs named in the question (exact, then fuzzy >= 0.85), else to a drug that dominates the top-10 hybrid results (>= 50% of rank weight), else unfiltered"
+  },
+  "limitations": [
+    "Question templates are simple; they test retrieval and grounding, not clinical reasoning.",
+    "Boxed-warning \"no\" must be inferred from the absence of a boxed-warning passage.",
+    "Label sections are capped at 600 words each, so late details can be missing.",
+    "Coverage shares are computed from formulary rules, not claims or utilization.",
+    "The drug filter relies on the question naming or strongly implying one drug; misspellings are synthetic (letter swap)."
+  ],
+  "run": {
+    "where": "AWS CodeBuild pbm-claims-build build #8, source commit e9eb6da",
+    "outputs_s3": "s3://pbm-claims-scoring-331604528033/drug-rag/8/ (predictions and fetched label cache)",
+    "copied_from_s3": "drug_rag.json verbatim values"
+  }
+}

@@ -9,3 +9,4 @@
 - **Not done:** GCP deploy kit never executed.
 - **CMS spending and MIMIC analyses:** unchanged; see `cms_analysis.json` and `mimic_workflow.json`.
 - **Clinical-notes extraction:** GitHub Actions run 40448264497 (6 logic tests passed; LLM run on all 1,081 test sentences). Formulary link recomputed in run 40454539321 after fixing the RxNav query encoding.
+- **Drug-label RAG:** AWS CodeBuild build #8 (commit e9eb6da): 14 unit tests passed; 470 Bedrock prompts answered; results copied into `drug_rag.json` (outputs in S3 `drug-rag/8/`). Build #7 was discarded: it predates the RxNorm label fallback and prose-answer parsing.

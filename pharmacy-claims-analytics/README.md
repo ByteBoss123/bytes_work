@@ -82,6 +82,34 @@ The JSON output format itself caps F1 at 0.977 (gold labels pushed through the s
 
 **Link to Part D rules.** The 25 most-mentioned drug terms were mapped to RxNorm (NLM RxNav) and joined to the real CY2026 formulary file. 14 matched products listed on 224–331 of 331 formularies. Among formularies listing them: brinzolamide (Azopt) has step therapy on 27%, Rhopressa on 13% and latanoprost on 10%; Restasis has quantity limits on 72%. The 11 unmatched terms are mostly over-the-counter artificial-tear abbreviations that Part D does not cover. Caveats: a brand name's RxNorm products include its generic equivalents, and the join is not route-specific (prednisolone's 45% PA rate reflects oral products).
 
+## Drug-label and Part D coverage question answering (RAG)
+
+[`pbm/drug_rag.py`](pbm/drug_rag.py). Results: [`reports/drug_rag.json`](reports/drug_rag.json). Run on AWS CodeBuild (build #8, commit `e9eb6da`) with Qwen3-32B on Amazon Bedrock. Per-question predictions and the fetched label cache are in `s3://pbm-claims-scoring-331604528033/drug-rag/8/`.
+
+- **Drugs:** the 80 highest-spend generic names in the real CMS Part D prescriber extract. 59 matched an FDA prescribing-information label through openFDA, by exact name, salt-stripped name, or an RxNorm approximate match plus product RxCUI. The 21 unmatched are mostly truncated combination names, biologics and devices such as pen needles.
+- **Corpus (775 chunks):** label sections (boxed warning, indications, dosage and administration, dosage forms, contraindications, warnings; 600 words each at most), plus one CY2026 coverage summary per drug computed from the real formulary file (55 drugs).
+- **173 questions with gold answers from structured fields the system never sees:**
+  - route of administration, from openFDA route metadata
+  - whether the label has a boxed warning
+  - the share of listing formularies that require prior authorization (±0.5 points)
+- **Retrieval:** hybrid BM25 + bge-small with reciprocal-rank fusion, restricted to the drug named in the question. The drug is matched exactly, then fuzzily (similarity ≥ 0.85), then inferred when one drug dominates the top-10 hits; otherwise the search is unfiltered.
+
+| Accuracy (173 questions, 59 drugs) | Closed-book | RAG | Difference (95% CI, drug bootstrap) |
+|---|---:|---:|---:|
+| Prior-authorization share (55) | 0% (all abstained) | **100%** | +100 points |
+| Boxed warning yes/no (59) | 45.8% | **89.8%** | +44.1 (+32.2 to +57.6) |
+| Route (59) | **83.1%** | 71.2% | −11.9 (−25.4 to +1.7) |
+| All | 43.9% | **86.7%** | **+42.8 (+36.2 to +49.7)** |
+
+- **Retrieval:** every retriever found the right drug's documents in the top 5 for all 173 original questions. The difference was precision. Without the drug filter, 34.4% of boxed-warning questions about drugs that have no boxed warning also retrieved another drug's boxed-warning passage. With the filter, 0%.
+- **Robustness (222 rephrased questions):**
+  - **Misspelled brands** (3rd and 4th letters swapped): top-5 hit rate rose from 53.4% to 96.6% with the filter, and other drugs' boxed-warning passages in the top 5 fell from 90.3% to 6.5%.
+  - **Generic names instead of brands:** 98.1% to 100%.
+  - **Answers to misspelled boxed-warning questions:** 81.0% vs 69.0% unfiltered (+12.1, CI −1.7 to +25.9), but 3 false "yes" answers vs 1. The filter is not a free win at the answer level.
+- **Route is where RAG loses.** The model already knows most routes. The 600-word section cap sometimes cut the sentence that states the route, which led to 8 abstentions. A fix would be indexing the full dosage-and-administration and dosage-forms sections.
+- **Grounding:** every RAG answer with valid citations (162 of 163) cited only passages from the correct drug.
+- **Format compliance:** 72 of 173 RAG answers ignored the forced tool call and answered in prose. Those were parsed (answer text, [C#] citations, "passages do not specify" counted as an abstention) and are counted under `text_fallback`.
+
 ## Real healthcare-data analyses
 
 - [MIMIC-IV medication workflow](MIMIC_WORKFLOW.md): 18,087 prescription-component rows from 100 de-identified patients; join validation and timestamp/documentation quality checks.
