@@ -1,0 +1,26 @@
+05:18:34 downloading https://data.cms.gov/sites/default/files/2026-01/5942aa7e-a0c4-4e65-bd56-32608c33649f/SPUF_2026_20260107.zip
+05:18:59 link latanoprost exact_or_normalized {'formularies_listing': 331, 'share_of_formularies': 1.0, 'pa_share': 0.006042296072507553, 'step_therapy_share': 0.1027190332326284, 'quantity_limit_share': 0.525679758308157}
+05:19:00 link timolol exact_or_normalized {'formularies_listing': 331, 'share_of_formularies': 1.0, 'pa_share': 0.0030211480362537764, 'step_therapy_share': 0.03625377643504532, 'quantity_limit_share': 0.012084592145015106}
+05:19:00 link brimonidine exact_or_normalized {'formularies_listing': 331, 'share_of_formularies': 1.0, 'pa_share': 0.00906344410876133, 'step_therapy_share': 0.0030211480362537764, 'quantity_limit_share': 0.09969788519637462}
+05:19:00 link cosopt exact_or_normalized {'formularies_listing': 331, 'share_of_formularies': 1.0, 'pa_share': 0.0, 'step_therapy_share': 0.03323262839879154, 'quantity_limit_share': 0.006042296072507553}
+05:19:01 link dorzolamide exact_or_normalized {'formularies_listing': 331, 'share_of_formularies': 1.0, 'pa_share': 0.0, 'step_therapy_share': 0.03323262839879154, 'quantity_limit_share': 0.006042296072507553}
+05:19:01 link prednisolone exact_or_normalized {'formularies_listing': 331, 'share_of_formularies': 1.0, 'pa_share': 0.4501510574018127, 'step_therapy_share': 0.0, 'quantity_limit_share': 0.012084592145015106}
+05:19:01 link lumigan exact_or_normalized {'formularies_listing': 325, 'share_of_formularies': 0.9818731117824774, 'pa_share': 0.003076923076923077, 'step_therapy_share': 0.012307692307692308, 'quantity_limit_share': 0.5476923076923077}
+05:19:02 link ats approximate {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:19:02 link dorzolamide/timolol exact_or_normalized {'formularies_listing': 331, 'share_of_formularies': 1.0, 'pa_share': 0.0, 'step_therapy_share': 0.03323262839879154, 'quantity_limit_share': 0.006042296072507553}
+05:19:03 link travatan exact_or_normalized {'formularies_listing': 253, 'share_of_formularies': 0.7643504531722054, 'pa_share': 0.003952569169960474, 'step_therapy_share': 0.019762845849802372, 'quantity_limit_share': 0.5375494071146245}
+05:19:03 link restasis exact_or_normalized {'formularies_listing': 331, 'share_of_formularies': 1.0, 'pa_share': 0.0, 'step_therapy_share': 0.0, 'quantity_limit_share': 0.7190332326283988}
+05:19:03 link azopt exact_or_normalized {'formularies_listing': 224, 'share_of_formularies': 0.676737160120846, 'pa_share': 0.0, 'step_therapy_share': 0.27232142857142855, 'quantity_limit_share': 0.017857142857142856}
+05:19:04 link pred approximate {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:19:04 link at's approximate {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:19:04 link combigan exact_or_normalized {'formularies_listing': 280, 'share_of_formularies': 0.8459214501510574, 'pa_share': 0.0, 'step_therapy_share': 0.0035714285714285713, 'quantity_limit_share': 0.007142857142857143}
+05:19:05 link pfats approximate {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:19:05 link alphagan exact_or_normalized {'formularies_listing': 266, 'share_of_formularies': 0.8036253776435045, 'pa_share': 0.0, 'step_therapy_share': 0.0, 'quantity_limit_share': 0.015037593984962405}
+05:19:06 link at approximate {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:19:06 link systane approximate {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:19:07 link artificial tears approximate {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:19:07 link rhopressa exact_or_normalized {'formularies_listing': 300, 'share_of_formularies': 0.9063444108761329, 'pa_share': 0.006666666666666667, 'step_therapy_share': 0.12666666666666668, 'quantity_limit_share': 0.4866666666666667}
+05:19:08 link refresh approximate {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:19:08 link travatan z approximate {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:19:09 link lubrication approximate {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:19:09 link pfat unmapped {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}

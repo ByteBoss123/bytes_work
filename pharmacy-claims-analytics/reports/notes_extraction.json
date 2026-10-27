@@ -617,12 +617,12 @@
       "rxnorm_ids": [
         "43611"
       ],
-      "product_rxcuis": 0,
-      "formularies_listing": 0,
-      "share_of_formularies": 0.0,
-      "pa_share": null,
-      "step_therapy_share": null,
-      "quantity_limit_share": null
+      "product_rxcuis": 8,
+      "formularies_listing": 331,
+      "share_of_formularies": 1.0,
+      "pa_share": 0.006042296072507553,
+      "step_therapy_share": 0.1027190332326284,
+      "quantity_limit_share": 0.525679758308157
     },
     {
       "note_term": "timolol",
@@ -631,12 +631,12 @@
       "rxnorm_ids": [
         "10600"
       ],
-      "product_rxcuis": 0,
-      "formularies_listing": 0,
-      "share_of_formularies": 0.0,
-      "pa_share": null,
-      "step_therapy_share": null,
-      "quantity_limit_share": null
+      "product_rxcuis": 32,
+      "formularies_listing": 331,
+      "share_of_formularies": 1.0,
+      "pa_share": 0.0030211480362537764,
+      "step_therapy_share": 0.03625377643504532,
+      "quantity_limit_share": 0.012084592145015106
     },
     {
       "note_term": "brimonidine",
@@ -645,12 +645,12 @@
       "rxnorm_ids": [
         "134615"
       ],
-      "product_rxcuis": 0,
-      "formularies_listing": 0,
-      "share_of_formularies": 0.0,
-      "pa_share": null,
-      "step_therapy_share": null,
-      "quantity_limit_share": null
+      "product_rxcuis": 15,
+      "formularies_listing": 331,
+      "share_of_formularies": 1.0,
+      "pa_share": 0.00906344410876133,
+      "step_therapy_share": 0.0030211480362537764,
+      "quantity_limit_share": 0.09969788519637462
     },
     {
       "note_term": "cosopt",
@@ -659,12 +659,12 @@
       "rxnorm_ids": [
         "216253"
       ],
-      "product_rxcuis": 0,
-      "formularies_listing": 0,
-      "share_of_formularies": 0.0,
-      "pa_share": null,
-      "step_therapy_share": null,
-      "quantity_limit_share": null
+      "product_rxcuis": 4,
+      "formularies_listing": 331,
+      "share_of_formularies": 1.0,
+      "pa_share": 0.0,
+      "step_therapy_share": 0.03323262839879154,
+      "quantity_limit_share": 0.006042296072507553
     },
     {
       "note_term": "dorzolamide",
@@ -673,12 +673,12 @@
       "rxnorm_ids": [
         "60207"
       ],
-      "product_rxcuis": 0,
-      "formularies_listing": 0,
-      "share_of_formularies": 0.0,
-      "pa_share": null,
-      "step_therapy_share": null,
-      "quantity_limit_share": null
+      "product_rxcuis": 5,
+      "formularies_listing": 331,
+      "share_of_formularies": 1.0,
+      "pa_share": 0.0,
+      "step_therapy_share": 0.03323262839879154,
+      "quantity_limit_share": 0.006042296072507553
     },
     {
       "note_term": "prednisolone",
@@ -687,12 +687,12 @@
       "rxnorm_ids": [
         "8638"
       ],
-      "product_rxcuis": 0,
-      "formularies_listing": 0,
-      "share_of_formularies": 0.0,
-      "pa_share": null,
-      "step_therapy_share": null,
-      "quantity_limit_share": null
+      "product_rxcuis": 59,
+      "formularies_listing": 331,
+      "share_of_formularies": 1.0,
+      "pa_share": 0.4501510574018127,
+      "step_therapy_share": 0.0,
+      "quantity_limit_share": 0.012084592145015106
     },
     {
       "note_term": "lumigan",
@@ -701,12 +701,12 @@
       "rxnorm_ids": [
         "284771"
       ],
-      "product_rxcuis": 0,
-      "formularies_listing": 0,
-      "share_of_formularies": 0.0,
-      "pa_share": null,
-      "step_therapy_share": null,
-      "quantity_limit_share": null
+      "product_rxcuis": 4,
+      "formularies_listing": 325,
+      "share_of_formularies": 0.9818731117824774,
+      "pa_share": 0.003076923076923077,
+      "step_therapy_share": 0.012307692307692308,
+      "quantity_limit_share": 0.5476923076923077
     },
     {
       "note_term": "ats",
@@ -729,12 +729,12 @@
       "rxnorm_ids": [
         "662263"
       ],
-      "product_rxcuis": 0,
-      "formularies_listing": 0,
-      "share_of_formularies": 0.0,
-      "pa_share": null,
-      "step_therapy_share": null,
-      "quantity_limit_share": null
+      "product_rxcuis": 4,
+      "formularies_listing": 331,
+      "share_of_formularies": 1.0,
+      "pa_share": 0.0,
+      "step_therapy_share": 0.03323262839879154,
+      "quantity_limit_share": 0.006042296072507553
     },
     {
       "note_term": "travatan",
@@ -743,12 +743,12 @@
       "rxnorm_ids": [
         "284896"
       ],
-      "product_rxcuis": 0,
-      "formularies_listing": 0,
-      "share_of_formularies": 0.0,
-      "pa_share": null,
-      "step_therapy_share": null,
-      "quantity_limit_share": null
+      "product_rxcuis": 2,
+      "formularies_listing": 253,
+      "share_of_formularies": 0.7643504531722054,
+      "pa_share": 0.003952569169960474,
+      "step_therapy_share": 0.019762845849802372,
+      "quantity_limit_share": 0.5375494071146245
     },
     {
       "note_term": "restasis",
@@ -757,12 +757,12 @@
       "rxnorm_ids": [
         "352951"
       ],
-      "product_rxcuis": 0,
-      "formularies_listing": 0,
-      "share_of_formularies": 0.0,
-      "pa_share": null,
-      "step_therapy_share": null,
-      "quantity_limit_share": null
+      "product_rxcuis": 4,
+      "formularies_listing": 331,
+      "share_of_formularies": 1.0,
+      "pa_share": 0.0,
+      "step_therapy_share": 0.0,
+      "quantity_limit_share": 0.7190332326283988
     },
     {
       "note_term": "azopt",
@@ -771,12 +771,12 @@
       "rxnorm_ids": [
         "194882"
       ],
-      "product_rxcuis": 0,
-      "formularies_listing": 0,
-      "share_of_formularies": 0.0,
-      "pa_share": null,
-      "step_therapy_share": null,
-      "quantity_limit_share": null
+      "product_rxcuis": 2,
+      "formularies_listing": 224,
+      "share_of_formularies": 0.676737160120846,
+      "pa_share": 0.0,
+      "step_therapy_share": 0.27232142857142855,
+      "quantity_limit_share": 0.017857142857142856
     },
     {
       "note_term": "pred",
@@ -813,12 +813,12 @@
       "rxnorm_ids": [
         "746962"
       ],
-      "product_rxcuis": 0,
-      "formularies_listing": 0,
-      "share_of_formularies": 0.0,
-      "pa_share": null,
-      "step_therapy_share": null,
-      "quantity_limit_share": null
+      "product_rxcuis": 2,
+      "formularies_listing": 280,
+      "share_of_formularies": 0.8459214501510574,
+      "pa_share": 0.0,
+      "step_therapy_share": 0.0035714285714285713,
+      "quantity_limit_share": 0.007142857142857143
     },
     {
       "note_term": "pfats",
@@ -841,12 +841,12 @@
       "rxnorm_ids": [
         "153358"
       ],
-      "product_rxcuis": 0,
-      "formularies_listing": 0,
-      "share_of_formularies": 0.0,
-      "pa_share": null,
-      "step_therapy_share": null,
-      "quantity_limit_share": null
+      "product_rxcuis": 4,
+      "formularies_listing": 266,
+      "share_of_formularies": 0.8036253776435045,
+      "pa_share": 0.0,
+      "step_therapy_share": 0.0,
+      "quantity_limit_share": 0.015037593984962405
     },
     {
       "note_term": "at",
@@ -897,12 +897,12 @@
       "rxnorm_ids": [
         "1992869"
       ],
-      "product_rxcuis": 0,
-      "formularies_listing": 0,
-      "share_of_formularies": 0.0,
-      "pa_share": null,
-      "step_therapy_share": null,
-      "quantity_limit_share": null
+      "product_rxcuis": 2,
+      "formularies_listing": 300,
+      "share_of_formularies": 0.9063444108761329,
+      "pa_share": 0.006666666666666667,
+      "step_therapy_share": 0.12666666666666668,
+      "quantity_limit_share": 0.4866666666666667
     },
     {
       "note_term": "refresh",
