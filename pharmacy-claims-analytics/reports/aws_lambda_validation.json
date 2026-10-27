@@ -84,12 +84,16 @@
   "cloudwatch": {
     "pbm-scoring-score_drift": {
       "OK->ALARM": "2026-10-27T04:53:28.312Z",
-      "seconds_after_service_raised": 48
+      "seconds_after_service_raised": 48,
+      "ALARM->OK": "2026-10-27T04:59:28.313Z"
     },
     "pbm-scoring-request_failure_rate": {
       "OK->ALARM": "2026-10-27T04:53:48.572Z",
-      "seconds_after_service_raised": 73
-    }
+      "seconds_after_service_raised": 73,
+      "ALARM->OK": "2026-10-27T04:59:48.571Z"
+    },
+    "sns_actions": "Both alarms executed their SNS action (pbm-claims-scoring-alerts) on entering ALARM.",
+    "note": "Alarms use 60 s periods with missing data treated as not breaching; both returned to OK 6 minutes after firing."
   },
   "other_changes": [
     "Paused EventBridge schedule pbm-claims-canary (target pbm-claims-durable-monitor, created 2026-10-24) because it sent synthetic-claims payloads that the real-data model rejects."
