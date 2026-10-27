@@ -85,9 +85,23 @@ def select_generics(spend_csv, n):
     return out
 
 
-def openfda_search(generic):
-    q = f'openfda.generic_name:"{generic}" AND openfda.product_type:"HUMAN PRESCRIPTION DRUG"'
-    url = 'https://api.fda.gov/drug/label.json?search=' + urllib.parse.quote(q, safe=':"').replace('%20', '+') + '&limit=25'
+SALTS = {'hcl', 'hydrochloride', 'propanediol', 'propaned', 'mesylate', 'mesylat', 'hydrobromide', 'hbr', 'sodium',
+         'potassium', 'calcium', 'maleate', 'fumarate', 'tartrate', 'succinate', 'acetate', 'besylate', 'citrate',
+         'sulfate', 'phosphate', 'phos', 'dihydrate', 'monohydrate', 'bromide'}
+
+
+def clean_name(cms_name):
+    """Drop trailing salt words from single-ingredient CMS names (e.g. 'cariprazine hcl' -> 'cariprazine')."""
+    if '/' in cms_name:
+        return cms_name
+    w = cms_name.split()
+    while len(w) > 1 and w[-1] in SALTS:
+        w.pop()
+    return ' '.join(w)
+
+
+def openfda_query(q, limit=25):
+    url = 'https://api.fda.gov/drug/label.json?search=' + urllib.parse.quote(q, safe=':"()').replace('%20', '+') + f'&limit={limit}'
     for attempt in range(4):
         try:
             with urllib.request.urlopen(urllib.request.Request(url, headers={'User-Agent': 'pbm-portfolio'}), timeout=60) as r:
@@ -101,18 +115,54 @@ def openfda_search(generic):
     return []
 
 
-def pick_label(generic, results):
-    """Prefer a branded single-ingredient label whose generic name matches exactly; newest first."""
+def openfda_search(generic):
+    return openfda_query(f'openfda.generic_name:"{generic}" AND openfda.product_type:"HUMAN PRESCRIPTION DRUG"')
+
+
+def openfda_by_rxcui(rxcuis):
+    """Labels whose product RxCUIs include any of the given ones (space = OR in openFDA)."""
+    return openfda_query(' '.join(f'openfda.rxcui:"{x}"' for x in list(rxcuis)[:20]))
+
+
+def rx_approx(name):
+    """Top RxNorm approximate match for a truncated CMS name, its RxNorm name, and its product RxCUIs."""
+    from pbm.notes_extraction import rxnav
+    cand = rxnav('approximateTerm.json', term=name.replace('/', ' / '), maxEntries=1).get('approximateGroup', {}).get('candidate', [])
+    if not cand:
+        return None
+    rx = cand[0]['rxcui']
+    prop = rxnav(f'rxcui/{rx}/properties.json').get('properties', {}) or {}
+    products = set()
+    rel = rxnav(f'rxcui/{rx}/related.json', tty='SCD SBD GPCK BPCK')
+    for g in rel.get('relatedGroup', {}).get('conceptGroup', []) or []:
+        for c in g.get('conceptProperties', []) or []:
+            products.add(c['rxcui'])
+    if prop.get('tty') in ('SCD', 'SBD', 'GPCK', 'BPCK'):
+        products.add(rx)
+    return {'rxcui': rx, 'rxnorm_name': prop.get('name'), 'tty': prop.get('tty'), 'score': cand[0].get('score'),
+            'products': sorted(products)}
+
+
+def usable(r):
+    o = r.get('openfda', {})
+    return bool(o.get('route') and o.get('brand_name') and any(r.get(k) for k, _ in SECTIONS[1:3]))
+
+
+def pick_label(generic, results, products=None):
+    """Branded label (newest first) matching the generic name exactly, or, for the RxNorm fallback,
+    sharing a product RxCUI."""
     def ok(r):
-        o = r.get('openfda', {})
-        gens = [g.lower() for g in o.get('generic_name', [])]
-        return o.get('route') and o.get('brand_name') and generic in gens and any(r.get(k) for k, _ in SECTIONS[1:3])
+        if not usable(r):
+            return False
+        o = r['openfda']
+        if products is not None:
+            return bool(set(o.get('rxcui', [])) & set(products))
+        return generic in [g.lower() for g in o.get('generic_name', [])]
     cands = [r for r in results if ok(r)]
     if not cands:
         return None
-    branded = [r for r in cands if r['openfda']['brand_name'][0].lower() != generic]
-    pool = branded or cands
-    return max(pool, key=lambda r: r.get('effective_time', ''))
+    branded = [r for r in cands if r['openfda']['brand_name'][0].lower() != r['openfda'].get('generic_name', [''])[0].lower()]
+    return max(branded or cands, key=lambda r: r.get('effective_time', ''))
 
 
 def fetch_labels(generics, cache):
@@ -121,13 +171,21 @@ def fetch_labels(generics, cache):
         return json.loads(cache.read_text())
     labels, misses = [], []
     for g in generics:
-        r = pick_label(g, openfda_search(g))
+        name, products, match, rx = clean_name(g), None, 'exact', None
+        r = pick_label(name, openfda_search(name))
+        if r is None:
+            rx = rx_approx(g)
+            if rx and rx['products']:
+                r = pick_label(None, openfda_by_rxcui(rx['products']), rx['products'])
+                products, match = rx['products'], 'rxnorm_approximate'
         time.sleep(0.3)
         if r is None:
             misses.append(g)
             continue
         o = r['openfda']
-        labels.append({'generic': g, 'brand': norm(o['brand_name'][0]), 'set_id': r.get('set_id'),
+        generic = name if match == 'exact' else norm(o.get('generic_name', [rx['rxnorm_name'] or g])[0]).lower()
+        labels.append({'generic': generic, 'cms_name': g, 'match': match, 'rxnorm': rx, 'products': products,
+                       'brand': norm(o['brand_name'][0]), 'set_id': r.get('set_id'),
                        'effective_time': r.get('effective_time'), 'routes': sorted(set(o['route'])),
                        'boxed': bool(r.get('boxed_warning')),
                        'sections': {k: norm(' '.join(r[k])) for k, _ in SECTIONS if r.get(k)}})
@@ -147,7 +205,7 @@ def dedupe(labels):
     return out
 
 
-def coverage(generics, raw_dir):
+def coverage(labels, raw_dir):
     """Share of CY2026 formularies listing each drug that apply PA / step therapy / QL."""
     from pbm import formulary as F
     from pbm.notes_extraction import rx_concepts
@@ -156,8 +214,12 @@ def coverage(generics, raw_dir):
     pairs = F.pairs(form)
     n_forms = int(pairs.formulary_id.nunique())
     out = {}
-    for g in generics:
-        method, ids, products = rx_concepts(g)
+    for l in labels:
+        g = l['generic']
+        if l.get('products'):
+            method, products = 'rxnorm_approximate', l['products']
+        else:
+            method, _, products = rx_concepts(g)
         sub = pairs[pairs.rxcui.isin(products)]
         if not len(sub):
             continue
@@ -401,6 +463,17 @@ class LlamaQA:
             return None, raw
 
 
+def text_fallback(text):
+    """Model skipped the tool call and answered in prose: keep the prose, pull [C12]-style citations,
+    and treat 'context does not say' replies as abstentions. Counted separately as a format failure."""
+    if not text:
+        return None
+    cites = re.findall(r'\bC\d+\b', text)
+    answer = re.sub(r'\[[^\]]*\bC\d+\b[^\]]*\]', '', text).strip()
+    abstain = bool(re.search(r'(do(es)? not (specify|contain|mention|provide|state)|not (specified|mentioned|stated)|no information)', answer.lower()))
+    return {'answer': answer, 'citations': cites, 'abstain': abstain, 'format': 'text_fallback'}
+
+
 class BedrockQA:
     """Amazon Bedrock Converse API with a forced tool call so the output always matches SCHEMA.
     `batch` answers many prompts concurrently (adaptive retries absorb throttling); results are
@@ -427,7 +500,8 @@ class BedrockQA:
                 out = block['toolUse']['input']
                 ok = isinstance(out, dict) and {'answer', 'citations', 'abstain'} <= set(out)
                 return (out if ok else None), json.dumps(out)
-        return None, json.dumps(r['output']['message'])
+        text = ' '.join(b.get('text', '') for b in r['output']['message']['content']).strip()
+        return text_fallback(text), json.dumps({'text_fallback': text})
 
     def batch(self, all_msgs):
         from concurrent.futures import ThreadPoolExecutor
@@ -525,6 +599,7 @@ def summarize(qs, ok, preds=None):
         if preds is not None:
             row['abstained'] = int(sum(1 for i in m if preds[i] and preds[i].get('abstain')))
             row['invalid_json'] = int(sum(1 for i in m if preds[i] is None))
+            row['text_fallback'] = int(sum(1 for i in m if preds[i] and preds[i].get('format') == 'text_fallback'))
         out[t] = row
     return out
 
@@ -541,7 +616,7 @@ def run(out, spend_csv, n_drugs=80, raw_dir=None, model_path=None, labels_cache=
     log('drugs', len(generics), 'labels', len(labels), 'not found', len(fetched['not_found']))
     cov_meta = None
     if cov is None:
-        cov, cov_meta = coverage([l['generic'] for l in labels], raw_dir) if raw_dir else ({}, None)
+        cov, cov_meta = coverage(labels, raw_dir) if raw_dir else ({}, None)
     corpus, qs = build(labels, cov)
     log('corpus chunks', len(corpus), 'questions', len(qs))
 

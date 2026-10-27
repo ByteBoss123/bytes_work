@@ -56,6 +56,23 @@ class Parsing(unittest.TestCase):
         self.assertFalse(R.correct({'type': 'pa_share', 'gold': 87.3}, {'answer': '80%', 'abstain': False}))
 
 
+class Matching(unittest.TestCase):
+    def test_clean_name_and_text_fallback(self):
+        self.assertEqual(R.clean_name('cariprazine hcl'), 'cariprazine')
+        self.assertEqual(R.clean_name('dapagliflozin propanediol'), 'dapagliflozin')
+        self.assertEqual(R.clean_name('sacubitril/valsartan'), 'sacubitril/valsartan')
+        f = R.text_fallback('Ozempic is administered subcutaneously ["C20"].')
+        self.assertEqual((f['citations'], f['abstain'], f['format']), (['C20'], False, 'text_fallback'))
+        self.assertTrue(R.correct({'type': 'route', 'gold': ['SUBCUTANEOUS']}, f))
+        self.assertTrue(R.text_fallback('The provided passages do not specify the route. ["C1"]')['abstain'])
+
+    def test_pick_label_by_product_rxcui(self):
+        r = {'openfda': {'route': ['ORAL'], 'brand_name': ['Entresto'], 'generic_name': ['SACUBITRIL AND VALSARTAN'],
+                         'rxcui': ['1656340']}, 'indications_and_usage': ['x'], 'effective_time': '2024'}
+        self.assertIs(R.pick_label(None, [r], ['1656340']), r)
+        self.assertIsNone(R.pick_label(None, [r], ['999']))
+
+
 class Corpus(unittest.TestCase):
     def test_build_questions_and_chunks(self):
         corpus, qs = R.build(LABELS, COV)
