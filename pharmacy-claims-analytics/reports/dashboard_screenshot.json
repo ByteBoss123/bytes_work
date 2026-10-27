@@ -1,0 +1,33 @@
+{
+  "console_errors": [],
+  "views": {
+    "desktop": {
+      "cards": [
+        "REQUESTS\n46",
+        "FAILURE RATE\n13.0%\nALERT \u00b7 alert above 5.0%",
+        "P95 LATENCY\n0 ms\nOK \u00b7 alert above 2000 ms",
+        "SCORE PSI\n6.240\nALERT \u00b7 alert above 0.2"
+      ],
+      "horizontal_overflow": false
+    },
+    "dark": {
+      "cards": [
+        "REQUESTS\n46",
+        "FAILURE RATE\n13.0%\nALERT \u00b7 alert above 5.0%",
+        "P95 LATENCY\n0 ms\nOK \u00b7 alert above 2000 ms",
+        "SCORE PSI\n6.240\nALERT \u00b7 alert above 0.2"
+      ],
+      "horizontal_overflow": false
+    },
+    "mobile": {
+      "cards": [
+        "REQUESTS\n46",
+        "FAILURE RATE\n13.0%\nALERT \u00b7 alert above 5.0%",
+        "P95 LATENCY\n0 ms\nOK \u00b7 alert above 2000 ms",
+        "SCORE PSI\n6.240\nALERT \u00b7 alert above 0.2"
+      ],
+      "horizontal_overflow": false
+    }
+  },
+  "passed": true
+}

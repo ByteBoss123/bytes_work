@@ -1,0 +1,38 @@
+{"severity": "INFO", "event": "pbm_alert_transition", "alert": "score_drift", "active": false, "value": null, "model_sha256": "529e5e4494f725ee4603952a87600ae289dfa5fb2b1707bf15c1251398033a71"}
+{"severity": "INFO", "event": "pbm_alert_transition", "alert": "request_failure_rate", "active": false, "value": 0.0, "model_sha256": "529e5e4494f725ee4603952a87600ae289dfa5fb2b1707bf15c1251398033a71"}
+{"severity": "INFO", "event": "pbm_alert_transition", "alert": "latency", "active": false, "value": 0.0, "model_sha256": "529e5e4494f725ee4603952a87600ae289dfa5fb2b1707bf15c1251398033a71"}
+{"severity": "WARNING", "event": "pbm_alert_transition", "alert": "request_failure_rate", "active": true, "value": 0.09090909090909091, "model_sha256": "529e5e4494f725ee4603952a87600ae289dfa5fb2b1707bf15c1251398033a71"}
+{"severity": "WARNING", "event": "pbm_alert_transition", "alert": "score_drift", "active": true, "value": 0.22584257335716826, "model_sha256": "529e5e4494f725ee4603952a87600ae289dfa5fb2b1707bf15c1251398033a71"}
+{
+  "console_errors": [],
+  "views": {
+    "desktop": {
+      "cards": [
+        "REQUESTS\n46",
+        "FAILURE RATE\n13.0%\nALERT \u00b7 alert above 5.0%",
+        "P95 LATENCY\n0 ms\nOK \u00b7 alert above 2000 ms",
+        "SCORE PSI\n6.240\nALERT \u00b7 alert above 0.2"
+      ],
+      "horizontal_overflow": false
+    },
+    "dark": {
+      "cards": [
+        "REQUESTS\n46",
+        "FAILURE RATE\n13.0%\nALERT \u00b7 alert above 5.0%",
+        "P95 LATENCY\n0 ms\nOK \u00b7 alert above 2000 ms",
+        "SCORE PSI\n6.240\nALERT \u00b7 alert above 0.2"
+      ],
+      "horizontal_overflow": false
+    },
+    "mobile": {
+      "cards": [
+        "REQUESTS\n46",
+        "FAILURE RATE\n13.0%\nALERT \u00b7 alert above 5.0%",
+        "P95 LATENCY\n0 ms\nOK \u00b7 alert above 2000 ms",
+        "SCORE PSI\n6.240\nALERT \u00b7 alert above 0.2"
+      ],
+      "horizontal_overflow": false
+    }
+  },
+  "passed": true
+}
