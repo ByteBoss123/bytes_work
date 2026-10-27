@@ -1,7 +1,6 @@
 # Scoring service image for Cloud Run.
-# The model is not committed to Git, so the image trains it from the seed-42
-# synthetic simulator at build time. The model and its monitoring reference are
-# written together, so the service's fingerprint check passes.
+# Serves the model trained by CI on real CMS Part D formulary files. The service checks the
+# model's SHA-256 against monitoring_reference.json before it starts.
 FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
@@ -11,9 +10,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY pbm ./pbm
-COPY sql ./sql
-RUN python -m pbm.pipeline --n 60000 --seed 42 --out reports \
-    && rm -f reports/claims.sqlite reports/test_predictions.csv
+COPY reports/model.joblib reports/monitoring_reference.json ./reports/
 
 RUN useradd --create-home --uid 10001 app && chown -R app /app
 USER app

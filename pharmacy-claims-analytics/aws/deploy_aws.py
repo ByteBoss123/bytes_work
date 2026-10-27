@@ -29,16 +29,14 @@ BUILDSPEC = """version: 0.2
 phases:
   pre_build:
     commands:
-      - sha256sum pbm/service.py pbm/pipeline.py sql/curate.sql sql/operations.sql requirements.txt
+      - sha256sum pbm/service.py pbm/formulary.py reports/model.joblib reports/monitoring_reference.json requirements.txt
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $REPO_URI
   build:
     commands:
-      - export TAG=$(sha256sum pbm/service.py pbm/pipeline.py | sha256sum | cut -c1-12)
+      - export TAG=$(sha256sum pbm/service.py reports/model.joblib | sha256sum | cut -c1-12)
       - docker build --provenance=false -f aws/Dockerfile.lambda -t $REPO_URI:$TAG .
-      - pip install -q -r requirements.txt
-      - python -m pbm.pipeline --n 60000 --seed 42 --out /tmp/ref > /dev/null
-      - PYTHONPATH=. python aws/export_reference.py /tmp/ref/claims.sqlite /tmp/reference_episodes.json
-      - aws s3 cp /tmp/reference_episodes.json s3://$BUCKET/validation/reference_episodes.json
+      - python3 -c "import json;json.dump({'note':'Real CMS formulary feature rows (CY2026 test year), features only','pairs':json.load(open('reports/reference_pairs.json'))},open('/tmp/reference_pairs.json','w'))"
+      - aws s3 cp /tmp/reference_pairs.json s3://$BUCKET/validation/reference_pairs.json
   post_build:
     commands:
       - docker push $REPO_URI:$TAG
@@ -81,7 +79,7 @@ def source_zip():
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--email', default='')
-    ap.add_argument('--canary-hours', type=float, default=6, help='0 disables the scheduled synthetic canary')
+    ap.add_argument('--canary-hours', type=float, default=6, help='0 disables the scheduled canary')
     args = ap.parse_args()
     s = boto3.Session(region_name=REGION)
     acct = s.client('sts').get_caller_identity()['Account']
@@ -175,10 +173,10 @@ def main():
 
 
 def create_canary(s, acct, bucket, hours):
-    """EventBridge Scheduler: one synthetic 100-episode /predict request per minute, auto-ending.
+    """EventBridge Scheduler: one 100-pair /predict request per minute, auto-ending.
 
-    Uses reference episodes 900-999, whose repeated scores sit at PSI 0.026 vs. validation, so
-    the canary alone stays under the 0.20 drift threshold.
+    Replays real reference pairs 900-999 (check their PSI vs. validation before relying on the
+    canary staying under the 0.20 drift threshold).
     """
     import datetime
     fn_arn = f'arn:aws:lambda:{REGION}:{acct}:function:{NAME}'
@@ -191,7 +189,7 @@ def create_canary(s, acct, bucket, hours):
         {'Version': '2012-10-17', 'Statement': [{'Effect': 'Allow', 'Action': 'lambda:InvokeFunction',
                                                  'Resource': [fn_arn, fn_arn + ':*']}]}))
     time.sleep(10)
-    ref = json.loads(s.client('s3').get_object(Bucket=bucket, Key='validation/reference_episodes.json')['Body'].read())
+    ref = json.loads(s.client('s3').get_object(Bucket=bucket, Key='validation/reference_pairs.json')['Body'].read())
     event = {'version': '2.0', 'routeKey': '$default', 'rawPath': '/predict', 'rawQueryString': '',
              'headers': {'content-type': 'application/json', 'host': 'scheduler-canary'},
              'requestContext': {'accountId': 'anonymous', 'apiId': 'canary', 'domainName': 'scheduler-canary',
@@ -199,7 +197,7 @@ def create_canary(s, acct, bucket, hours):
                                 'stage': '$default', 'time': '', 'timeEpoch': 0,
                                 'http': {'method': 'POST', 'path': '/predict', 'protocol': 'HTTP/1.1',
                                          'sourceIp': '127.0.0.1', 'userAgent': 'pbm-scheduler-canary'}},
-             'body': json.dumps({'episodes': ref['episodes'][900:1000]}), 'isBase64Encoded': False}
+             'body': json.dumps({'pairs': ref['pairs'][900:1000]}), 'isBase64Encoded': False}
     params = dict(Name='pbm-claims-canary', ScheduleExpression='rate(1 minute)', FlexibleTimeWindow={'Mode': 'OFF'},
                   EndDate=datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=hours),
                   Target={'Arn': fn_arn, 'RoleArn': f'arn:aws:iam::{acct}:role/pbm-claims-scheduler',

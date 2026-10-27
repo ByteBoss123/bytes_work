@@ -1,4 +1,4 @@
-"""Bounded real CMS aggregate-data analysis, separate from synthetic ML."""
+"""Bounded real CMS aggregate-data analysis (provider-drug spending), separate from the PA model."""
 import hashlib
 import json
 import sqlite3

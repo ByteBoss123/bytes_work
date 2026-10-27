@@ -17,7 +17,7 @@ from urllib.parse import urlsplit
 import joblib
 import numpy as np
 import pandas as pd
-from pbm.pipeline import FEATURES, NUMERIC, CATEGORICAL, psi
+from pbm.monitoring import psi
 
 
 def log_event(event, severity, **fields):
@@ -36,6 +36,8 @@ class ScoringService:
         if reference['model_sha256'] != self.model_sha:
             raise ValueError('Reference/model version mismatch')
         self.reference = np.array(reference['validation_scores'])
+        self.features = list(reference['features'])
+        self.label = reference['label']
         self.db = str(telemetry_path)
         self.lock = threading.Lock()
         self.started = time.time()
@@ -49,33 +51,32 @@ class ScoringService:
               id INTEGER PRIMARY KEY, timestamp REAL, name TEXT, active INTEGER,
               value REAL, model_sha TEXT);''')
 
+    BINARY = {'prev_pair_listed', 'prev_pair_pa', 'prev_pair_st', 'prev_pair_ql', 'drug_listed_prev',
+              'form_linked', 'any_snp'}
+    RATES = {'drug_pa_rate_prev', 'drug_st_rate_prev', 'drug_ql_rate_prev', 'drug_breadth_prev',
+             'form_pa_share_prev', 'is_pdp'}
+
     def predict(self, body):
-        if not isinstance(body, dict) or set(body) != {'episodes'}:
-            raise ValueError('Expected episodes array only')
-        rows = body['episodes']
+        if not isinstance(body, dict) or set(body) != {'pairs'}:
+            raise ValueError('Expected pairs array only')
+        rows = body['pairs']
         if not isinstance(rows, list) or not 1 <= len(rows) <= 100:
-            raise ValueError('Batch must contain 1 to 100 episodes')
-        expected = set(FEATURES)
+            raise ValueError('Batch must contain 1 to 100 pairs')
+        expected = set(self.features)
         if any(not isinstance(row, dict) or set(row) != expected for row in rows):
-            raise ValueError('Use submission-time features only; no identifiers, outcomes, or extra fields')
+            raise ValueError('Send prior-year features only; no identifiers, labels, or extra fields')
         for row in rows:
-            if any(isinstance(row[k], bool) or not isinstance(row[k], (int, float)) for k in NUMERIC):
-                raise ValueError('Numeric fields must be finite numbers')
-            if any(not isinstance(row[k], str) for k in CATEGORICAL):
-                raise ValueError('Category fields must be strings')
-        df = pd.DataFrame(rows)
-        if not np.isfinite(df[NUMERIC].to_numpy()).all() or (df[NUMERIC] < 0).any().any():
-            raise ValueError('Nonfinite or negative numeric feature')
-        if not df.days_supply.isin([30, 60, 90]).all() or not df.weekend.isin([0, 1]).all():
-            raise ValueError('Invalid days_supply or weekend')
-        for c in ['prior_rejections_90d', 'member_tenure_days']:
-            if (df[c] % 1 != 0).any():
-                raise ValueError('Counts must be integers')
-        categories = self.model.steps[0][1].named_transformers_['category'].categories_
-        for column, allowed in zip(CATEGORICAL, categories):
-            if not df[column].isin(allowed).all():
-                raise ValueError('Unrecognized category: ' + column)
-        return self.model.predict_proba(df[FEATURES])[:, 1].tolist()
+            for k, v in row.items():
+                if v is None:
+                    continue  # prior-year history can be absent; the model handles missing values
+                if isinstance(v, bool) or not isinstance(v, (int, float)) or not np.isfinite(v) or v < 0:
+                    raise ValueError('Features must be finite nonnegative numbers or null')
+                if k in self.BINARY and v not in (0, 1):
+                    raise ValueError('Indicator out of range: ' + k)
+                if k in self.RATES and v > 1:
+                    raise ValueError('Rate out of range: ' + k)
+        df = pd.DataFrame(rows, columns=self.features).astype(float)
+        return self.model.predict_proba(df)[:, 1].tolist()
 
     def record(self, status, latency, scores):
         with self.lock, sqlite3.connect(self.db) as con:
@@ -103,13 +104,13 @@ class ScoringService:
                                 (time.time(), name, int(active), metric, self.model_sha))
                     log_event('pbm_alert_transition', 'WARNING' if active else 'INFO', alert=name,
                               active=bool(active), value=metric, model_sha256=self.model_sha)
-            return {'deployment':'HTTP scoring service; synthetic test traffic', 'model_sha256':self.model_sha,
+            return {'deployment':'HTTP scoring service; test traffic replays real CMS formulary feature rows', 'model_sha256':self.model_sha,
                     'requests_total':total, 'request_window':len(rows), 'score_window':len(p),
                     'request_failure_rate':error_rate, 'latency_p95_ms':p95, 'score_psi':value,
                     'alerts':{k:bool(v[0]) for k,v in alerts.items()},
                     'thresholds':{'psi':.20, 'failure_rate':.05, 'latency_ms':2000},
                     'minimum_samples':{'requests':20,'scores':200},
-                    'performance_monitoring':'Unavailable: no real matured outcome labels',
+                    'performance_monitoring':'Not live: labels arrive with the next contract-year formulary file',
                     'alert_delivery':'Persisted SQLite transitions and HTTP endpoint; no external paging'}
 
 
@@ -151,7 +152,7 @@ def make_server(service, port=8765, host='127.0.0.1'):
                 self.connection.settimeout(5)
                 body=json.loads(self.rfile.read(size))
                 scores=service.predict(body)
-                response={'probabilities':scores,'model_sha256':service.model_sha,'label':'no paid resolution within seven days (synthetic model)'}
+                response={'probabilities':scores,'model_sha256':service.model_sha,'label':service.label}
             except (ValueError, TypeError, KeyError, TimeoutError):
                 status=400; response={'error':'Invalid payload; consult SERVICE.md schema'}
             except Exception:

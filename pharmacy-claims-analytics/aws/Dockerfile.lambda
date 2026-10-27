@@ -13,11 +13,10 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY pbm ./pbm
-COPY sql ./sql
-# Same seed-42 model as the committed run; model and monitoring reference are written together.
-RUN python -m pbm.pipeline --n 60000 --seed 42 --out reports \
-    && rm -f reports/claims.sqlite reports/test_predictions.csv \
-    && chmod -R a+rX /app
+# The model trained by the CI run on real CMS formulary files (see reports/pa_metrics.json).
+# The service refuses to start unless its SHA-256 matches monitoring_reference.json.
+COPY reports/model.joblib reports/monitoring_reference.json ./reports/
+RUN chmod -R a+rX /app
 
 # Lambda's filesystem is read-only except /tmp, so telemetry lives there. It persists while
 # an execution environment stays warm and resets when Lambda replaces it.

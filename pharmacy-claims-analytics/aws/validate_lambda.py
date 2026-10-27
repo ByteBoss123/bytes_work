@@ -1,4 +1,4 @@
-"""Validate the deployed Lambda scoring service with synthetic traffic, via the Lambda Invoke API.
+"""Validate the deployed Lambda scoring service by replaying real CMS formulary feature rows, via the Lambda Invoke API.
 
 Sends Function-URL-format (payload v2.0) events, so requests reach the HTTP service through
 the Lambda Web Adapter exactly as Function URL calls do, without exposing the URL publicly.
@@ -9,7 +9,8 @@ Latency here is client-side Invoke round trip (includes AWS API overhead), not s
 Usage:
     python aws/validate_lambda.py --soak-minutes 20
 Needs AWS credentials with lambda:InvokeFunction and s3:GetObject on the reference file.
-Scope: synthetic traffic sent by the author. Not real users, real claims, or production load.
+Scope: test traffic sent by the author, replaying public plan-design rows. Not real users or production load.
+Shift phase: real rows whose pair required PA the prior year (a subpopulation shift, values unaltered).
 """
 import argparse
 import json
@@ -24,7 +25,7 @@ import numpy as np
 REGION = 'us-east-1'
 FUNCTION = 'pbm-claims-scoring'
 BUCKET = 'pbm-claims-scoring-331604528033'
-REFERENCE_KEY = 'validation/reference_episodes.json'
+REFERENCE_KEY = 'validation/reference_pairs.json'
 
 
 def event(method, path, body=''):
@@ -54,8 +55,8 @@ class Client:
             self.statuses.append(status)
         return status, out.get('body', '')
 
-    def predict(self, episodes):
-        return self.call('POST', '/predict', {'episodes': episodes}, track=True)[0]
+    def predict(self, pairs):
+        return self.call('POST', '/predict', {'pairs': pairs}, track=True)[0]
 
     def monitoring(self):
         status, body = self.call('GET', '/monitoring')
@@ -78,7 +79,8 @@ def main():
     ap.add_argument('--out', type=Path, default=Path('reports/aws_lambda_validation.json'))
     args = ap.parse_args()
     ref = json.loads(boto3.client('s3', region_name=REGION).get_object(Bucket=BUCKET, Key=REFERENCE_KEY)['Body'].read())
-    records = ref['episodes']
+    records = ref['pairs'][:1000]
+    prior_pa = [r for r in ref['pairs'] if r['prev_pair_pa'] == 1][:50]
     batch = lambda i: records[(i % 20) * 50:(i % 20 + 1) * 50]  # noqa: E731
     c = Client()
     status, body = c.call('GET', '/health')
@@ -90,13 +92,11 @@ def main():
     normal = c.monitoring()
     checks['normal_no_drift_alert'] = not normal['alerts']['score_drift']
     for _ in range(10):
-        assert c.predict([{'resolved_at': 'future'}]) == 400
+        assert c.predict([{'pa_required': 1}]) == 400
     invalid = c.monitoring()
     checks['failure_rate_alert_fired'] = invalid['alerts']['request_failure_rate']
-    stress = [dict(r, reject_reason='authorization_required', prior_rejections_90d=r['prior_rejections_90d'] + 4)
-              for r in records[:50]]
     for _ in range(20):
-        assert c.predict(stress) == 200
+        assert c.predict(prior_pa) == 200
     shifted = c.monitoring()
     checks['drift_alert_fired'] = shifted['alerts']['score_drift']
     for i in range(100):
@@ -113,13 +113,13 @@ def main():
             time.sleep(args.soak_interval)
         soak = summarize(c.latencies, c.statuses)
         soak.update(minutes=args.soak_minutes, final_monitoring=c.monitoring())
-    result = {'test': 'AWS Lambda deployment validation with synthetic traffic (Lambda Invoke, Function URL event format)',
+    result = {'test': 'AWS Lambda deployment validation replaying real CMS formulary feature rows (Lambda Invoke, Function URL event format)',
               'function': FUNCTION, 'region': REGION, 'started_utc': started,
               'finished_utc': datetime.now(timezone.utc).isoformat(), 'model_sha256': json.loads(body)['model_sha256'],
               'phase_requests': phases,
               'monitoring': {'normal': normal, 'invalid_payload_stage': invalid, 'shifted': shifted, 'recovered': recovered},
               'checks': checks, 'passed': all(checks.values()), 'soak': soak,
-              'scope': 'Synthetic traffic sent by the author. Not real users, real claims, or production workload.'}
+              'scope': 'Test traffic sent by the author replaying public plan-design rows. Not real users or production workload.'}
     args.out.write_text(json.dumps(result, indent=2, allow_nan=False))
     print(json.dumps({'passed': result['passed'], 'checks': checks}, indent=2))
 

@@ -1,5 +1,7 @@
 # Pharmacy Claims Operations Analytics
 
+> **Rebuild in progress (Oct 2026):** the synthetic-claims model has been removed. The model is being replaced by a prior-authorization forecast trained on real CMS Part D formulary files (`pbm/formulary.py`, run by `.github/workflows/pa-formulary.yml`). Sections below that describe the synthetic model are outdated until this README is rewritten with the real-data results.
+
 **A PBM portfolio project combining synthetic claims modeling, real public CMS aggregate-data analysis, real de-identified MIMIC medication-workflow analysis, and an AWS-deployed HTTP monitoring service.** Python + SQL + scikit-learn, temporal model validation, batch scoring, an offline interactive dashboard, and simulated monitoring.
 
 ## The operational question

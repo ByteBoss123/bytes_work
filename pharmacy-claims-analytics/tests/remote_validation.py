@@ -1,18 +1,17 @@
-"""Exercise a deployed scoring service (e.g. Cloud Run) over HTTPS with synthetic traffic.
+"""Exercise a deployed scoring service (e.g. Cloud Run) over HTTPS by replaying real CMS formulary feature rows.
 
 Phases: normal -> invalid payloads -> shifted features -> recovery, then an optional
 timed soak of normal traffic. Records client-side end-to-end latency (network included)
 and the service's own /monitoring snapshots. Writes reports/cloud_run_validation.json.
 
-Scope: synthetic test traffic sent by the author. Not real users, not real claims.
+Scope: test traffic sent by the author, replaying public plan-design rows. Not real users.
 
-Usage (after `python -m pbm.pipeline`, which creates reports/claims.sqlite):
+Usage (needs reports/reference_pairs.json from the CI run):
     python tests/remote_validation.py --url https://SERVICE-URL --soak-minutes 30
 Auth: by default runs `gcloud auth print-identity-token` and refreshes it every 30 min.
 """
 import argparse
 import json
-import sqlite3
 import subprocess
 import sys
 import time
@@ -22,10 +21,7 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 import numpy as np
-import pandas as pd
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from pbm.pipeline import FEATURES  # noqa: E402
 
 
 class Client:
@@ -61,8 +57,8 @@ class Client:
             self.statuses.append(status)
         return status, body
 
-    def predict(self, episodes):
-        status, body = self.call('POST', '/predict', {'episodes': episodes}, track=True)
+    def predict(self, pairs):
+        status, body = self.call('POST', '/predict', {'pairs': pairs}, track=True)
         return status
 
     def monitoring(self):
@@ -94,13 +90,9 @@ def main():
     ap.add_argument('--out', type=Path, default=Path('reports/cloud_run_validation.json'))
     args = ap.parse_args()
 
-    db = Path('reports/claims.sqlite')
-    if not db.exists():
-        sys.exit('reports/claims.sqlite missing: run `python -m pbm.pipeline` first')
-    with sqlite3.connect(db) as con:
-        ref = pd.read_sql_query("SELECT * FROM rejected_features WHERE submitted_at >= '2025-05-18' "
-                                "AND submitted_at < '2025-06-23'", con)
-    records = ref[FEATURES].to_dict(orient='records')
+    ref = json.loads(Path('reports/reference_pairs.json').read_text())
+    records = ref[:1000]
+    prior_pa = [r for r in ref if r['prev_pair_pa'] == 1][:50]
     batch = lambda i: records[(i % 20) * 50:(i % 20 + 1) * 50]  # noqa: E731
 
     c = Client(args.url, args.token_cmd)
@@ -111,7 +103,7 @@ def main():
     started = datetime.now(timezone.utc).isoformat()
     checks = {}
 
-    # 1. Normal traffic: 20 requests x 50 validation-period episodes.
+    # 1. Normal traffic: 20 requests x 50 real reference pairs.
     for i in range(20):
         assert c.predict(batch(i)) == 200, 'normal request failed'
     normal = c.monitoring()
@@ -120,15 +112,14 @@ def main():
     # 2. Invalid payloads. 10 failures is >5% of any 100-request window, even if the
     #    instance already holds earlier normal traffic.
     for _ in range(10):
-        assert c.predict([{'resolved_at': 'future'}]) == 400, 'invalid payload was not rejected'
+        assert c.predict([{'pa_required': 1}]) == 400, 'invalid payload was not rejected'
     invalid = c.monitoring()
     checks['failure_rate_alert_fired'] = invalid['alerts']['request_failure_rate']
 
-    # 3. Shifted features: 20 x 50 = 1,000 scores, filling the whole PSI window.
-    stress = [dict(r, reject_reason='authorization_required',
-                   prior_rejections_90d=r['prior_rejections_90d'] + 4) for r in records[:50]]
+    # 3. Subpopulation shift: only real pairs that required PA last year (values unaltered);
+    #    20 x 50 = 1,000 scores, filling the whole PSI window.
     for _ in range(20):
-        assert c.predict(stress) == 200, 'shifted request failed'
+        assert c.predict(prior_pa) == 200, 'shifted request failed'
     shifted = c.monitoring()
     checks['drift_alert_fired'] = shifted['alerts']['score_drift']
 
@@ -156,7 +147,7 @@ def main():
         soak['success_rate'] = soak['http_200'] / soak['requests'] if soak['requests'] else None
         soak['final_monitoring'] = c.monitoring()
 
-    result = {'test': 'Deployed-service validation with synthetic traffic',
+    result = {'test': 'Deployed-service validation replaying real CMS formulary feature rows',
               'url_host': args.url.split('/')[2],
               'started_utc': started, 'finished_utc': datetime.now(timezone.utc).isoformat(),
               'model_sha256': health['model_sha256'],
@@ -164,8 +155,8 @@ def main():
               'monitoring': {'normal': normal, 'invalid_payload_stage': invalid,
                              'shifted': shifted, 'recovered': recovered},
               'checks': checks, 'passed': all(checks.values()), 'soak': soak,
-              'scope': ('Synthetic traffic sent by the author to a deployed endpoint. Not real users, '
-                        'real claims, or production workload. Client latency includes network.')}
+              'scope': ('Test traffic sent by the author to a deployed endpoint, replaying public plan-design rows. '
+                        'Not real users or production workload. Client latency includes network.')}
     args.out.write_text(json.dumps(result, indent=2, allow_nan=False))
     print(json.dumps({'passed': result['passed'], 'checks': checks,
                       'phase_requests': result['phase_requests'],
