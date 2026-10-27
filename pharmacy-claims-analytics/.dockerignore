@@ -4,6 +4,7 @@ __pycache__
 node_modules
 tests
 deploy
-reports
+reports/*
+!reports/model.joblib
+!reports/monitoring_reference.json
 *.md
-package.json
