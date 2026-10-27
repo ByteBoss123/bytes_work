@@ -1,0 +1,48 @@
+# Runs the real-data prior-authorization pipeline on CMS Part D formulary files and commits
+# the evaluation outputs (aggregates and metrics only; raw CMS files are never committed).
+name: pa-formulary
+on:
+  workflow_dispatch:
+  push:
+    branches: [pharmacy-claims-analytics]
+    paths:
+      - pharmacy-claims-analytics/pbm/formulary.py
+      - pharmacy-claims-analytics/pbm/monitoring.py
+      - .github/workflows/pa-formulary.yml
+permissions:
+  contents: write
+concurrency:
+  group: pa-formulary
+  cancel-in-progress: false
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    defaults:
+      run:
+        working-directory: pharmacy-claims-analytics
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install
+        run: python -m pip install -r requirements.txt
+      - name: Unit tests
+        run: python -m unittest tests.test_formulary -v 2>&1 | tee reports/formulary_tests.log
+      - name: Real-data pipeline
+        run: |
+          set -o pipefail
+          df -h . | tee reports/formulary_run.log
+          python -m pbm.formulary --out reports --raw "$RUNNER_TEMP/cms" 2>&1 | tee -a reports/formulary_run.log
+      - name: Commit outputs (always, so failures are visible)
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898315+github-actions[bot]@users.noreply.github.com"
+          git add -f reports/formulary_run.log reports/formulary_tests.log
+          for f in pa_metrics.json monitoring_reference.json reference_pairs.json pa_rate_by_prior_tier.csv manifest.json; do
+            [ -f "reports/$f" ] && git add -f "reports/$f"
+          done
+          git commit -m "CI: real CMS formulary PA pipeline outputs (run ${GITHUB_RUN_ID}, ${{ job.status }})" || echo "nothing to commit"
+          git pull --rebase origin pharmacy-claims-analytics && git push origin HEAD:pharmacy-claims-analytics
