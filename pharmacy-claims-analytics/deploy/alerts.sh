@@ -83,7 +83,7 @@ for ALERT in score_drift request_failure_rate latency; do
   "alertStrategy": {"autoClose": "1800s"},
   "notificationChannels": $CHANNELS,
   "documentation": {"mimeType": "text/markdown",
-    "content": "Service rule: $RULE. Check GET /monitoring on $SERVICE. Synthetic portfolio service; no real-user traffic."}
+    "content": "Service rule: $RULE. Check GET /monitoring on $SERVICE. Portfolio service; no real-user traffic."}
 }
 JSON
 done

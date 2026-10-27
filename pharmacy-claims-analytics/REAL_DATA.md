@@ -3,7 +3,7 @@
 ## Business question
 Which generic-drug groups account for the largest share of recorded drug spending in a bounded CMS extract, and should be prioritized for further analyst review?
 
-This is a separate real-data analysis. It does not supply rejection labels or replace the synthetic model's training data.
+This is a separate real-data analysis. It does not supply labels for the prior-authorization model.
 
 ## Source and scope
 CMS Medicare Part D Prescribers — by Provider and Drug:
@@ -19,7 +19,7 @@ Measured extract: **5,000 aggregate rows**, **553 generic names**, **286,832 rep
 
 ## Limitations
 
-No patient-level features, rejected claims, clinical notes, resolution timestamps, or labels for the synthetic prediction task are available here. Real patient-level claims would require an authorized source and appropriate data handling. Do not describe these aggregates as patient records or use spending concentration to make clinical decisions.
+No patient-level features, rejected claims, clinical notes, or resolution timestamps are available here. Real patient-level claims would require an authorized source and appropriate data handling. Do not describe these aggregates as patient records or use spending concentration to make clinical decisions.
 
 ## Supported resume wording
 

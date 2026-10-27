@@ -43,7 +43,7 @@ def main():
                   [{'hour': d['Timestamp'].isoformat(), **d['ExtendedStatistics']} for d in dur], key=lambda x: x['hour']),
               'alarm_state_changes': history,
               'note': 'Invocations include the canary (1/min) plus any manual validation traffic in the window. '
-                      'Synthetic traffic only.'}
+                      'Author-sent canary traffic replaying public formulary rows.'}
     args.out.write_text(json.dumps(report, indent=2, default=str))
     print(json.dumps({k: report[k] for k in ['window_utc', 'hours', 'invocations', 'errors', 'throttles']}, indent=2))
 

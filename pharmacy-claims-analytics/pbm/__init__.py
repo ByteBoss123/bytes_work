@@ -1,1 +1,1 @@
-"""Synthetic pharmacy claims operations portfolio project."""
+"""Pharmacy benefit operations portfolio project on real public data (CMS, MIMIC-IV demo)."""

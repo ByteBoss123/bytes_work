@@ -1,111 +1,92 @@
-# Pharmacy Claims Operations Analytics
+# Pharmacy Benefit Operations Analytics
 
-> **Rebuild in progress (Oct 2026):** the synthetic-claims model has been removed. The model is being replaced by a prior-authorization forecast trained on real CMS Part D formulary files (`pbm/formulary.py`, run by `.github/workflows/pa-formulary.yml`). Sections below that describe the synthetic model are outdated until this README is rewritten with the real-data results.
+**Real public data only.** A prior-authorization (PA) forecast trained on CMS Part D formulary files, an HTTP scoring service with drift, failure-rate and latency alerts, and two real healthcare-data analyses (de-identified MIMIC-IV medication records and CMS Part D spending aggregates). Python, SQL, scikit-learn.
 
-**A PBM portfolio project combining synthetic claims modeling, real public CMS aggregate-data analysis, real de-identified MIMIC medication-workflow analysis, and an AWS-deployed HTTP monitoring service.** Python + SQL + scikit-learn, temporal model validation, batch scoring, an offline interactive dashboard, and simulated monitoring.
+This is a portfolio project. It is not professional PBM experience and is not affiliated with CVS Health or Caremark. No claims, rejections, member records or patient-level PBM data are used anywhere: those are not public.
 
 ## The operational question
 
-At the moment a synthetic pharmacy claim is initially rejected, which cases should an operations team review first because no paid resolution is likely within seven days?
+Each fall, Part D plans publish next year's formulary rules. A prior-authorization requirement means a pharmacy claim for that drug will reject until the PA is approved, so PA changes drive rejection volume, call volume and member outreach.
 
-This project demonstrates a workflow relevant to Pharmacy Benefit Manager (PBM) operations. It is **not professional PBM experience**, not a real-user production workload, not clinical decision support, and not affiliated with CVS Health or Caremark. The claims model uses simulated records and relationships. A separate CMS analysis uses real public provider-drug aggregates. The MIMIC module analyzes real de-identified patient-level medication records; neither dataset supplies PBM rejection labels. Rejection is not automatically a final coverage denial, abandonment, or harm to a member.
+**For each (formulary, drug) pair a plan lists next year, will it require prior authorization, and which pairs are *newly* gaining PA?** Every feature comes from the prior contract year's public file; the label is the next year's PA flag.
 
-## Added: real healthcare data and measured service telemetry
+## Data
 
-- [MIMIC medication workflow analysis](MIMIC_WORKFLOW.md): 18,087 prescription-component rows from 100 de-identified patients; SQL join validation and timestamp/documentation quality checks. [Measured output](reports/mimic_workflow.json).
+CMS Quarterly Prescription Drug Plan Formulary, Pharmacy Network, and Pricing Information files ([data.cms.gov](https://catalog.data.gov/dataset/quarterly-prescription-drug-plan-formulary-pharmacy-network-and-pricing-information)). Exact URLs and SHA-256 hashes of each download are in [`reports/pa_metrics.json`](reports/pa_metrics.json). Raw files are not committed.
 
-- [CMS spending analysis](REAL_DATA.md): 5,000 real public aggregate rows covering $36.7M in recorded drug spending. Separate from synthetic model training.
-- [HTTP scoring and monitoring service](SERVICE.md): actual request telemetry, model fingerprints, rolling latency/failure/PSI metrics, persisted alerts, and Prometheus-compatible output. Verified using 145 HTTP requests and 7,000 synthetic episode scores.
-- Live integration evidence: [service_validation.json](reports/service_validation.json). Local test deployment only; no real-user production or patient-data deployment is claimed.
-- [AWS Lambda deployment](aws/README.md): container image on Lambda behind an IAM-authenticated Function URL, CloudWatch alarms driven by the service's own alert logs, and a once-a-minute synthetic canary. Validated with 150 synthetic requests; both service alarms fired in CloudWatch after a controlled injection. Evidence: [aws_lambda_validation.json](reports/aws_lambda_validation.json).
-- [Cloud Run deployment kit](deploy/README.md): equivalent GCP scripts (Cloud Build, Cloud Run, Cloud Monitoring). Written and dry-run tested only; not executed against GCP.
+| Contract year | Formulary-drug pairs | Formularies | Drugs (RXCUI) | Pairs with PA |
+|---|---:|---:|---:|---:|
+| 2024 | 1,490,827 | 421 | 6,522 | 26.6% |
+| 2025 | 1,298,449 | 378 | 6,092 | 27.7% |
+| 2026 | 1,121,429 | 331 | 5,994 | 28.1% |
 
-## Measured result — seed 42
+Unit: formulary × RXCUI (PA = any NDC under the RXCUI flagged). Formularies get new IDs every year, so each 2026 formulary is linked to its 2025 predecessor through the continuing plans (contract-plan-segment) that use it; 90.8% of 2026 pairs belong to a linked formulary.
 
-| Held-out test measure | Selected logistic regression | Rejection-reason baseline |
-|---|---:|---:|
-| ROC-AUC | 0.665 | 0.642 |
-| Average precision | 0.513 | 0.456 |
-| Brier score (lower is better) | 0.210 | 0.214 |
-| Recall at 20% review capacity | 32.4% | 29.7% |
-| Cases captured in 592 reviews | 337 / 1,041 | 309 / 1,041 |
+## Design
 
-**60,000 synthetic episodes; 2,958 test rejected episodes.** These are measured simulator results, not evidence of real-world generalization or improved patient outcomes. The model captures 28 more unresolved cases than the reason-only baseline at the same cohort-level review capacity; it does not resolve or prevent them. See [metrics.json](reports/metrics.json) for all partitions, validation results, confidence intervals, and denominators.
+- **Train:** 2024 features → 2025 labels (1,298,449 pairs). **Test:** 2025 features → 2026 labels (1,121,429 pairs), evaluated once.
+- **Model selection:** 75 held-out training-year formularies (255,908 pairs). Histogram gradient boosting beat logistic regression on average precision (0.992 vs 0.987), then was refit on the full training year.
+- **Features (16):** last year's PA/step-therapy/quantity-limit flags and tier for the same pair; the drug's prior-year PA, step-therapy and quantity-limit rates across all formularies, breadth and mean tier; the predecessor formulary's PA share and size; plan type (PDP vs MA) and special-needs status. No year-Y rule enters the features.
+- **Baselines an analyst could run without a model:** (1) carry forward last year's PA flag, falling back to the drug's prior-year PA rate for new pairs; (2) the drug's prior-year PA rate alone.
+- **Uncertainty:** 200-replicate bootstrap that resamples whole formularies.
 
-## Run locally (Python 3.11 or 3.12)
+## Results (CY2026 test year)
 
-From this project directory:
+| | Model | Carry-forward rule | Drug PA rate only |
+|---|---:|---:|---:|
+| ROC-AUC, all 1.12M pairs | **0.995** | 0.986 | 0.982 |
+| Average precision | **0.990** | 0.969 | 0.960 |
+| Brier score (lower is better) | 0.0166 | **0.0163** | 0.0458 |
+| Precision when flagging the top 314,740 pairs (the true PA count) | 96.2% | **96.4%** | 88.0% |
+
+**What this means**
+- The model ranks pairs better overall (AUC +0.009, 95% CI +0.008 to +0.010), but **at the operating point it does not beat the carry-forward rule**: precision is 96.2% vs 96.4%, and calibration is no better. Last year's PA flag explains most of next year's.
+- **The hard part is change.** 985,605 pairs appeared in both years; only 6,242 gained PA (0.87%) and 4,528 lost it. For flagging the pairs that gain PA, the model (AUC 0.840, AP 0.034) is slightly **worse** than simply ranking by the drug's prior-year PA rate (AUC 0.852, AP 0.040). Carry-forward cannot rank these at all (AUC 0.5).
+- **Pairs new to a formulary** (135,824; 33.8% PA): model AUC 0.979 vs 0.978 for the drug-rate fallback; the difference is not significant (CI −0.0003 to +0.0016).
+- **Drugs new to Part D** (7,912 pairs; 46.5% PA): AUC 0.556. Prior-year formulary data carries almost no signal for them.
+- PA rate by last year's tier: 78.6% at tier 5 (specialty) vs 8.5% at tier 2 ([`pa_rate_by_prior_tier.csv`](reports/pa_rate_by_prior_tier.csv)).
+- Score drift between the training-year validation formularies and the 2026 test year: PSI 0.041, under the 0.20 alert threshold.
+
+**Recommendation from this run:** for next-year PA planning, start from the carry-forward list and rank non-PA pairs by the drug's PA rate across other plans; the gradient-boosted model adds ranking polish, not a better operating list. The open problem is predicting PA additions and new-to-market drugs, which needs signals this file does not have (launch dates, list price, clinical class).
+
+## Scoring service and monitoring
+
+[`pbm/service.py`](pbm/service.py) serves the CI-trained model over HTTP (`/predict`, `/health`, `/monitoring`, `/metrics`). It refuses to start unless the model's SHA-256 matches the monitoring reference, rejects labels, identifiers and out-of-range values, and tracks:
+
+- request failure rate over the last 100 requests (alert above 5%)
+- p95 processing latency (alert above 2,000 ms)
+- PSI of the last 1,000 scores against the validation-score reference (alert above 0.20)
+
+The loopback integration test ([`reports/service_validation.json`](reports/service_validation.json)) sends 145 HTTP requests replaying real 2026 feature rows. A shift phase replays only pairs that required PA last year (real rows, unaltered values), which raised the drift alert; invalid payloads raised the failure-rate alert; both cleared on recovery.
+
+**AWS:** [`aws/`](aws/README.md) deploys the service as a container on Lambda with CloudWatch alarms. The earlier deployment served the removed synthetic model, so its evidence was deleted; the real-data model has **not yet been redeployed**.
+
+## Real healthcare-data analyses
+
+- [MIMIC-IV medication workflow](MIMIC_WORKFLOW.md): 18,087 prescription-component rows from 100 de-identified patients; join validation and timestamp/documentation quality checks.
+- [CMS Part D spending](REAL_DATA.md): 5,000 provider-drug aggregate rows covering $36.7M in recorded drug cost.
+
+## Run
 
 ```bash
-python -m venv .venv
-# macOS/Linux:
-source .venv/bin/activate
-# Windows PowerShell instead:
-# .venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
-python -m unittest discover -s tests -v
-python -m pbm.pipeline --n 60000 --seed 42 --out reports
-python -m pbm.score --model reports/model.joblib --input reports/sample_synthetic_claims.csv --output reports/scored_sample.csv
+python -m unittest discover -s tests -p "test_*.py" -v
+python -m pbm.formulary --out reports      # downloads ~8 GB of CMS archives
+PYTHONPATH=. python tests/service_integration.py
+python -m pbm.service --reports reports
 ```
 
-Open `reports/dashboard.html` in a browser. It is self-contained, works offline, and supports rejection-reason selection and review-capacity comparison. GitHub displays its source; download it to interact. No API key, cloud account, or private patient data is required.
+The real-data run executes in GitHub Actions ([`.github/workflows/pa-formulary.yml`](../.github/workflows/pa-formulary.yml)), which commits the metrics, model and monitoring reference back to this branch. Log: [`reports/formulary_run.log`](reports/formulary_run.log).
 
-The committed dashboard and metrics let reviewers inspect the measured run without installing Python. Large generated SQLite databases, fitted models, and full predictions are deliberately excluded from Git. Regenerate them with the pipeline command. Never load an untrusted joblib model.
+## Limitations
 
-## Architecture
+- Plan-design records only: no claims, rejection counts, member enrollment or utilization, so impact on rejection volume is not measured.
+- One training year pair and one test year pair. The CY2027 file (expected January 2027) would allow a prospective test of the frozen model.
+- PA is collapsed to RXCUI level; NDC-specific rules are lost.
+- 9.2% of 2026 pairs sit in formularies with no linked predecessor and get no pair history.
 
-1. **Generate:** seed-controlled initial episodes, submission-time features, and separate future resolution timestamps.
-2. **Validate:** reject duplicate episode IDs, missing fields, invalid categories/ranges, and impossible timestamp order.
-3. **Curate with SQLite:** enforce claim grain; derive seven-day labels only for mature episodes.
-4. **Train and validate:** training-only preprocessing; logistic regression versus histogram gradient boosting; select by validation average precision.
-5. **Evaluate:** frozen model on a later test period; prevalence and training-derived rejection-reason baselines; capacity curves, Brier score, subgroup diagnostics, and bootstrap ROC-AUC interval.
-6. **Score:** persist locally and run batch inference on initially rejected episodes; fail on unexpected categories.
-7. **Monitor:** compare validation/test score distributions and an explicitly injected stress scenario using PSI.
+## Supported resume wording
 
-## Leakage and censoring controls
+> Forecast 2026 prior-authorization requirements for 1.12M real CMS Part D formulary-drug pairs (331 formularies) from prior-year rules; gradient boosting reached 0.995 ROC-AUC but matched a carry-forward rule at the operating cutoff (96.2% vs 96.4% precision), so recommended the simpler rule.
 
-- Prediction time is immediately after **initial rejection**.
-- `resolved_at` is used only to construct the outcome; it is never a model input.
-- Only episodes with seven days of follow-up before the fixed snapshot enter training/evaluation.
-- Training: Jan 1–May 10; validation: May 18–Jun 22; test: Jun 30–Aug 20, 2025. Seven-day gaps permit earlier labels to mature.
-- IDs and submission dates are excluded from modeling. One episode per member avoids cross-split member overlap in this simplified simulator.
-- No tuning or model selection uses test metrics. Validation chooses between two fixed candidates; neither is refit on test data.
-- The generator's relationships are deliberately known. Learning them proves implementation works, not that actual PBM workflows follow them.
-
-## Repository guide
-
-| File | Purpose |
-|---|---|
-| `pbm/pipeline.py` | Generator, validation, SQL execution, evaluation, monitoring |
-| `pbm/score.py` | Batch inference CLI |
-| `pbm/dashboard.py` | Offline interactive dashboard renderer |
-| `sql/curate.sql` | Mature outcomes and submission-time modeling dataset |
-| `sql/operations.sql` | Workflow metrics with explicit denominators |
-| `tests/test_pipeline.py` | Grain, chronology, embargo, censoring, ranking, PSI tests |
-| `reports/metrics.json` | Complete measured evaluation |
-| `reports/dashboard.html` | Downloadable interactive dashboard |
-| `reports/manifest.json` | Versions, seed, and source hashes |
-| `MODEL_CARD.md` | Intended use, limitations, and monitoring semantics |
-| `DATA_DICTIONARY.md` | Field definitions and simulation assumptions |
-
-## What to investigate next
-
-The simulator produces measurable differences across rejection categories. This supports demonstrating workflow analysis, not recommending changes to actual benefit policy. A real implementation would need longitudinal transactions, resubmission/reversal matching, clinical urgency review, expert-validated outcomes, data authorization, subgroup checks, and prospective evaluation. The current capacity comparison ranks a whole held-out cohort and does not simulate staffing arrivals or daily backlogs.
-
-## Resume wording supported by this run
-
-> Implemented a Python/SQL pharmacy claims analytics project on 60,000 synthetic episodes; achieved 0.665 test ROC-AUC and captured 32.4% of seven-day unresolved cases at 20% review capacity versus 29.7% for a reason-based baseline, with an interactive dashboard and simulated drift alerts.
-
-Use under **Projects**. Keep the synthetic-model and synthetic-test-traffic labels. AWS deployment and observed CloudWatch alarm behavior are supported by the cloud evidence; real patient-level data experience is supported by the separate MIMIC analysis. Do not claim real-user production traffic, healthcare employment, actual cost savings, or clinical impact.
-
-## Domain and methodology references
-
-These sources explain context; **none supplied the generated data or simulation parameters**.
-
-- [CMS: Guide to requests for Part D Prescription Drug Event data](https://www.cms.gov/PrescriptionDrugCovGenIn/Downloads/GuidePartDDataRequests.pdf). PDE records are summary extracts, not the full sequence of individual claim transactions. This project does not claim to reproduce CMS PDE or NCPDP schemas.
-- [CMS: Prescription Drug Event Data Guidance](https://www.cms.gov/medicare/prescription-drug-coverage/drugcoverageclaimsdata/index).
-- [scikit-learn: time-series split and gaps](https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.TimeSeriesSplit.html). This project implements explicit calendar cutoffs and gaps rather than calling TimeSeriesSplit.
-
-## Verification
-
-The full pipeline, batch scoring, and **18 Python tests passed** (10 pipeline, 8 service). Optional dashboard interaction tests (`npm install && npm test`, Node 22+) passed in jsdom. Browser visual verification was blocked by a failed Chromium download; see [verification record](reports/VALIDATION.md). The project also has an active AWS Lambda deployment. Cloud validation used synthetic traffic; GCP deployment scripts have not been executed.
+Keep "formulary" or "plan-design" data. Do not describe this as claims data, rejection data or production PBM work.

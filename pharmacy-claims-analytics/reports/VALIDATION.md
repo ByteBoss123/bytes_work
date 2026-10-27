@@ -1,17 +1,8 @@
-# Verification record
+# Verification record (Oct 26, 2026)
 
-- Full 60,000-episode pipeline executed with seed 42.
-- 10 Python unit tests passed: reproducibility, duplicate grain, category validation, finite numeric inputs, impossible timestamp ordering, exact seven-day boundaries, immature-label exclusion, replay row stability, temporal embargo/feature exclusion, capacity counts, and PSI behavior (some tests cover multiple checks).
-- Batch-scoring CLI executed successfully against the generated sample using the locally fitted model.
-- Dashboard JavaScript executed in jsdom: capacity and rejection-reason selectors changed results; all four KPI cards and all three model rows rendered in the DOM; no JavaScript errors.
-- Browser visual/layout verification could not be completed: local Chromium was unavailable and its download failed. DOM checks do not establish pixel-level or mobile layout quality.
-- Remote CI has not been run. These results are from local execution; no claim of live deployment.
-
-Reproduce Python checks: `python -m unittest discover -s tests -v`.
-Optional dashboard logic checks (Node 22+): `npm install` then `npm test`.
-
-## Monitoring and real-data extension
-
-- 16 Python tests passed after adding service validation, model/reference fingerprint checks, insufficient-sample behavior, and restart persistence checks.
-- Actual HTTP integration: 145 requests; 7,000 scored synthetic episodes; drift/failure alerts and recovery verified. See service_validation.json.
-- CMS API retrieval succeeded for 5,000 real provider-drug aggregate rows; source grain and numeric validation passed. These aggregates do not train the unresolved-claim model.
+- **Real-data run:** GitHub Actions run 40436413306 downloaded the CY2024, CY2025 and CY2026 CMS formulary archives (SHA-256 in `pa_metrics.json`), passed the 5 pipeline logic tests, and produced `pa_metrics.json`, `model.joblib` and `monitoring_reference.json`. Log: `formulary_run.log`.
+- **Model fingerprint:** `model.joblib` SHA-256 `529e5e44…` matches `monitoring_reference.json` and `manifest.json`.
+- **Local tests (pinned requirements):** 14 passed (5 pipeline logic on hand-built fixtures, 9 service checks against the CI-trained model).
+- **Loopback integration:** 145 HTTP requests, 7,000 real reference pairs scored; failure-rate and drift alerts raised and cleared (`service_validation.json`).
+- **Not done:** AWS redeployment of this model; GCP deploy kit never executed.
+- **CMS spending and MIMIC analyses:** unchanged; see `cms_analysis.json` and `mimic_workflow.json`.

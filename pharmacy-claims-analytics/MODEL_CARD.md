@@ -1,30 +1,29 @@
-# Model card
+# Model card: next-year prior-authorization forecast
 
 ## Intended use
-Portfolio demonstration of prioritizing synthetic initially rejected pharmacy claim episodes for operational review. Positive label: no paid resolution by exactly seven days after initial submission. A resolution at exactly seven days is negative. Missing resolution or resolution later than seven days is positive, provided the label is mature.
+Rank (formulary, drug) pairs listed for the next contract year by the chance they require prior authorization, to help plan PA review capacity and member outreach. Portfolio demonstration on public CMS plan-design data. Not for coverage decisions, clinical decisions, or any individual member.
 
-Not for denying claims, changing coverage, choosing treatment, or determining access to care. No real healthcare deployment, prospective validation, or outcome improvement is established.
+## Data
+Real CMS Part D quarterly formulary public use files for contract years 2024, 2025 and 2026 (URLs and SHA-256 in `reports/pa_metrics.json`). Plan-design records only: no claims, members or patients. Unit: formulary × RXCUI; PA is 1 if any NDC under the RXCUI is flagged.
 
-## Data and model
-60,000 generated episodes, one episode per synthetic member. Reason/channel/drug categories and numeric features are invented. Prior rejection count is a simulated pre-submission attribute, not a longitudinal aggregation. Demographic attributes are omitted; no protected-group fairness claim is possible. Member uniqueness simplifies evaluation but removes repeated-member behavior.
+## Training and selection
+Features from year Y-1, label from year Y. Train 2024→2025 (1,298,449 pairs), test 2025→2026 (1,121,429 pairs). Formularies are linked across years through continuing contract-plan-segment keys. Logistic regression (median imputation with missing indicators, scaling) and histogram gradient boosting were compared on 75 held-out training-year formularies; gradient boosting won on average precision and was refit on the full training year. The test year was evaluated once.
 
-Training-only StandardScaler and one-hot encoder. Logistic regression and histogram gradient boosting have fixed configurations. Selection uses validation average precision. Test metrics are reported once after selection; no test tuning or generator adjustment to inflate scores. Baselines: constant training prevalence and training mean outcome by rejection reason. Scores are risk estimates under this simulator, not calibrated real-world probabilities.
+## Performance (2026 test year)
+| | Model | Carry-forward rule | Drug PA rate |
+|---|---:|---:|---:|
+| ROC-AUC | 0.995 | 0.986 | 0.982 |
+| Average precision | 0.990 | 0.969 | 0.960 |
+| Brier score | 0.0166 | 0.0163 | 0.0458 |
+| Precision at true-PA count | 96.2% | 96.4% | 88.0% |
 
-## Evaluation
-ROC-AUC measures ranking across thresholds; average precision reflects positive-class ranking; Brier score measures probability error. Review capacity uses ceil(N*fraction) highest scores with stable chronological tie-breaking. Constant-score capacity approximates a chronological queue, not randomized selection. The reason baseline uses chronological order within tied reasons.
+Segments: pairs gaining PA among prior no-PA pairs (6,242 of 718,543) AUC 0.840 vs 0.852 for the drug-rate rule; pairs new to a formulary AUC 0.979 vs 0.978 (difference CI includes zero); drugs new to Part D AUC 0.556.
 
-The ROC-AUC interval bootstraps 300 test samples at episode level. It covers sampling variability for a single fixed synthetic generator/model, not data-generation uncertainty, deployment shift, or repeated model selection. The 28-case improvement is descriptive; it has not been established as a statistically significant improvement. No causal claim is made.
+## Known weaknesses
+- Does not beat the carry-forward rule at the operating cutoff, and is slightly worse than the drug-rate rule at detecting PA additions.
+- Near chance for drugs with no Part D history.
+- One year pair for training and one for testing; stability across other years is untested.
+- Scores are probabilities under this data-generating process, not guarantees about any plan's decision.
 
-Segment counts, prevalence, and Brier scores by rejection reason are in metrics.json. These are descriptive diagnostics, not fairness certification.
-
-## Monitoring simulation
-Reference: validation predicted-risk histogram with fixed [0,1] bins and count smoothing. Compare with unmodified test scores, then a separate stress scenario that increases prior rejections by four and forces authorization_required. PSI > 0.20 raises a demo alert. The stress scenario is intentionally strong and not empirically calibrated. It does not measure concept drift or actual post-shift model performance because stressed outcomes are not regenerated.
-
-Labels arrive after seven days. A real monitoring service would also track schema/data quality, delayed labeled performance, missingness, operational backlog, and workflow harms. This implementation runs offline, has no live paging integration, and does not automatically retrain.
-
-## Limitations and release status
-Local batch inference, a loopback HTTP scoring/monitoring service, and an offline dashboard. No GCP/AWS deployment, LLM component, live PBM integration, clinical notes, real NCPDP codes, formulary rules, reversals, or actual intervention experiment. Requirements are pinned to the tested environment. Full data and model artifacts are generated locally rather than committed. No PHI is generated or used.
-
-
-## Service extension
-The HTTP service measures actual processing latency, request failures, and score drift during integration traffic, with persisted alert transitions. Traffic remains synthetic; thresholds are illustrative. See SERVICE.md for scope. The separate real CMS aggregate analysis is not a model-training source and supplies no clinical outcome labels.
+## Monitoring
+The service compares the last 1,000 scores with the validation-score reference (PSI, alert above 0.20). Test-year PSI was 0.041. True performance can only be checked when the next contract year's file is published, so the service cannot monitor accuracy live.

@@ -1,0 +1,148 @@
+{
+  "test": "Actual HTTP service integration replaying real CMS formulary feature rows",
+  "requests": 145,
+  "scored_pairs": 7000,
+  "normal": {
+    "deployment": "HTTP scoring service; test traffic replays real CMS formulary feature rows",
+    "model_sha256": "529e5e4494f725ee4603952a87600ae289dfa5fb2b1707bf15c1251398033a71",
+    "requests_total": 20,
+    "request_window": 20,
+    "score_window": 1000,
+    "request_failure_rate": 0.0,
+    "latency_p95_ms": 24.790849499970598,
+    "score_psi": 0.06392966425103067,
+    "alerts": {
+      "score_drift": false,
+      "request_failure_rate": false,
+      "latency": false
+    },
+    "thresholds": {
+      "psi": 0.2,
+      "failure_rate": 0.05,
+      "latency_ms": 2000
+    },
+    "minimum_samples": {
+      "requests": 20,
+      "scores": 200
+    },
+    "performance_monitoring": "Not live: labels arrive with the next contract-year formulary file",
+    "alert_delivery": "Persisted SQLite transitions and HTTP endpoint; no external paging"
+  },
+  "invalid_payload_stage": {
+    "deployment": "HTTP scoring service; test traffic replays real CMS formulary feature rows",
+    "model_sha256": "529e5e4494f725ee4603952a87600ae289dfa5fb2b1707bf15c1251398033a71",
+    "requests_total": 25,
+    "request_window": 25,
+    "score_window": 1000,
+    "request_failure_rate": 0.2,
+    "latency_p95_ms": 22.982952399934202,
+    "score_psi": 0.06392966425103067,
+    "alerts": {
+      "score_drift": false,
+      "request_failure_rate": true,
+      "latency": false
+    },
+    "thresholds": {
+      "psi": 0.2,
+      "failure_rate": 0.05,
+      "latency_ms": 2000
+    },
+    "minimum_samples": {
+      "requests": 20,
+      "scores": 200
+    },
+    "performance_monitoring": "Not live: labels arrive with the next contract-year formulary file",
+    "alert_delivery": "Persisted SQLite transitions and HTTP endpoint; no external paging"
+  },
+  "shifted": {
+    "deployment": "HTTP scoring service; test traffic replays real CMS formulary feature rows",
+    "model_sha256": "529e5e4494f725ee4603952a87600ae289dfa5fb2b1707bf15c1251398033a71",
+    "requests_total": 45,
+    "request_window": 45,
+    "score_window": 1000,
+    "request_failure_rate": 0.1111111111111111,
+    "latency_p95_ms": 21.430315199950197,
+    "score_psi": 6.23979705920293,
+    "alerts": {
+      "score_drift": true,
+      "request_failure_rate": true,
+      "latency": false
+    },
+    "thresholds": {
+      "psi": 0.2,
+      "failure_rate": 0.05,
+      "latency_ms": 2000
+    },
+    "minimum_samples": {
+      "requests": 20,
+      "scores": 200
+    },
+    "performance_monitoring": "Not live: labels arrive with the next contract-year formulary file",
+    "alert_delivery": "Persisted SQLite transitions and HTTP endpoint; no external paging"
+  },
+  "recovered": {
+    "deployment": "HTTP scoring service; test traffic replays real CMS formulary feature rows",
+    "model_sha256": "529e5e4494f725ee4603952a87600ae289dfa5fb2b1707bf15c1251398033a71",
+    "requests_total": 145,
+    "request_window": 100,
+    "score_window": 1000,
+    "request_failure_rate": 0.0,
+    "latency_p95_ms": 21.861254399914287,
+    "score_psi": 0.06392966425103067,
+    "alerts": {
+      "score_drift": false,
+      "request_failure_rate": false,
+      "latency": false
+    },
+    "thresholds": {
+      "psi": 0.2,
+      "failure_rate": 0.05,
+      "latency_ms": 2000
+    },
+    "minimum_samples": {
+      "requests": 20,
+      "scores": 200
+    },
+    "performance_monitoring": "Not live: labels arrive with the next contract-year formulary file",
+    "alert_delivery": "Persisted SQLite transitions and HTTP endpoint; no external paging"
+  },
+  "alert_transitions": [
+    [
+      "score_drift",
+      0,
+      null
+    ],
+    [
+      "request_failure_rate",
+      0,
+      0.0
+    ],
+    [
+      "latency",
+      0,
+      24.19762299996364
+    ],
+    [
+      "request_failure_rate",
+      1,
+      0.09090909090909091
+    ],
+    [
+      "score_drift",
+      1,
+      0.22584257335716826
+    ],
+    [
+      "score_drift",
+      0,
+      0.1921387643125143
+    ],
+    [
+      "request_failure_rate",
+      0,
+      0.05
+    ]
+  ],
+  "passed": true,
+  "scope": "Transient loopback deployment. Replayed public plan-design rows; not real-user production traffic."
+}

@@ -131,7 +131,7 @@ def main():
     try:
         lam.create_function(FunctionName=NAME, PackageType='Image', Code={'ImageUri': image}, Role=fn_role,
                             MemorySize=2048, Timeout=30, Architectures=['x86_64'],
-                            Description='Synthetic pharmacy-claims scoring service (portfolio demo)')
+                            Description='Prior-authorization forecast scoring service (portfolio demo, CMS formulary data)')
     except ClientError as e:
         if 'ResourceConflict' not in e.response['Error']['Code']:
             raise

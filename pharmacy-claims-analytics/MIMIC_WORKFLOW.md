@@ -1,6 +1,6 @@
 # Real patient-level medication workflow analysis
 
-This module uses **real, de-identified patient-level electronic health records** from the openly available MIMIC-IV Clinical Database Demo v2.2. It is separate from the synthetic PBM claims model; inpatient prescriptions are not pharmacy-benefit claims.
+This module uses **real, de-identified patient-level electronic health records** from the openly available MIMIC-IV Clinical Database Demo v2.2. It is separate from the prior-authorization model; inpatient prescriptions are not pharmacy-benefit claims.
 
 ## Operational problem
 Before estimating medication-reconciliation workload or building pharmacy reports, analysts need to know whether prescription components join to orders/admissions reliably and whether timestamps and dose fields are usable.
