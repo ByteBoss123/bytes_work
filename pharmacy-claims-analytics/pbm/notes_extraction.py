@@ -326,7 +326,7 @@ def rx_concepts(name):
         method = 'approximate' if ids else 'unmapped'
     products = set()
     for i in ids[:3]:
-        rel = rxnav(f'rxcui/{i}/related.json', tty='SCD+SBD+GPCK+BPCK')
+        rel = rxnav(f'rxcui/{i}/related.json', tty='SCD SBD GPCK BPCK')  # space-separated; urlencode turns spaces into '+'
         for g in rel.get('relatedGroup', {}).get('conceptGroup', []) or []:
             for c in g.get('conceptProperties', []) or []:
                 products.add(c['rxcui'])
@@ -461,5 +461,13 @@ if __name__ == '__main__':
     ap.add_argument('--raw', type=Path, default=None, help='CMS archive cache; enables the 2026 formulary link')
     ap.add_argument('--limit', type=int, default=None)
     ap.add_argument('--boot', type=int, default=1000)
+    ap.add_argument('--link-only', action='store_true', help='recompute only the formulary link into an existing notes_extraction.json')
     a = ap.parse_args()
-    run(a.data, a.out, a.model, a.raw, a.limit, a.boot)
+    if a.link_only:
+        res_path = a.out / 'notes_extraction.json'
+        res = json.loads(res_path.read_text())
+        rows, _ = load(a.data / 'Annotations' / 'Combined_annotations.jsonl')
+        res['formulary_link'], res['formulary_link_meta'] = formulary_link(rows, a.raw)
+        res_path.write_text(json.dumps(res, indent=2, default=float))
+    else:
+        run(a.data, a.out, a.model, a.raw, a.limit, a.boot)
