@@ -1,0 +1,192 @@
+test_build_questions_and_chunks (tests.test_drug_rag.Corpus.test_build_questions_and_chunks) ... ok
+test_retrieval_finds_right_drug (tests.test_drug_rag.Corpus.test_retrieval_finds_right_drug) ... ok
+test_select_generics_cleans_cms_names (tests.test_drug_rag.Corpus.test_select_generics_cleans_cms_names) ... ok
+test_filter_blocks_other_drugs_boxed_passages (tests.test_drug_rag.DrugFilter.test_filter_blocks_other_drugs_boxed_passages) ... ok
+test_inferred_drug_without_name (tests.test_drug_rag.DrugFilter.test_inferred_drug_without_name) ... ok
+test_misspelling_and_variants (tests.test_drug_rag.DrugFilter.test_misspelling_and_variants) ... ok
+test_no_name_never_errors (tests.test_drug_rag.DrugFilter.test_no_name_never_errors) ... ok
+test_run_with_injected_components (tests.test_drug_rag.EndToEnd.test_run_with_injected_components) ... 16:17:23 drugs 3 labels 3 not found 0
+16:17:23 corpus chunks 10 questions 8
+16:17:23 retrieval {"bm25": {"route": {"n": 3, "accuracy": 1.0}, "boxed": {"n": 3, "accuracy": 1.0}, "pa_share": {"n": 2, "accuracy": 1.0}, "ALL": {"n": 8, "accuracy": 1.0}}, "dense": {"route": {"n": 3, "accuracy": 1.0}, "boxed": {"n": 3, "accuracy": 1.0}, "pa_share": {"n": 2, "accuracy": 1.0}, "ALL": {"n": 8, "accuracy": 1.0}}, "hybrid": {"route": {"n": 3, "accuracy": 1.0}, "boxed": {"n": 3, "accuracy": 1.0}, "pa_share": {"n": 2, "accuracy": 1.0}, "ALL": {"n": 8, "accuracy": 1.0}}, "hybrid_drug_filter": {"route": {"n": 3, "accuracy": 1.0}, "boxed": {"n": 3, "accuracy": 1.0}, "pa_share": {"n": 2, "accuracy": 1.0}, "ALL": {"n": 8, "accuracy": 1.0}}, "boxed_section_hit_hybrid": 1.0, "boxed_section_hit_hybrid_drug_filter": 1.0, "other_drug_boxed_passage_in_top5_hybrid": 1.0, "other_drug_boxed_passage_in_top5_hybrid_drug_filter": 0.0}
+16:17:23 robustness {"questions": 12, "construction": "misspelled brand (3rd/4th letters swapped) and generic name in place of brand", "misspelled_brand": {"n": 6, "resolution": {"fuzzy": 6}, "hit_at_5_hybrid": 1.0, "other_drug_boxed_in_top5_hybrid": 1.0, "hit_at_5_hybrid_drug_filter": 1.0, "other_drug_boxed_in_top5_hybrid_drug_filter": 0.0}, "generic_name": {"n": 6, "resolution": {"exact": 6}, "hit_at_5_hybrid": 1.0, "other_drug_boxed_in_top5_hybrid": 1.0, "hit_at_5_hybrid_drug_filter": 1.0, "other_drug_boxed_in_top5_hybrid_drug_filter": 0.0}}
+16:17:23 qa 0 8 0.0s/question (both modes)
+16:17:23 robustness answers {"questions": 3, "drugs_without_boxed_warning": 1, "filtered": {"accuracy": 1.0, "false_yes_on_no_boxed_drugs": 0}, "unfiltered": {"accuracy": 0.6666666666666666, "false_yes_on_no_boxed_drugs": 1}, "filtered_minus_unfiltered": {"point": 0.33333333333333337, "ci95": [0.0, 1.0]}}
+16:17:23 {
+ "retrieval_hit_at_5": {
+  "bm25": {
+   "route": {
+    "n": 3,
+    "accuracy": 1.0
+   },
+   "boxed": {
+    "n": 3,
+    "accuracy": 1.0
+   },
+   "pa_share": {
+    "n": 2,
+    "accuracy": 1.0
+   },
+   "ALL": {
+    "n": 8,
+    "accuracy": 1.0
+   }
+  },
+  "dense": {
+   "route": {
+    "n": 3,
+    "accuracy": 1.0
+   },
+   "boxed": {
+    "n": 3,
+    "accuracy": 1.0
+   },
+   "pa_share": {
+    "n": 2,
+    "accuracy": 1.0
+   },
+   "ALL": {
+    "n": 8,
+    "accuracy": 1.0
+   }
+  },
+  "hybrid": {
+   "route": {
+    "n": 3,
+    "accuracy": 1.0
+   },
+   "boxed": {
+    "n": 3,
+    "accuracy": 1.0
+   },
+   "pa_share": {
+    "n": 2,
+    "accuracy": 1.0
+   },
+   "ALL": {
+    "n": 8,
+    "accuracy": 1.0
+   }
+  },
+  "hybrid_drug_filter": {
+   "route": {
+    "n": 3,
+    "accuracy": 1.0
+   },
+   "boxed": {
+    "n": 3,
+    "accuracy": 1.0
+   },
+   "pa_share": {
+    "n": 2,
+    "accuracy": 1.0
+   },
+   "ALL": {
+    "n": 8,
+    "accuracy": 1.0
+   }
+  },
+  "boxed_section_hit_hybrid": 1.0,
+  "boxed_section_hit_hybrid_drug_filter": 1.0,
+  "other_drug_boxed_passage_in_top5_hybrid": 1.0,
+  "other_drug_boxed_passage_in_top5_hybrid_drug_filter": 0.0
+ },
+ "answer_accuracy": {
+  "closed_book": {
+   "route": {
+    "n": 3,
+    "accuracy": 0.0,
+    "abstained": 3,
+    "invalid_json": 0
+   },
+   "boxed": {
+    "n": 3,
+    "accuracy": 0.0,
+    "abstained": 3,
+    "invalid_json": 0
+   },
+   "pa_share": {
+    "n": 2,
+    "accuracy": 0.0,
+    "abstained": 2,
+    "invalid_json": 0
+   },
+   "ALL": {
+    "n": 8,
+    "accuracy": 0.0,
+    "abstained": 8,
+    "invalid_json": 0
+   }
+  },
+  "rag_hybrid_drug_filter": {
+   "route": {
+    "n": 3,
+    "accuracy": 1.0,
+    "abstained": 0,
+    "invalid_json": 0
+   },
+   "boxed": {
+    "n": 3,
+    "accuracy": 1.0,
+    "abstained": 0,
+    "invalid_json": 0
+   },
+   "pa_share": {
+    "n": 2,
+    "accuracy": 1.0,
+    "abstained": 0,
+    "invalid_json": 0
+   },
+   "ALL": {
+    "n": 8,
+    "accuracy": 1.0,
+    "abstained": 0,
+    "invalid_json": 0
+   }
+  }
+ },
+ "rag_minus_closed_book": {
+  "route": {
+   "point": 1.0,
+   "ci95": [
+    1.0,
+    1.0
+   ]
+  },
+  "boxed": {
+   "point": 1.0,
+   "ci95": [
+    1.0,
+    1.0
+   ]
+  },
+  "pa_share": {
+   "point": 1.0,
+   "ci95": [
+    1.0,
+    1.0
+   ]
+  },
+  "ALL": {
+   "point": 1.0,
+   "ci95": [
+    1.0,
+    1.0
+   ]
+  }
+ },
+ "citations": {
+  "rag_answers": 8,
+  "with_valid_citation": 8,
+  "citation_precision": 1.0,
+  "answers_citing_unknown_ids": 8
+ }
+}
+ok
+test_correct_rules (tests.test_drug_rag.Parsing.test_correct_rules) ... ok
+test_routes (tests.test_drug_rag.Parsing.test_routes) ... ok
+test_yes_no_and_pct (tests.test_drug_rag.Parsing.test_yes_no_and_pct) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 0.124s
+
+OK

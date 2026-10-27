@@ -1,0 +1,16 @@
+4
+llama-cpp-python 0.3.36 sentence-transformers 6.2.0
+16:18:55 drugs 80 labels 48 not found 32
+16:18:55 downloading https://data.cms.gov/sites/default/files/2026-01/5942aa7e-a0c4-4e65-bd56-32608c33649f/SPUF_2026_20260107.zip
+16:20:23 corpus chunks 611 questions 134
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]Loading weights: 100%|██████████| 199/199 [00:00<00:00, 3634.12it/s]
+16:21:53 retrieval {"bm25": {"route": {"n": 48, "accuracy": 1.0}, "boxed": {"n": 48, "accuracy": 0.9791666666666666}, "pa_share": {"n": 38, "accuracy": 1.0}, "ALL": {"n": 134, "accuracy": 0.9925373134328358}}, "dense": {"route": {"n": 48, "accuracy": 1.0}, "boxed": {"n": 48, "accuracy": 1.0}, "pa_share": {"n": 38, "accuracy": 1.0}, "ALL": {"n": 134, "accuracy": 1.0}}, "hybrid": {"route": {"n": 48, "accuracy": 1.0}, "boxed": {"n": 48, "accuracy": 1.0}, "pa_share": {"n": 38, "accuracy": 1.0}, "ALL": {"n": 134, "accuracy": 1.0}}, "hybrid_drug_filter": {"route": {"n": 48, "accuracy": 1.0}, "boxed": {"n": 48, "accuracy": 1.0}, "pa_share": {"n": 38, "accuracy": 1.0}, "ALL": {"n": 134, "accuracy": 1.0}}, "boxed_section_hit_hybrid": 1.0, "boxed_section_hit_hybrid_drug_filter": 1.0, "other_drug_boxed_passage_in_top5_hybrid": 0.41379310344827586, "other_drug_boxed_passage_in_top5_hybrid_drug_filter": 0.0}
+16:21:53 robustness {"questions": 176, "construction": "misspelled brand (3rd/4th letters swapped) and generic name in place of brand", "misspelled_brand": {"n": 96, "resolution": {"fuzzy": 88, "inferred": 3, "unfiltered": 5}, "hit_at_5_hybrid": 0.59375, "other_drug_boxed_in_top5_hybrid": 0.896551724137931, "hit_at_5_hybrid_drug_filter": 0.96875, "other_drug_boxed_in_top5_hybrid_drug_filter": 0.0}, "generic_name": {"n": 80, "resolution": {"exact": 80}, "hit_at_5_hybrid": 0.9875, "other_drug_boxed_in_top5_hybrid": 0.782608695652174, "hit_at_5_hybrid_drug_filter": 1.0, "other_drug_boxed_in_top5_hybrid_drug_filter": 0.0}}
+16:23:57 qa 0 134 121.0s/question (both modes)
+17:04:21 qa 20 134 121.2s/question (both modes)
+17:44:47 qa 40 134 121.2s/question (both modes)
+18:21:09 qa 60 134 117.3s/question (both modes)
+18:57:55 qa 80 134 115.5s/question (both modes)
+19:37:56 qa 100 134 116.4s/question (both modes)
+20:17:47 qa 120 134 117.0s/question (both modes)
