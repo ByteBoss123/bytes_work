@@ -60,6 +60,21 @@ class ServiceChecks(unittest.TestCase):
             req=Request(base+'/predict?x=1',json.dumps({'pairs':[self.row]}).encode(),headers={'Content-Type':'application/json'})
             with urlopen(req,timeout=10) as r:self.assertEqual(r.status,200)
         finally:server.shutdown();server.server_close();t.join()
+    def test_history_and_dashboard_routes(self):
+        import threading
+        from urllib.request import urlopen
+        from pbm.service import make_server
+        self.s.record(200,10,[.2]);self.s.record(400,5,[])
+        h=self.s.history()
+        self.assertEqual([x['requests_total'] for x in h['snapshots']],[1,2])
+        server=make_server(self.s,0)
+        t=threading.Thread(target=server.serve_forever,daemon=True);t.start()
+        base=f'http://127.0.0.1:{server.server_port}'
+        try:
+            with urlopen(base+'/dashboard',timeout=10) as r:
+                self.assertIn('text/html',r.headers['Content-Type']);self.assertIn(b'Prior-authorization model monitor',r.read())
+            with urlopen(base+'/history',timeout=10) as r:self.assertEqual(len(json.load(r)['snapshots']),2)
+        finally:server.shutdown();server.server_close();t.join()
     def test_reference_version_mismatch(self):
         p=Path(self.tmp.name)/'wrong.json'
         p.write_text(json.dumps({'model_sha256':'wrong','validation_scores':[.5],'features':['x'],'label':'x'}))

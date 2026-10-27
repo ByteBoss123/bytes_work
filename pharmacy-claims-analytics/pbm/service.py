@@ -49,7 +49,10 @@ class ScoringService:
               id INTEGER PRIMARY KEY, request_id INTEGER, probability REAL, model_sha TEXT);
               CREATE TABLE IF NOT EXISTS alerts (
               id INTEGER PRIMARY KEY, timestamp REAL, name TEXT, active INTEGER,
-              value REAL, model_sha TEXT);''')
+              value REAL, model_sha TEXT);
+              CREATE TABLE IF NOT EXISTS snapshots (
+              id INTEGER PRIMARY KEY, timestamp REAL, requests_total INTEGER, failure_rate REAL,
+              latency_p95_ms REAL, score_psi REAL, model_sha TEXT);''')
 
     BINARY = {'prev_pair_listed', 'prev_pair_pa', 'prev_pair_st', 'prev_pair_ql', 'drug_listed_prev',
               'form_linked', 'any_snp'}
@@ -84,7 +87,11 @@ class ScoringService:
                                  (time.time(), status, latency, self.model_sha))
             con.executemany('INSERT INTO scores(request_id,probability,model_sha) VALUES(?,?,?)',
                             [(cursor.lastrowid, p, self.model_sha) for p in scores])
-        self.monitor()
+        m = self.monitor()
+        with self.lock, sqlite3.connect(self.db) as con:
+            con.execute('INSERT INTO snapshots(timestamp,requests_total,failure_rate,latency_p95_ms,score_psi,model_sha) VALUES(?,?,?,?,?,?)',
+                        (time.time(), m['requests_total'], m['request_failure_rate'], m['latency_p95_ms'], m['score_psi'], self.model_sha))
+        return m
 
     def monitor(self):
         with self.lock, sqlite3.connect(self.db) as con:
@@ -114,6 +121,21 @@ class ScoringService:
                     'alert_delivery':'Persisted SQLite transitions and HTTP endpoint; no external paging'}
 
 
+    def history(self, limit=500):
+        """Monitoring snapshots (one per prediction request) and alert transitions, oldest first."""
+        with self.lock, sqlite3.connect(self.db) as con:
+            snaps = con.execute('SELECT timestamp,requests_total,failure_rate,latency_p95_ms,score_psi FROM snapshots '
+                                'WHERE model_sha=? ORDER BY id DESC LIMIT ?', (self.model_sha, limit)).fetchall()
+            alerts = con.execute('SELECT timestamp,name,active,value FROM alerts WHERE model_sha=? ORDER BY id DESC LIMIT 200',
+                                 (self.model_sha,)).fetchall()
+        keys = ['timestamp', 'requests_total', 'failure_rate', 'latency_p95_ms', 'score_psi']
+        return {'snapshots': [dict(zip(keys, r)) for r in reversed(snaps)],
+                'alert_transitions': [dict(zip(['timestamp', 'name', 'active', 'value'], r)) for r in reversed(alerts)]}
+
+
+DASHBOARD = (Path(__file__).with_name('dashboard.html')).read_text() if Path(__file__).with_name('dashboard.html').exists() else ''
+
+
 def make_server(service, port=8765, host='127.0.0.1'):
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *_):
@@ -131,6 +153,10 @@ def make_server(service, port=8765, host='127.0.0.1'):
                 return self.send(200, {'status':'ready', 'model_sha256':service.model_sha})
             if path == '/monitoring':
                 return self.send(200,service.monitor())
+            if path == '/history':
+                return self.send(200,service.history())
+            if path == '/dashboard':
+                return self.send(200,DASHBOARD,'text/html; charset=utf-8')
             if path == '/metrics':
                 m=service.monitor()
                 lines=['# TYPE pbm_requests_total counter',f'pbm_requests_total {m["requests_total"]}']

@@ -47,12 +47,14 @@ def exercise():
             recovered=json.loads(get('/monitoring'))
             assert not recovered['alerts']['score_drift'] and not recovered['alerts']['request_failure_rate']
             assert 'pbm_requests_total 145' in get('/metrics')
+            history=json.loads(get('/history'))
+            assert len(history['snapshots'])==145 and 'Prior-authorization model monitor' in get('/dashboard')
             with sqlite3.connect(service.db) as con:
                 transitions=con.execute('SELECT name,active,value FROM alerts ORDER BY id').fetchall()
                 assert con.execute('SELECT COUNT(*) FROM scores').fetchone()[0]==7000
             result={'test':'Actual HTTP service integration replaying real CMS formulary feature rows','requests':145,'scored_pairs':7000,
                     'normal':normal,'invalid_payload_stage':invalid,'shifted':shifted,'recovered':recovered,
-                    'alert_transitions':transitions,'passed':True,
+                    'alert_transitions':transitions,'snapshots':history['snapshots'],'passed':True,
                     'scope':'Transient loopback deployment. Replayed public plan-design rows; not real-user production traffic.'}
             Path('reports/service_validation.json').write_text(json.dumps(result,indent=2))
             print(json.dumps({'passed':True,'requests':145,'scored_pairs':7000,'drift_detected':True,'failure_alert_detected':True,'recovery_verified':True},indent=2))

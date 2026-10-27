@@ -16,6 +16,8 @@ By default the server binds only to `127.0.0.1`. It has no credentials, TLS, or 
 - POST `/predict`: 1–100 formulary-drug pairs, prior-year features only (see `reports/monitoring_reference.json` for the 16 feature names; `null` is allowed for missing history).
 - GET `/monitoring`: rolling metrics, thresholds, sample sizes, and current alert states.
 - GET `/metrics`: Prometheus-compatible text exposition. A Prometheus server is not deployed.
+- GET `/history`: one monitoring snapshot per prediction request (failure rate, p95 latency, PSI) plus alert transitions.
+- GET `/dashboard`: self-contained monitoring page (no external scripts) that polls `/monitoring` and `/history` every 5 seconds: status cards with thresholds, PSI and failure-rate charts with the alert line, and the alert-transition log.
 
 Example payload: one row of `reports/reference_pairs.json` wrapped as `{"pairs": [ ... ]}`.
 

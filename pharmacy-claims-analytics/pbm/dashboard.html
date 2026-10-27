@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PA Model Monitor</title>
+<style>
+  :root { --bg:#f7f7f5; --panel:#ffffff; --ink:#1d1d1b; --muted:#6b6b66; --line:#e3e2dd;
+          --ok:#2f7d4f; --alert:#b3261e; --series:#2c5da8; --threshold:#b3261e; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#151514; --panel:#1f1f1d; --ink:#ecebe6; --muted:#a3a29b; --line:#33322f;
+            --ok:#5fbf86; --alert:#f08a80; --series:#7da7e8; --threshold:#f08a80; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font:14px/1.45 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  main { max-width:1040px; margin:0 auto; padding:24px 16px 48px; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  .sub { color:var(--muted); margin:0 0 20px; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px; }
+  .label { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+  .value { font-size:26px; font-weight:600; margin-top:4px; font-variant-numeric:tabular-nums; }
+  .state { font-size:12px; margin-top:4px; }
+  .state.ok { color:var(--ok); } .state.alert { color:var(--alert); font-weight:600; }
+  .grid2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:12px; margin-top:12px; }
+  svg { width:100%; height:180px; display:block; }
+  table { width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums; }
+  th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); }
+  th { color:var(--muted); font-weight:500; font-size:12px; }
+  .note { color:var(--muted); font-size:12px; margin-top:16px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Prior-authorization model monitor</h1>
+  <p class="sub" id="sub">Loading…</p>
+  <section class="cards" id="cards"></section>
+  <section class="grid2">
+    <div class="card"><div class="label">Score drift (PSI, last 1,000 scores)</div><svg id="psi" role="img" aria-label="PSI over requests"></svg></div>
+    <div class="card"><div class="label">Request failure rate (last 100 requests)</div><svg id="fail" role="img" aria-label="Failure rate over requests"></svg></div>
+  </section>
+  <section class="card" style="margin-top:12px">
+    <div class="label">Alert transitions</div>
+    <table><thead><tr><th>Time (UTC)</th><th>Alert</th><th>State</th><th>Value</th></tr></thead><tbody id="alerts"></tbody></table>
+  </section>
+  <p class="note">Telemetry is stored by this service instance. Accuracy is not monitored live: labels arrive with the next contract-year CMS formulary file.</p>
+</main>
+<script>
+const fmt = (v, d=3) => v === null || v === undefined ? '—' : Number(v).toFixed(d);
+const pct = v => v === null || v === undefined ? '—' : (100 * v).toFixed(1) + '%';
+function line(svg, pts, threshold, maxY) {
+  const W = 600, H = 180, P = 28;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const ys = pts.filter(p => p !== null);
+  const top = Math.max(maxY, threshold * 1.4, ...(ys.length ? ys : [0]));
+  const x = i => P + (W - 2 * P) * (pts.length > 1 ? i / (pts.length - 1) : 0);
+  const y = v => H - P - (H - 2 * P) * (v / top);
+  let d = '', pen = false;
+  pts.forEach((v, i) => { if (v === null) { pen = false; return; } d += (pen ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1); pen = true; });
+  svg.innerHTML =
+    `<line x1="${P}" x2="${W - P}" y1="${y(threshold)}" y2="${y(threshold)}" stroke="var(--threshold)" stroke-dasharray="4 4"/>` +
+    `<text x="${W - P}" y="${y(threshold) - 4}" fill="var(--threshold)" font-size="11" text-anchor="end">alert above ${threshold}</text>` +
+    `<line x1="${P}" x2="${W - P}" y1="${H - P}" y2="${H - P}" stroke="var(--line)"/>` +
+    `<text x="${P}" y="${P - 10}" fill="var(--muted)" font-size="11">max ${top.toFixed(2)}</text>` +
+    `<text x="${P}" y="${H - 8}" fill="var(--muted)" font-size="11">${pts.length ? 'request 1' : 'no data yet'}</text>` +
+    `<text x="${W - P}" y="${H - 8}" fill="var(--muted)" font-size="11" text-anchor="end">${pts.length ? 'request ' + pts.length : ''}</text>` +
+    `<path d="${d}" fill="none" stroke="var(--series)" stroke-width="2"/>`;
+}
+async function refresh() {
+  try {
+    const [m, h] = await Promise.all([fetch('monitoring').then(r => r.json()), fetch('history').then(r => r.json())]);
+    document.getElementById('sub').textContent = `Model ${m.model_sha256.slice(0, 12)} · ${m.requests_total} requests · refreshed ${new Date().toLocaleTimeString()}`;
+    const t = m.thresholds, a = m.alerts;
+    const cards = [
+      ['Requests', m.requests_total, null],
+      ['Failure rate', pct(m.request_failure_rate), a.request_failure_rate, `alert above ${pct(t.failure_rate)}`],
+      ['p95 latency', m.latency_p95_ms === null ? '—' : fmt(m.latency_p95_ms, 0) + ' ms', a.latency, `alert above ${t.latency_ms} ms`],
+      ['Score PSI', fmt(m.score_psi), a.score_drift, `alert above ${t.psi}`],
+    ];
+    document.getElementById('cards').innerHTML = cards.map(([k, v, on, rule]) =>
+      `<div class="card"><div class="label">${k}</div><div class="value">${v}</div>` +
+      (on === null ? '' : `<div class="state ${on ? 'alert' : 'ok'}">${on ? 'ALERT' : 'OK'} · ${rule}</div>`) + `</div>`).join('');
+    line(document.getElementById('psi'), h.snapshots.map(s => s.score_psi), t.psi, 0.3);
+    line(document.getElementById('fail'), h.snapshots.map(s => s.failure_rate), t.failure_rate, 0.1);
+    document.getElementById('alerts').innerHTML = h.alert_transitions.slice().reverse().map(e =>
+      `<tr><td>${new Date(e.timestamp * 1000).toISOString().replace('T', ' ').slice(0, 19)}</td><td>${e.name}</td>` +
+      `<td class="state ${e.active ? 'alert' : 'ok'}">${e.active ? 'raised' : 'cleared'}</td><td>${fmt(e.value)}</td></tr>`).join('') ||
+      '<tr><td colspan="4">No transitions yet</td></tr>';
+  } catch (err) {
+    document.getElementById('sub').textContent = 'Could not reach the service: ' + err;
+  }
+}
+refresh();
+setInterval(refresh, 5000);
+</script>
+</body>
+</html>
