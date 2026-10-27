@@ -1,0 +1,17 @@
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/root       145G   60G   86G  42% /
+02:04:13 downloading https://data.cms.gov/sites/default/files/2025-05/e015bae0-4b23-455d-8243-65aef830ab3c/SPUF_2024_20250430_2024Q3.zip
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/runner/work/bytes_work/bytes_work/pharmacy-claims-analytics/pbm/formulary.py", line 422, in <module>
+    run(a.out, a.raw, a.seed, a.boot)
+  File "/home/runner/work/bytes_work/bytes_work/pharmacy-claims-analytics/pbm/formulary.py", line 286, in run
+    form, plans, src = load_year(y, Path(raw))
+                       ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/bytes_work/bytes_work/pharmacy-claims-analytics/pbm/formulary.py", line 143, in load_year
+    fpath = find(files, 'basic', 'formulary')
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/runner/work/bytes_work/bytes_work/pharmacy-claims-analytics/pbm/formulary.py", line 122, in find
+    raise ValueError(f'expected one file matching {keywords}, found {[p.name for p in hits]} among {[p.name for p in files]}')
+ValueError: expected one file matching ('basic', 'formulary'), found ['basic drugs formulary file  PPUF_2024Q3.txt', 'basic drugs formulary file sample PPUF_2024Q3.txt'] among ['basic drugs formulary file  PPUF_2024Q3.txt', 'basic drugs formulary file sample PPUF_2024Q3.txt', 'plan information  PPUF_2024Q3.txt', 'plan information sample PPUF_2024Q3.txt']
