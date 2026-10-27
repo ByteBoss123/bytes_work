@@ -1,12 +1,12 @@
 {
-  "python": "3.12.14",
+  "python": "3.12.15",
   "numpy": "2.3.5",
   "pandas": "2.2.3",
   "sklearn": "1.8.0",
   "seed": 42,
+  "model_sha256": "529e5e4494f725ee4603952a87600ae289dfa5fb2b1707bf15c1251398033a71",
   "source_sha256": {
-    "pbm/pipeline.py": "0e0458cf28c224422493923a4cff73a3d9a9a3ef03476b154957a749b5706d91",
-    "sql/curate.sql": "45a8310f4946d56ae3b4db675ab1c25eb54390d1306f657a0a9f69f5cb0d286c",
-    "sql/operations.sql": "3a401b41a49f35d7d6f6d9f875aa54e146d7233ddfa69f2ce1fff63e9ac88fa9"
+    "pbm/formulary.py": "dbc3c1c47e1dace9f354f85d4fbb60a80a0a52ceb84b4e55cea3094c766cfcce",
+    "pbm/monitoring.py": "b98bb48bb49af156e96f0986d23b8284b29e3f08c506f945fa19018c1a864633"
   }
 }

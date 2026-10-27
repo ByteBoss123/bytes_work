@@ -2,13 +2,13 @@ test_features_use_prior_year_only_and_keep_grain (tests.test_formulary.Curation.
 test_link_uses_majority_of_continuing_plans (tests.test_formulary.Curation.test_link_uses_majority_of_continuing_plans) ... ok
 test_pair_grain_takes_any_ndc_flag (tests.test_formulary.Curation.test_pair_grain_takes_any_ndc_flag) ... ok
 test_validation_rejects_bad_flag_and_year (tests.test_formulary.Curation.test_validation_rejects_bad_flag_and_year) ... ok
-test_run_on_fixture_zips (tests.test_formulary.EndToEnd.test_run_on_fixture_zips) ... 02:04:11 2024 {'url': 'https://data.cms.gov/sites/default/files/2025-05/e015bae0-4b23-455d-8243-65aef830ab3c/SPUF_2024_20250430_2024Q3.zip', 'sha256': '3656c7854ad04c4c02fede475d17fb34443ce7215194e7c9dd8303c57edc4c7c', 'bytes': 20799, 'formulary_file': 'basic drugs formulary file  20250101.txt', 'plan_file': 'plan information  20250101.txt', 'formulary_rows': 720, 'plan_rows': 12, 'pairs': 720, 'formularies': 12, 'rxcuis': 60, 'pa_pair_rate': 0.25972222222222224}
-02:04:11 2025 {'url': 'https://data.cms.gov/sites/default/files/2025-10/6b0620f5-9259-4f1f-929c-70feb8857887/SPUF_2025_20251009.zip', 'sha256': 'c3eba0f134af8ae921c538845fff1e1f5402f280e37a0fc4cda222e82a3e6cea', 'bytes': 20799, 'formulary_file': 'basic drugs formulary file  20250101.txt', 'plan_file': 'plan information  20250101.txt', 'formulary_rows': 720, 'plan_rows': 12, 'pairs': 720, 'formularies': 12, 'rxcuis': 60, 'pa_pair_rate': 0.25972222222222224}
-02:04:11 2026 {'url': 'https://data.cms.gov/sites/default/files/2026-01/5942aa7e-a0c4-4e65-bd56-32608c33649f/SPUF_2026_20260107.zip', 'sha256': 'e698a8676e2560221928a5d8a92a4f146361102260df00d89f76529238004174', 'bytes': 20799, 'formulary_file': 'basic drugs formulary file  20250101.txt', 'plan_file': 'plan information  20250101.txt', 'formulary_rows': 720, 'plan_rows': 12, 'pairs': 720, 'formularies': 12, 'rxcuis': 60, 'pa_pair_rate': 0.2638888888888889}
-02:04:11 train (720, 21) test (720, 21)
-02:04:11 validation logistic_regression {'n': 120, 'positives': 27, 'prevalence': 0.225, 'roc_auc': 0.8761449621664674, 'average_precision': 0.7097054538181, 'brier_score': 0.083332219466994}
-02:04:11 validation hist_gradient_boosting {'n': 120, 'positives': 27, 'prevalence': 0.225, 'roc_auc': 0.8709677419354837, 'average_precision': 0.8227563221572145, 'brier_score': 0.10568730585763904}
-02:04:12 {
+test_run_on_fixture_zips (tests.test_formulary.EndToEnd.test_run_on_fixture_zips) ... 02:06:02 2024 {'url': 'https://data.cms.gov/sites/default/files/2025-05/e015bae0-4b23-455d-8243-65aef830ab3c/SPUF_2024_20250430_2024Q3.zip', 'sha256': 'f52e65859d485aa5a9f7721b7afc5aee945e9b593c5eb6c8c0c0aa61776881e5', 'bytes': 20799, 'formulary_file': 'basic drugs formulary file  20250101.txt', 'plan_file': 'plan information  20250101.txt', 'formulary_rows': 720, 'plan_rows': 12, 'pairs': 720, 'formularies': 12, 'rxcuis': 60, 'pa_pair_rate': 0.25972222222222224}
+02:06:02 2025 {'url': 'https://data.cms.gov/sites/default/files/2025-10/6b0620f5-9259-4f1f-929c-70feb8857887/SPUF_2025_20251009.zip', 'sha256': 'b217beb8c197731f3e9bdb221cfb2eb579a94a69ac62dcba62633976fe4f3ea0', 'bytes': 20799, 'formulary_file': 'basic drugs formulary file  20250101.txt', 'plan_file': 'plan information  20250101.txt', 'formulary_rows': 720, 'plan_rows': 12, 'pairs': 720, 'formularies': 12, 'rxcuis': 60, 'pa_pair_rate': 0.25972222222222224}
+02:06:03 2026 {'url': 'https://data.cms.gov/sites/default/files/2026-01/5942aa7e-a0c4-4e65-bd56-32608c33649f/SPUF_2026_20260107.zip', 'sha256': 'c79e91ffeb17012eb1de74c52ab8f85e23cc898c2c40c5fbb937b526eebf1f1d', 'bytes': 20799, 'formulary_file': 'basic drugs formulary file  20250101.txt', 'plan_file': 'plan information  20250101.txt', 'formulary_rows': 720, 'plan_rows': 12, 'pairs': 720, 'formularies': 12, 'rxcuis': 60, 'pa_pair_rate': 0.2638888888888889}
+02:06:03 train (720, 21) test (720, 21)
+02:06:03 validation logistic_regression {'n': 120, 'positives': 27, 'prevalence': 0.225, 'roc_auc': 0.8761449621664674, 'average_precision': 0.7097054538181, 'brier_score': 0.083332219466994}
+02:06:03 validation hist_gradient_boosting {'n': 120, 'positives': 27, 'prevalence': 0.225, 'roc_auc': 0.8709677419354837, 'average_precision': 0.8227563221572145, 'brier_score': 0.10568730585763904}
+02:06:03 {
  "selected": "hist_gradient_boosting",
  "results": {
   "model": {
@@ -94,6 +94,6 @@ test_run_on_fixture_zips (tests.test_formulary.EndToEnd.test_run_on_fixture_zips
 ok
 
 ----------------------------------------------------------------------
-Ran 5 tests in 0.992s
+Ran 5 tests in 1.116s
 
 OK

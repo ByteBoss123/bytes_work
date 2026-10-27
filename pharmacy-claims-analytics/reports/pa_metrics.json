@@ -1,0 +1,442 @@
+{
+  "data": "Real CMS Part D formulary public use files (plan-design records, not claims or patient data)",
+  "task": "Predict whether a (formulary, RXCUI) pair listed in contract year Y requires prior authorization, using year Y-1 rules only",
+  "unit": "formulary_id x RXCUI; PA = any NDC under the RXCUI flagged PRIOR_AUTHORIZATION_YN=Y",
+  "sources": {
+    "2024": {
+      "url": "https://data.cms.gov/sites/default/files/2025-05/e015bae0-4b23-455d-8243-65aef830ab3c/SPUF_2024_20250430_2024Q3.zip",
+      "sha256": "f06ff79c8fdb44501af4c023945949960fb5e43a419ffc1fc4845c86002ef69c",
+      "bytes": 2829748748,
+      "archive_listing": [
+        "basic drugs formulary file  PPUF_2024Q3.zip (11163632 bytes)",
+        "basic drugs formulary file  PPUF_2024Q3.zip/basic drugs formulary file  PPUF_2024Q3.txt (74763945 bytes)",
+        "beneficiary cost file  PPUF_2024Q3.zip (738889 bytes)",
+        "beneficiary cost file  PPUF_2024Q3.zip/beneficiary cost file  PPUF_2024Q3.txt (11468632 bytes)",
+        "excluded drugs formulary file  PPUF_2024Q3.zip (50410 bytes)",
+        "excluded drugs formulary file  PPUF_2024Q3.zip/excluded drugs formulary file  PPUF_2024Q3.txt (607948 bytes)",
+        "geographic locator file  PPUF_2024Q3.zip (29615 bytes)",
+        "geographic locator file  PPUF_2024Q3.zip/geographic locator file PPUF_2024Q3.txt (303047 bytes)",
+        "indication based coverage formulary file  PPUF_2024Q3.zip (2408 bytes)",
+        "indication based coverage formulary file  PPUF_2024Q3.zip/Indication Based Coverage Formulary File  PPUF_2024Q3.txt (23081 bytes)",
+        "insulin beneficiary cost file  PPUF_2024Q3.zip (130741 bytes)",
+        "insulin beneficiary cost file  PPUF_2024Q3.zip/insulin beneficiary cost file  PPUF_2024Q3.txt (1490958 bytes)",
+        "partial gap coverage file  PPUF_2024Q3.zip (156566 bytes)",
+        "partial gap coverage file  PPUF_2024Q3.zip/partial gap coverage file  PPUF_2024Q3.txt (2145532 bytes)",
+        "pharmacy networks file  PPUF_2024Q3 part 1.zip (406047760 bytes)",
+        "pharmacy networks file  PPUF_2024Q3 part 1.zip/pharmacy networks file  PPUF_2024Q3 part 1.txt (3838768469 bytes)",
+        "pharmacy networks file  PPUF_2024Q3 part 2.zip (406970791 bytes)",
+        "pharmacy networks file  PPUF_2024Q3 part 2.zip/pharmacy networks file  PPUF_2024Q3 part 2.txt (3867089386 bytes)",
+        "pharmacy networks file  PPUF_2024Q3 part 3.zip (407691689 bytes)",
+        "pharmacy networks file  PPUF_2024Q3 part 3.zip/pharmacy networks file  PPUF_2024Q3 part 3.txt (3787667578 bytes)",
+        "pharmacy networks file  PPUF_2024Q3 part 4.zip (402310147 bytes)",
+        "pharmacy networks file  PPUF_2024Q3 part 4.zip/pharmacy networks file  PPUF_2024Q3 part 4.txt (3785750947 bytes)",
+        "pharmacy networks file  PPUF_2024Q3 part 5.zip (402131445 bytes)",
+        "pharmacy networks file  PPUF_2024Q3 part 5.zip/pharmacy networks file  PPUF_2024Q3 part 5.txt (3770880324 bytes)",
+        "pharmacy networks file  PPUF_2024Q3 part 6.zip (539628320 bytes)",
+        "pharmacy networks file  PPUF_2024Q3 part 6.zip/pharmacy networks file  PPUF_2024Q3 part 6.txt (5063317195 bytes)",
+        "plan information  PPUF_2024Q3.zip (432692 bytes)",
+        "plan information  PPUF_2024Q3.zip/plan information  PPUF_2024Q3.txt (13819607 bytes)",
+        "pricing file PPUF_2024Q3.zip (252256596 bytes)",
+        "pricing file PPUF_2024Q3.zip/pricing file PPUF_2024Q3.txt (2292223328 bytes)",
+        "sample files PPUF_2024Q3.zip (4455 bytes)",
+        "sample files PPUF_2024Q3.zip/basic drugs formulary file sample PPUF_2024Q3.txt (2699 bytes)",
+        "sample files PPUF_2024Q3.zip/beneficiary cost file sample PPUF_2024Q3.txt (3501 bytes)",
+        "sample files PPUF_2024Q3.zip/excluded drugs formulary file sample  PPUF_2024Q3.txt (1934 bytes)",
+        "sample files PPUF_2024Q3.zip/insulin beneficiary cost file sample PPUF_2024Q3.txt (2085 bytes)",
+        "sample files PPUF_2024Q3.zip/pharmacy networks file sample PPUF_2024Q3.txt (4116 bytes)",
+        "sample files PPUF_2024Q3.zip/plan information sample PPUF_2024Q3.txt (6124 bytes)",
+        "sample files PPUF_2024Q3.zip/pricing file sample PPUF_2024Q3.txt (1997 bytes)"
+      ],
+      "formulary_file": "basic drugs formulary file  PPUF_2024Q3.txt",
+      "plan_file": "plan information  PPUF_2024Q3.txt",
+      "formulary_rows": 1490827,
+      "plan_rows": 110664,
+      "pairs": 1490827,
+      "formularies": 421,
+      "rxcuis": 6522,
+      "pa_pair_rate": 0.2664339993842344
+    },
+    "2025": {
+      "url": "https://data.cms.gov/sites/default/files/2025-10/6b0620f5-9259-4f1f-929c-70feb8857887/SPUF_2025_20251009.zip",
+      "sha256": "614fbfc94d18d5f4f6e2d5a5a0354dd6992363c30c445cb9234ae14c7f9b800a",
+      "bytes": 2609317649,
+      "archive_listing": [
+        "basic drugs formulary file  PPUF_2025Q3.zip (9779520 bytes)",
+        "basic drugs formulary file  PPUF_2025Q3.zip/basic drugs formulary file  PPUF_2025Q3.txt (65236031 bytes)",
+        "beneficiary cost file  PPUF_2025Q3.zip (625991 bytes)",
+        "beneficiary cost file  PPUF_2025Q3.zip/beneficiary cost file  PPUF_2025Q3.txt (9796090 bytes)",
+        "excluded drugs formulary file  PPUF_2025Q3.zip (39526 bytes)",
+        "excluded drugs formulary file  PPUF_2025Q3.zip/excluded drugs formulary file  PPUF_2025Q3.txt (482754 bytes)",
+        "geographic locator file  PPUF_2025Q3.zip (29615 bytes)",
+        "geographic locator file  PPUF_2025Q3.zip/geographic locator file PPUF_2025Q3.txt (303047 bytes)",
+        "indication based coverage formulary file  PPUF_2025Q3.zip (2640 bytes)",
+        "indication based coverage formulary file  PPUF_2025Q3.zip/Indication Based Coverage Formulary File  PPUF_2025Q3.txt (26253 bytes)",
+        "insulin beneficiary cost file  PPUF_2025Q3.zip (135763 bytes)",
+        "insulin beneficiary cost file  PPUF_2025Q3.zip/insulin beneficiary cost file  PPUF_2025Q3.txt (1557220 bytes)",
+        "pharmacy networks file  PPUF_2025Q3 part 1.zip (406997977 bytes)",
+        "pharmacy networks file  PPUF_2025Q3 part 1.zip/pharmacy networks file  PPUF_2025Q3 part 1.txt (3872590978 bytes)",
+        "pharmacy networks file  PPUF_2025Q3 part 2.zip (398308339 bytes)",
+        "pharmacy networks file  PPUF_2025Q3 part 2.zip/pharmacy networks file  PPUF_2025Q3 part 2.txt (3839380724 bytes)",
+        "pharmacy networks file  PPUF_2025Q3 part 3.zip (401546970 bytes)",
+        "pharmacy networks file  PPUF_2025Q3 part 3.zip/pharmacy networks file  PPUF_2025Q3 part 3.txt (3806557553 bytes)",
+        "pharmacy networks file  PPUF_2025Q3 part 4.zip (406328770 bytes)",
+        "pharmacy networks file  PPUF_2025Q3 part 4.zip/pharmacy networks file  PPUF_2025Q3 part 4.txt (3869131110 bytes)",
+        "pharmacy networks file  PPUF_2025Q3 part 5.zip (403062239 bytes)",
+        "pharmacy networks file  PPUF_2025Q3 part 5.zip/pharmacy networks file  PPUF_2025Q3 part 5.txt (3764880457 bytes)",
+        "pharmacy networks file  PPUF_2025Q3 part 6.zip (349367459 bytes)",
+        "pharmacy networks file  PPUF_2025Q3 part 6.zip/pharmacy networks file  PPUF_2025Q3 part 6.txt (3308005515 bytes)",
+        "plan information  PPUF_2025Q3.zip (440345 bytes)",
+        "plan information  PPUF_2025Q3.zip/plan information  PPUF_2025Q3.txt (13974857 bytes)",
+        "pricing file PPUF_2025Q3.zip (232645625 bytes)",
+        "pricing file PPUF_2025Q3.zip/pricing file PPUF_2025Q3.txt (2086564916 bytes)",
+        "sample files PPUF_2025Q3.zip (4438 bytes)",
+        "sample files PPUF_2025Q3.zip/basic drugs formulary file sample PPUF_2025Q3.txt (2701 bytes)",
+        "sample files PPUF_2025Q3.zip/beneficiary cost file sample PPUF_2025Q3.txt (3634 bytes)",
+        "sample files PPUF_2025Q3.zip/excluded drugs formulary file sample  PPUF_2025Q3.txt (1829 bytes)",
+        "sample files PPUF_2025Q3.zip/insulin beneficiary cost file sample PPUF_2025Q3.txt (2084 bytes)",
+        "sample files PPUF_2025Q3.zip/pharmacy networks file sample PPUF_2025Q3.txt (4116 bytes)",
+        "sample files PPUF_2025Q3.zip/plan information sample PPUF_2025Q3.txt (5926 bytes)",
+        "sample files PPUF_2025Q3.zip/pricing file sample PPUF_2025Q3.txt (2001 bytes)"
+      ],
+      "formulary_file": "basic drugs formulary file  PPUF_2025Q3.txt",
+      "plan_file": "plan information  PPUF_2025Q3.txt",
+      "formulary_rows": 1298449,
+      "plan_rows": 115379,
+      "pairs": 1298449,
+      "formularies": 378,
+      "rxcuis": 6092,
+      "pa_pair_rate": 0.2768857305908819
+    },
+    "2026": {
+      "url": "https://data.cms.gov/sites/default/files/2026-01/5942aa7e-a0c4-4e65-bd56-32608c33649f/SPUF_2026_20260107.zip",
+      "sha256": "9d8d60ca09e4a72ca8329a75228cfb36613131053af4dd67b667087d80837088",
+      "bytes": 2489777249,
+      "archive_listing": [
+        "basic drugs formulary file  PPUF_2025Q4.zip (8547338 bytes)",
+        "basic drugs formulary file  PPUF_2025Q4.zip/basic drugs formulary file  PPUF_2025Q4.txt (57672956 bytes)",
+        "beneficiary cost file  PPUF_2025Q4.zip (652003 bytes)",
+        "beneficiary cost file  PPUF_2025Q4.zip/beneficiary cost file  PPUF_2025Q4.txt (10186294 bytes)",
+        "excluded drugs formulary file  PPUF_2025Q4.zip (36182 bytes)",
+        "excluded drugs formulary file  PPUF_2025Q4.zip/excluded drugs formulary file  PPUF_2025Q4.txt (449681 bytes)",
+        "geographic locator file  PPUF_2025Q4.zip (29615 bytes)",
+        "geographic locator file  PPUF_2025Q4.zip/geographic locator file PPUF_2025Q4.txt (303047 bytes)",
+        "indication based coverage formulary file  PPUF_2025Q4.zip (1626 bytes)",
+        "indication based coverage formulary file  PPUF_2025Q4.zip/Indication Based Coverage Formulary File  PPUF_2025Q4.txt (14071 bytes)",
+        "insulin beneficiary cost file  PPUF_2025Q4.zip (164244 bytes)",
+        "insulin beneficiary cost file  PPUF_2025Q4.zip/insulin beneficiary cost file  PPUF_2025Q4.txt (2371767 bytes)",
+        "pharmacy networks file  PPUF_2025Q4 part 1.zip (408610094 bytes)",
+        "pharmacy networks file  PPUF_2025Q4 part 1.zip/pharmacy networks file  PPUF_2025Q4 part 1.txt (4107947302 bytes)",
+        "pharmacy networks file  PPUF_2025Q4 part 2.zip (408467887 bytes)",
+        "pharmacy networks file  PPUF_2025Q4 part 2.zip/pharmacy networks file  PPUF_2025Q4 part 2.txt (4112850488 bytes)",
+        "pharmacy networks file  PPUF_2025Q4 part 3.zip (407667830 bytes)",
+        "pharmacy networks file  PPUF_2025Q4 part 3.zip/pharmacy networks file  PPUF_2025Q4 part 3.txt (4046025270 bytes)",
+        "pharmacy networks file  PPUF_2025Q4 part 4.zip (406904590 bytes)",
+        "pharmacy networks file  PPUF_2025Q4 part 4.zip/pharmacy networks file  PPUF_2025Q4 part 4.txt (4160820518 bytes)",
+        "pharmacy networks file  PPUF_2025Q4 part 5.zip (404094969 bytes)",
+        "pharmacy networks file  PPUF_2025Q4 part 5.zip/pharmacy networks file  PPUF_2025Q4 part 5.txt (4057402419 bytes)",
+        "pharmacy networks file  PPUF_2025Q4 part 6.zip (254897260 bytes)",
+        "pharmacy networks file  PPUF_2025Q4 part 6.zip/pharmacy networks file  PPUF_2025Q4 part 6.txt (2551576012 bytes)",
+        "plan information  PPUF_2025Q4.zip (433128 bytes)",
+        "plan information  PPUF_2025Q4.zip/plan information  PPUF_2025Q4.txt (13749128 bytes)",
+        "pricing file PPUF_2025Q4.zip (218400695 bytes)",
+        "pricing file PPUF_2025Q4.zip/pricing file PPUF_2025Q4.txt (1990353027 bytes)",
+        "sample files PPUF_2025Q4.zip (4300 bytes)",
+        "sample files PPUF_2025Q4.zip/basic drugs formulary file sample PPUF_2025Q4.txt (2819 bytes)",
+        "sample files PPUF_2025Q4.zip/beneficiary cost file sample PPUF_2025Q4.txt (3373 bytes)",
+        "sample files PPUF_2025Q4.zip/excluded drugs formulary file sample  PPUF_2025Q4.txt (1774 bytes)",
+        "sample files PPUF_2025Q4.zip/insulin beneficiary cost file sample PPUF_2025Q4.txt (3028 bytes)",
+        "sample files PPUF_2025Q4.zip/pharmacy networks file sample PPUF_2025Q4.txt (4203 bytes)",
+        "sample files PPUF_2025Q4.zip/plan information sample PPUF_2025Q4.txt (5391 bytes)",
+        "sample files PPUF_2025Q4.zip/pricing file sample PPUF_2025Q4.txt (1994 bytes)"
+      ],
+      "formulary_file": "basic drugs formulary file  PPUF_2025Q4.txt",
+      "plan_file": "plan information  PPUF_2025Q4.txt",
+      "formulary_rows": 1121429,
+      "plan_rows": 112733,
+      "pairs": 1121429,
+      "formularies": 331,
+      "rxcuis": 5994,
+      "pa_pair_rate": 0.2806597653529559
+    }
+  },
+  "train": {
+    "feature_year": 2024,
+    "label_year": 2025,
+    "rows": 1298449,
+    "prevalence": 0.2768857305908819,
+    "validation_formularies": 75,
+    "validation_rows": 255908
+  },
+  "test": {
+    "feature_year": 2025,
+    "label_year": 2026,
+    "rows": 1121429,
+    "formularies": 331
+  },
+  "formulary_link_rate_test": 0.908032519223241,
+  "selected_model": "hist_gradient_boosting",
+  "selection": "Highest average precision on held-out training-year formularies; refit on full training year; test evaluated once",
+  "validation": {
+    "logistic_regression": {
+      "n": 255908,
+      "positives": 69229,
+      "prevalence": 0.2705230004532879,
+      "roc_auc": 0.9942298935538955,
+      "average_precision": 0.9870514479221817,
+      "brier_score": 0.022729304627108798
+    },
+    "hist_gradient_boosting": {
+      "n": 255908,
+      "positives": 69229,
+      "prevalence": 0.2705230004532879,
+      "roc_auc": 0.9966101315937064,
+      "average_precision": 0.9917852459902522,
+      "brier_score": 0.01817626609321968
+    }
+  },
+  "results": {
+    "model": {
+      "n": 1121429,
+      "positives": 314740,
+      "prevalence": 0.2806597653529559,
+      "roc_auc": 0.9948671959617145,
+      "average_precision": 0.9902807991552456,
+      "brier_score": 0.016631747582929516
+    },
+    "carry_forward_then_drug_rate": {
+      "n": 1121429,
+      "positives": 314740,
+      "prevalence": 0.2806597653529559,
+      "roc_auc": 0.9860890314919009,
+      "average_precision": 0.9685213316015034,
+      "brier_score": 0.016259808039854703
+    },
+    "drug_rate_only": {
+      "n": 1121429,
+      "positives": 314740,
+      "prevalence": 0.2806597653529559,
+      "roc_auc": 0.981774178963483,
+      "average_precision": 0.959721719610047,
+      "brier_score": 0.045835378450110514
+    },
+    "top_k_at_true_pa_count": {
+      "k": 314740,
+      "model": {
+        "flagged": 314740,
+        "true_pa": 302887,
+        "precision": 0.96234034441126,
+        "recall": 0.96234034441126
+      },
+      "carry_forward_then_drug_rate": {
+        "flagged": 314740,
+        "true_pa": 303565,
+        "precision": 0.9644945033996314,
+        "recall": 0.9644945033996314
+      },
+      "drug_rate_only": {
+        "flagged": 314740,
+        "true_pa": 276973,
+        "precision": 0.8800057190061639,
+        "recall": 0.8800057190061639
+      }
+    }
+  },
+  "segments": {
+    "pairs_listed_prior_year": {
+      "model": {
+        "n": 985605,
+        "positives": 268776,
+        "prevalence": 0.2727015386488502,
+        "roc_auc": 0.9955017758302039,
+        "average_precision": 0.9917072584350267,
+        "brier_score": 0.011347782192994392
+      },
+      "carry_forward_then_drug_rate": {
+        "n": 985605,
+        "positives": 268776,
+        "prevalence": 0.2727015386488502,
+        "roc_auc": 0.9852297457645341,
+        "average_precision": 0.9665482581417629,
+        "brier_score": 0.01092729846135115
+      },
+      "drug_rate_only": {
+        "n": 985605,
+        "positives": 268776,
+        "prevalence": 0.2727015386488502,
+        "roc_auc": 0.9822184698221019,
+        "average_precision": 0.9595199479868001,
+        "brier_score": 0.044578611461592386
+      }
+    },
+    "pairs_new_to_formulary": {
+      "model": {
+        "n": 135824,
+        "positives": 45964,
+        "prevalence": 0.33840852868417953,
+        "roc_auc": 0.9788713922863563,
+        "average_precision": 0.9641715830910464,
+        "brier_score": 0.05497477023096675
+      },
+      "carry_forward_then_drug_rate": {
+        "n": 135824,
+        "positives": 45964,
+        "prevalence": 0.33840852868417953,
+        "roc_auc": 0.9783663817896521,
+        "average_precision": 0.9596819469813722,
+        "brier_score": 0.054955090928894904
+      },
+      "drug_rate_only": {
+        "n": 135824,
+        "positives": 45964,
+        "prevalence": 0.33840852868417953,
+        "roc_auc": 0.9783663817896521,
+        "average_precision": 0.9596819469813722,
+        "brier_score": 0.054955090928894904
+      }
+    },
+    "drugs_new_to_part_d": {
+      "model": {
+        "n": 7912,
+        "positives": 3676,
+        "prevalence": 0.46461071789686553,
+        "roc_auc": 0.556290111649872,
+        "average_precision": 0.5093796469961605,
+        "brier_score": 0.2707282902154302
+      },
+      "carry_forward_then_drug_rate": {
+        "n": 7912,
+        "positives": 3676,
+        "prevalence": 0.46461071789686553,
+        "roc_auc": 0.5,
+        "average_precision": 0.46461071789686553,
+        "brier_score": 0.28347322543646786
+      },
+      "drug_rate_only": {
+        "n": 7912,
+        "positives": 3676,
+        "prevalence": 0.46461071789686553,
+        "roc_auc": 0.5,
+        "average_precision": 0.46461071789686553,
+        "brier_score": 0.28347322543646786
+      }
+    },
+    "prior_year_no_pa": {
+      "model": {
+        "n": 718543,
+        "positives": 6242,
+        "prevalence": 0.00868702360192779,
+        "roc_auc": 0.8399645178154821,
+        "average_precision": 0.03435072525729188,
+        "brier_score": 0.00962711297745627
+      },
+      "carry_forward_then_drug_rate": {
+        "n": 718543,
+        "positives": 6242,
+        "prevalence": 0.00868702360192779,
+        "roc_auc": 0.5,
+        "average_precision": 0.00868702360192779,
+        "brier_score": 0.00868702360192779
+      },
+      "drug_rate_only": {
+        "n": 718543,
+        "positives": 6242,
+        "prevalence": 0.00868702360192779,
+        "roc_auc": 0.8516061671446665,
+        "average_precision": 0.03991523525907598,
+        "brier_score": 0.02837516117150932
+      }
+    },
+    "prior_year_pa": {
+      "model": {
+        "n": 267062,
+        "positives": 262534,
+        "prevalence": 0.983045135586493,
+        "roc_auc": 0.8986071669438286,
+        "average_precision": 0.9979807522745269,
+        "brier_score": 0.015977324472092158
+      },
+      "carry_forward_then_drug_rate": {
+        "n": 267062,
+        "positives": 262534,
+        "prevalence": 0.983045135586493,
+        "roc_auc": 0.5,
+        "average_precision": 0.983045135586493,
+        "brier_score": 0.016954864413506975
+      },
+      "drug_rate_only": {
+        "n": 267062,
+        "positives": 262534,
+        "prevalence": 0.983045135586493,
+        "roc_auc": 0.9060939340624796,
+        "average_precision": 0.99810188745129,
+        "brier_score": 0.08817476434664213
+      }
+    }
+  },
+  "bootstrap": {
+    "pairs_new_to_formulary": {
+      "auc_diff_vs_carry_forward_ci95": [
+        -0.00034399507147272736,
+        0.001645235906373258
+      ],
+      "median": 0.0005206853674084022,
+      "replicates": 200
+    },
+    "prior_year_no_pa": {
+      "auc_diff_vs_carry_forward_ci95": [
+        0.328591515585307,
+        0.35533670183322524
+      ],
+      "median": 0.3401128956357193,
+      "replicates": 200
+    },
+    "all_pairs": {
+      "auc_diff_vs_carry_forward_ci95": [
+        0.007514399380302905,
+        0.010193181137426236
+      ],
+      "median": 0.00868758127559649,
+      "replicates": 200
+    }
+  },
+  "bootstrap_note": "200 formulary-cluster bootstrap replicates; sampling uncertainty for this year pair only",
+  "year_over_year_changes": {
+    "listed_both_years": 985605,
+    "pa_added": 6242,
+    "pa_removed": 4528,
+    "new_pairs": 135824,
+    "new_pairs_with_pa": 45964
+  },
+  "monitoring": {
+    "reference": "validation-formulary scores from the training year (CY2025 labels)",
+    "current": "CY2026 test scores",
+    "psi": 0.04107971632371618,
+    "threshold": 0.2,
+    "alert": false
+  },
+  "coefficients": null,
+  "features": [
+    "prev_pair_listed",
+    "prev_pair_pa",
+    "prev_pair_st",
+    "prev_pair_ql",
+    "prev_pair_tier",
+    "drug_listed_prev",
+    "drug_pa_rate_prev",
+    "drug_st_rate_prev",
+    "drug_ql_rate_prev",
+    "drug_breadth_prev",
+    "drug_mean_tier_prev",
+    "form_linked",
+    "form_pa_share_prev",
+    "form_size_prev",
+    "is_pdp",
+    "any_snp"
+  ],
+  "limitations": [
+    "Plan-design records only: no claims, rejections, member counts, or utilization.",
+    "PA at RXCUI level is the max over NDC rows; NDC-specific nuance is collapsed.",
+    "Formulary linkage uses continuing plan keys; unlinked formularies get no pair history.",
+    "One train year pair and one test year pair; not evidence of stability across other years."
+  ]
+}

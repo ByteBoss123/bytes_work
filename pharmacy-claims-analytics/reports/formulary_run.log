@@ -1,17 +1,127 @@
 Filesystem      Size  Used Avail Use% Mounted on
-/dev/root       145G   60G   86G  42% /
-02:04:13 downloading https://data.cms.gov/sites/default/files/2025-05/e015bae0-4b23-455d-8243-65aef830ab3c/SPUF_2024_20250430_2024Q3.zip
-Traceback (most recent call last):
-  File "<frozen runpy>", line 198, in _run_module_as_main
-  File "<frozen runpy>", line 88, in _run_code
-  File "/home/runner/work/bytes_work/bytes_work/pharmacy-claims-analytics/pbm/formulary.py", line 422, in <module>
-    run(a.out, a.raw, a.seed, a.boot)
-  File "/home/runner/work/bytes_work/bytes_work/pharmacy-claims-analytics/pbm/formulary.py", line 286, in run
-    form, plans, src = load_year(y, Path(raw))
-                       ^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/bytes_work/bytes_work/pharmacy-claims-analytics/pbm/formulary.py", line 143, in load_year
-    fpath = find(files, 'basic', 'formulary')
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/runner/work/bytes_work/bytes_work/pharmacy-claims-analytics/pbm/formulary.py", line 122, in find
-    raise ValueError(f'expected one file matching {keywords}, found {[p.name for p in hits]} among {[p.name for p in files]}')
-ValueError: expected one file matching ('basic', 'formulary'), found ['basic drugs formulary file  PPUF_2024Q3.txt', 'basic drugs formulary file sample PPUF_2024Q3.txt'] among ['basic drugs formulary file  PPUF_2024Q3.txt', 'basic drugs formulary file sample PPUF_2024Q3.txt', 'plan information  PPUF_2024Q3.txt', 'plan information sample PPUF_2024Q3.txt']
+/dev/root       145G   59G   87G  41% /
+02:06:05 downloading https://data.cms.gov/sites/default/files/2025-05/e015bae0-4b23-455d-8243-65aef830ab3c/SPUF_2024_20250430_2024Q3.zip
+02:06:21 2024 {'url': 'https://data.cms.gov/sites/default/files/2025-05/e015bae0-4b23-455d-8243-65aef830ab3c/SPUF_2024_20250430_2024Q3.zip', 'sha256': 'f06ff79c8fdb44501af4c023945949960fb5e43a419ffc1fc4845c86002ef69c', 'bytes': 2829748748, 'formulary_file': 'basic drugs formulary file  PPUF_2024Q3.txt', 'plan_file': 'plan information  PPUF_2024Q3.txt', 'formulary_rows': 1490827, 'plan_rows': 110664, 'pairs': 1490827, 'formularies': 421, 'rxcuis': 6522, 'pa_pair_rate': 0.2664339993842344}
+02:06:21 downloading https://data.cms.gov/sites/default/files/2025-10/6b0620f5-9259-4f1f-929c-70feb8857887/SPUF_2025_20251009.zip
+02:07:08 2025 {'url': 'https://data.cms.gov/sites/default/files/2025-10/6b0620f5-9259-4f1f-929c-70feb8857887/SPUF_2025_20251009.zip', 'sha256': '614fbfc94d18d5f4f6e2d5a5a0354dd6992363c30c445cb9234ae14c7f9b800a', 'bytes': 2609317649, 'formulary_file': 'basic drugs formulary file  PPUF_2025Q3.txt', 'plan_file': 'plan information  PPUF_2025Q3.txt', 'formulary_rows': 1298449, 'plan_rows': 115379, 'pairs': 1298449, 'formularies': 378, 'rxcuis': 6092, 'pa_pair_rate': 0.2768857305908819}
+02:07:08 downloading https://data.cms.gov/sites/default/files/2026-01/5942aa7e-a0c4-4e65-bd56-32608c33649f/SPUF_2026_20260107.zip
+02:08:12 2026 {'url': 'https://data.cms.gov/sites/default/files/2026-01/5942aa7e-a0c4-4e65-bd56-32608c33649f/SPUF_2026_20260107.zip', 'sha256': '9d8d60ca09e4a72ca8329a75228cfb36613131053af4dd67b667087d80837088', 'bytes': 2489777249, 'formulary_file': 'basic drugs formulary file  PPUF_2025Q4.txt', 'plan_file': 'plan information  PPUF_2025Q4.txt', 'formulary_rows': 1121429, 'plan_rows': 112733, 'pairs': 1121429, 'formularies': 331, 'rxcuis': 5994, 'pa_pair_rate': 0.2806597653529559}
+02:08:16 train (1298449, 21) test (1121429, 21)
+02:08:20 validation logistic_regression {'n': 255908, 'positives': 69229, 'prevalence': 0.2705230004532879, 'roc_auc': 0.9942298935538955, 'average_precision': 0.9870514479221817, 'brier_score': 0.022729304627108798}
+02:08:41 validation hist_gradient_boosting {'n': 255908, 'positives': 69229, 'prevalence': 0.2705230004532879, 'roc_auc': 0.9966101315937064, 'average_precision': 0.9917852459902522, 'brier_score': 0.01817626609321968}
+02:10:41 {
+ "selected": "hist_gradient_boosting",
+ "results": {
+  "model": {
+   "n": 1121429,
+   "positives": 314740,
+   "prevalence": 0.2806597653529559,
+   "roc_auc": 0.9948671959617145,
+   "average_precision": 0.9902807991552456,
+   "brier_score": 0.016631747582929516
+  },
+  "carry_forward_then_drug_rate": {
+   "n": 1121429,
+   "positives": 314740,
+   "prevalence": 0.2806597653529559,
+   "roc_auc": 0.9860890314919009,
+   "average_precision": 0.9685213316015034,
+   "brier_score": 0.016259808039854703
+  },
+  "drug_rate_only": {
+   "n": 1121429,
+   "positives": 314740,
+   "prevalence": 0.2806597653529559,
+   "roc_auc": 0.981774178963483,
+   "average_precision": 0.959721719610047,
+   "brier_score": 0.045835378450110514
+  },
+  "top_k_at_true_pa_count": {
+   "k": 314740,
+   "model": {
+    "flagged": 314740,
+    "true_pa": 302887,
+    "precision": 0.96234034441126,
+    "recall": 0.96234034441126
+   },
+   "carry_forward_then_drug_rate": {
+    "flagged": 314740,
+    "true_pa": 303565,
+    "precision": 0.9644945033996314,
+    "recall": 0.9644945033996314
+   },
+   "drug_rate_only": {
+    "flagged": 314740,
+    "true_pa": 276973,
+    "precision": 0.8800057190061639,
+    "recall": 0.8800057190061639
+   }
+  }
+ },
+ "segments_new": {
+  "model": {
+   "n": 135824,
+   "positives": 45964,
+   "prevalence": 0.33840852868417953,
+   "roc_auc": 0.9788713922863563,
+   "average_precision": 0.9641715830910464,
+   "brier_score": 0.05497477023096675
+  },
+  "carry_forward_then_drug_rate": {
+   "n": 135824,
+   "positives": 45964,
+   "prevalence": 0.33840852868417953,
+   "roc_auc": 0.9783663817896521,
+   "average_precision": 0.9596819469813722,
+   "brier_score": 0.054955090928894904
+  },
+  "drug_rate_only": {
+   "n": 135824,
+   "positives": 45964,
+   "prevalence": 0.33840852868417953,
+   "roc_auc": 0.9783663817896521,
+   "average_precision": 0.9596819469813722,
+   "brier_score": 0.054955090928894904
+  }
+ },
+ "bootstrap": {
+  "pairs_new_to_formulary": {
+   "auc_diff_vs_carry_forward_ci95": [
+    -0.00034399507147272736,
+    0.001645235906373258
+   ],
+   "median": 0.0005206853674084022,
+   "replicates": 200
+  },
+  "prior_year_no_pa": {
+   "auc_diff_vs_carry_forward_ci95": [
+    0.328591515585307,
+    0.35533670183322524
+   ],
+   "median": 0.3401128956357193,
+   "replicates": 200
+  },
+  "all_pairs": {
+   "auc_diff_vs_carry_forward_ci95": [
+    0.007514399380302905,
+    0.010193181137426236
+   ],
+   "median": 0.00868758127559649,
+   "replicates": 200
+  }
+ },
+ "changes": {
+  "listed_both_years": 985605,
+  "pa_added": 6242,
+  "pa_removed": 4528,
+  "new_pairs": 135824,
+  "new_pairs_with_pa": 45964
+ },
+ "monitoring": {
+  "reference": "validation-formulary scores from the training year (CY2025 labels)",
+  "current": "CY2026 test scores",
+  "psi": 0.04107971632371618,
+  "threshold": 0.2,
+  "alert": false
+ }
+}
