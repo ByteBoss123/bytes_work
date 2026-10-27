@@ -12,7 +12,7 @@ permissions:
   contents: write
 concurrency:
   group: drug-rag
-  cancel-in-progress: false
+  cancel-in-progress: true
 env:
   MODEL_REPO: bartowski/Qwen2.5-7B-Instruct-GGUF
   MODEL_FILE: Qwen2.5-7B-Instruct-Q4_K_M.gguf

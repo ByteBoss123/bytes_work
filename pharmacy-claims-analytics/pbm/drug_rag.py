@@ -180,13 +180,13 @@ def chunks_for(label):
         for i in range(0, max(1, len(words) - OVERLAP), step):
             body = ' '.join(words[i:i + CHUNK_WORDS])
             if body:
-                out.append({'doc': 'label:' + label['generic'], 'section': key,
+                out.append({'doc': 'label:' + label['generic'], 'drug': label['generic'], 'section': key,
                             'text': f"{label['brand']} ({label['generic']}) prescribing information, {title}: {body}"})
     return out
 
 
 def coverage_doc(generic, brand, c):
-    return {'doc': 'coverage:' + generic, 'section': 'coverage',
+    return {'doc': 'coverage:' + generic, 'drug': generic, 'section': 'coverage',
             'text': (f"Medicare Part D contract year 2026 formulary coverage for {generic} ({brand}): listed on "
                      f"{c['listing']} of {c['formularies']} formularies. Among formularies that list it, prior "
                      f"authorization is required on {c['pa_pct']:.1f}%, step therapy on {c['st_pct']:.1f}% and "
@@ -245,10 +245,13 @@ class BM25:
 
 
 class Retriever:
-    """BM25, dense (injected embedding function), and reciprocal-rank-fusion hybrid."""
+    """BM25, dense (injected embedding function), reciprocal-rank-fusion hybrid, and a hybrid
+    restricted to the drugs named in the question (entity filter on brand or generic name)."""
 
-    def __init__(self, corpus, embed=None):
+    def __init__(self, corpus, embed=None, names=None):
         self.corpus = corpus
+        # names: {lowercase brand or generic name: generic}; longest names matched first
+        self.names = sorted((names or {}).items(), key=lambda kv: -len(kv[0]))
         self.bm25 = BM25([c['text'] for c in corpus])
         self.embed = embed
         self.emb = embed([c['text'] for c in corpus], query=False) if embed else None
@@ -265,7 +268,23 @@ class Retriever:
                 rrf[i] = rrf.get(i, 0) + 1 / (60 + r + 1)
         return sorted(rrf, key=lambda i: (-rrf[i], i))
 
+    def drugs_in(self, q):
+        t, found = q.lower(), set()
+        for name, generic in self.names:
+            if re.search(r'(?<![a-z0-9])' + re.escape(name) + r'(?![a-z0-9])', t):
+                found.add(generic)
+        return found
+
     def top(self, q, method, k=TOP_K):
+        if method == 'hybrid_drug_filter':
+            drugs = self.drugs_in(q)
+            ranked = self.rank(q, 'hybrid')
+            if drugs:  # no recognised drug name -> fall back to unfiltered hybrid
+                ranked = [i for i in ranked if self.corpus[i].get('drug') in drugs]
+                if len(ranked) < k:  # RRF lists cover only the top 50 of each ranker
+                    rest = [i for i in range(len(self.corpus)) if self.corpus[i].get('drug') in drugs and i not in set(ranked)]
+                    ranked += rest
+            return [self.corpus[i] for i in ranked[:k]]
         return [self.corpus[i] for i in self.rank(q, method)[:k]]
 
 
@@ -374,6 +393,19 @@ def drug_bootstrap(drugs, a, b, reps=2000, seed=0):
     return {'point': float(b.mean() - a.mean()), 'ci95': [float(np.quantile(d, .025)), float(np.quantile(d, .975))]}
 
 
+def boxed_ablation(rows):
+    if not rows:
+        return None
+    no = [r for r in rows if not r['gold']]
+    out = {'questions': len(rows), 'drugs_without_boxed_warning': len(no)}
+    for m in ('filtered', 'unfiltered'):
+        out[m] = {'accuracy': float(np.mean([r[f'{m}_ok'] for r in rows])),
+                  'false_yes_on_no_boxed_drugs': int(sum(r[f'{m}_said_yes'] for r in no))}
+    out['filtered_minus_unfiltered'] = drug_bootstrap([r['drug'] for r in rows], [r['unfiltered_ok'] for r in rows],
+                                                      [r['filtered_ok'] for r in rows])
+    return out
+
+
 def summarize(qs, ok, preds=None):
     out = {}
     for t in ['route', 'boxed', 'pa_share', 'ALL']:
@@ -406,24 +438,39 @@ def run(out, spend_csv, n_drugs=80, raw_dir=None, model_path=None, labels_cache=
 
     if embed is None:
         embed = st_embedder()
-    ret = Retriever(corpus, embed)
+    names = {}
+    for l in labels:
+        names[l['generic'].lower()] = l['generic']
+        names[l['brand'].lower()] = l['generic']
+    ret = Retriever(corpus, embed, names)
     retrieval = {}
-    for method in ['bm25', 'dense', 'hybrid']:
+    for method in ['bm25', 'dense', 'hybrid', 'hybrid_drug_filter']:
         hits = [any(c['doc'] == q['doc'] for c in ret.top(q['question'], method)) for q in qs]
         retrieval[method] = summarize(qs, hits)
     boxed_q = [q for q in qs if q['type'] == 'boxed' and q['gold']]
-    retrieval['boxed_section_hit_hybrid'] = float(np.mean(
-        [any(c['doc'] == q['doc'] and c['section'] == 'boxed_warning' for c in ret.top(q['question'], 'hybrid')) for q in boxed_q])) if boxed_q else None
+    for method in ['hybrid', 'hybrid_drug_filter']:
+        retrieval[f'boxed_section_hit_{method}'] = float(np.mean(
+            [any(c['doc'] == q['doc'] and c['section'] == 'boxed_warning' for c in ret.top(q['question'], method)) for q in boxed_q])) if boxed_q else None
+    no_box = [q for q in qs if q['type'] == 'boxed' and not q['gold']]
+    for method in ['hybrid', 'hybrid_drug_filter']:
+        retrieval[f'other_drug_boxed_passage_in_top5_{method}'] = float(np.mean(
+            [any(c['section'] == 'boxed_warning' and c['doc'] != q['doc'] for c in ret.top(q['question'], method)) for q in no_box])) if no_box else None
     log('retrieval', json.dumps(retrieval))
 
     if qa is None:
         qa = LlamaQA(model_path)
-    rows, closed_ok, rag_ok, closed_p, rag_p, cite = [], [], [], [], [], []
+    rows, closed_ok, rag_ok, closed_p, rag_p, cite, ablation = [], [], [], [], [], [], []
     t0 = time.time()
     for i, q in enumerate(qs):
         cp, craw = qa(messages(q['question']))
-        ctx = ret.top(q['question'], 'hybrid')
+        ctx = ret.top(q['question'], 'hybrid_drug_filter')
         rp, rraw = qa(messages(q['question'], ctx))
+        if q['type'] == 'boxed':  # ablation: same question with unfiltered hybrid retrieval
+            up, _ = qa(messages(q['question'], ret.top(q['question'], 'hybrid')))
+            ablation.append({'gold': q['gold'], 'drug': q['drug'], 'filtered_ok': correct(q, rp), 'unfiltered_ok': correct(q, up),
+                             'filtered_said_yes': parse_yes_no((rp or {}).get('answer', '')) is True,
+                             'unfiltered_said_yes': parse_yes_no((up or {}).get('answer', '')) is True,
+                             'unfiltered_answer': up})
         closed_p.append(cp)
         rag_p.append(rp)
         closed_ok.append(correct(q, cp))
@@ -454,7 +501,8 @@ def run(out, spend_csv, n_drugs=80, raw_dir=None, model_path=None, labels_cache=
                  'section_words_cap': SECTION_WORDS, 'chunk_words': CHUNK_WORDS, 'overlap': OVERLAP},
         'gold_answers': 'route = openFDA route metadata; boxed = presence of a boxed-warning section; pa_share = formulary-file share (+/-0.5 points)',
         'retrieval_hit_at_5': retrieval,
-        'answer_accuracy': {'closed_book': summarize(qs, closed_ok, closed_p), 'rag_hybrid': summarize(qs, rag_ok, rag_p)},
+        'answer_accuracy': {'closed_book': summarize(qs, closed_ok, closed_p), 'rag_hybrid_drug_filter': summarize(qs, rag_ok, rag_p)},
+        'boxed_warning_ablation': boxed_ablation(ablation),
         'rag_minus_closed_book': {t: drug_bootstrap([d for d, q in zip(drugs, qs) if t == 'ALL' or q['type'] == t],
                                                     [o for o, q in zip(closed_ok, qs) if t == 'ALL' or q['type'] == t],
                                                     [o for o, q in zip(rag_ok, qs) if t == 'ALL' or q['type'] == t], reps=boot)
@@ -462,7 +510,8 @@ def run(out, spend_csv, n_drugs=80, raw_dir=None, model_path=None, labels_cache=
         'citations': citation,
         'base_rates': {'boxed_true_share': float(np.mean([q['gold'] for q in qs if q['type'] == 'boxed'])) if any(q['type'] == 'boxed' for q in qs) else None},
         'generator': {'model_file': Path(model_path).name if model_path else 'injected',
-                      'decoding': 'temperature 0, JSON-schema constrained', 'top_k': TOP_K},
+                      'decoding': 'temperature 0, JSON-schema constrained', 'top_k': TOP_K,
+                      'rag_retrieval': 'hybrid (BM25 + bge-small, RRF) restricted to drugs named in the question; unfiltered hybrid if none'},
         'limitations': ['Question templates are simple; they test retrieval and grounding, not clinical reasoning.',
                         'Boxed-warning "no" must be inferred from the absence of a boxed-warning passage.',
                         'Label sections are capped at 600 words each, so late details can be missing.',
