@@ -8,3 +8,4 @@
 - **Dashboard:** rendered in headless Chromium on GitHub Actions in desktop, dark and phone views, with no console errors or overflow (`dashboard_screenshot.json`).
 - **Not done:** GCP deploy kit never executed.
 - **CMS spending and MIMIC analyses:** unchanged; see `cms_analysis.json` and `mimic_workflow.json`.
+- **Clinical-notes extraction:** GitHub Actions run 40448264497 (6 logic tests passed; LLM run on all 1,081 test sentences). Formulary link recomputed in run 40454539321 after fixing the RxNav query encoding.

@@ -63,6 +63,25 @@ The loopback integration test ([`reports/service_validation.json`](reports/servi
 
 **Dashboard:** `/dashboard` on the service (screenshots: [desktop](reports/dashboard_desktop.png), [dark](reports/dashboard_dark.png), [phone](reports/dashboard_mobile.png), rendered in headless Chromium by [`dashboard-screenshot.yml`](../.github/workflows/dashboard-screenshot.yml)).
 
+## Medication extraction from real clinical notes
+
+[`pbm/notes_extraction.py`](pbm/notes_extraction.py), run by [`notes-extraction.yml`](../.github/workflows/notes-extraction.yml). Data: the [OHSU Glaucoma Medication Dataset](https://github.com/jche253/Glaucoma_Med_Dataset) (Chen et al., TVST 2022; BSD-3-Clause, commit `15e67ea`): 480 de-identified ophthalmology visit notes from Casey Eye Institute with clinician sentence-level labels. Results: [`reports/notes_extraction.json`](reports/notes_extraction.json); every test prediction is in [`reports/notes_test_predictions.jsonl`](reports/notes_test_predictions.jsonl).
+
+- **Split:** cut at a note boundary. Train 4,411 sentences; test 1,081 sentences from 74 held-out notes. 19 test sentences whose gold drug, frequency or route was masked by de-identification are excluded, and 9 unparseable annotation lines are dropped.
+- **Baseline:** drug, frequency and route lexicons learned from the training notes only, keeping strings that were labeled at least half the times they appeared.
+- **LLM:** Qwen2.5-7B-Instruct (Q4_K_M GGUF, Apache-2.0) on a 4-core CPU runner, 7 few-shot training examples, temperature 0, JSON-schema-constrained output. Each returned string is mapped back onto the sentence; strings not found in it count as errors.
+
+| Strict span F1 (held-out notes) | Lexicon baseline | LLM | Difference (95% CI, note bootstrap) |
+|---|---:|---:|---:|
+| Drug (338 gold) | **0.953** | 0.930 | −0.023 (−0.046 to −0.001) |
+| Frequency (286) | **0.963** | 0.960 | −0.003 (−0.024 to +0.017) |
+| Route (278) | 0.711 | **0.909** | **+0.198** (+0.134 to +0.255) |
+| All | 0.875 | **0.933** | **+0.058** (+0.033 to +0.080) |
+
+The JSON output format itself caps F1 at 0.977 (gold labels pushed through the same mapping). The LLM's gain is almost entirely in routes: the lexicon tags every "OS"/"OU" in exam findings, while the LLM separates medication routes from exam text. On drugs the LLM is slightly worse; its false positives include "drops" and "POAG", which is the glaucoma diagnosis, not a drug. 6.1% of the strings it returned (60 of 980) did not appear in the sentence. It produced no invalid JSON and averaged 3.4 s per sentence (p95 6.4 s).
+
+**Link to Part D rules.** The 25 most-mentioned drug terms were mapped to RxNorm (NLM RxNav) and joined to the real CY2026 formulary file. 14 matched products listed on 224–331 of 331 formularies. Among formularies listing them: brinzolamide (Azopt) has step therapy on 27%, Rhopressa on 13% and latanoprost on 10%; Restasis has quantity limits on 72%. The 11 unmatched terms are mostly over-the-counter artificial-tear abbreviations that Part D does not cover. Caveats: a brand name's RxNorm products include its generic equivalents, and the join is not route-specific (prednisolone's 45% PA rate reflects oral products).
+
 ## Real healthcare-data analyses
 
 - [MIMIC-IV medication workflow](MIMIC_WORKFLOW.md): 18,087 prescription-component rows from 100 de-identified patients; join validation and timestamp/documentation quality checks.
