@@ -41,7 +41,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898315+github-actions[bot]@users.noreply.github.com"
           git add -f reports/formulary_run.log reports/formulary_tests.log
-          for f in pa_metrics.json monitoring_reference.json reference_pairs.json pa_rate_by_prior_tier.csv manifest.json; do
+          for f in model.joblib pa_metrics.json monitoring_reference.json reference_pairs.json pa_rate_by_prior_tier.csv manifest.json; do
             [ -f "reports/$f" ] && git add -f "reports/$f"
           done
           git commit -m "CI: real CMS formulary PA pipeline outputs (run ${GITHUB_RUN_ID}, ${{ job.status }})" || echo "nothing to commit"

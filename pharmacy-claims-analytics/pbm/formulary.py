@@ -117,7 +117,9 @@ def extract(zpath, dest):
 
 
 def find(files, *keywords):
-    hits = [p for p in files if all(k in p.name.lower().replace('_', ' ') for k in keywords)]
+    # Archives also ship small '... sample ...' extracts; use the full files only.
+    hits = [p for p in files if all(k in p.name.lower().replace('_', ' ') for k in keywords)
+            and 'sample' not in p.name.lower()]
     if len(hits) != 1:
         raise ValueError(f'expected one file matching {keywords}, found {[p.name for p in hits]} among {[p.name for p in files]}')
     return hits[0]
