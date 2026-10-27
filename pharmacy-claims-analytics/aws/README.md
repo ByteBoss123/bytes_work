@@ -2,7 +2,9 @@
 
 `deploy_aws.py` runs the scoring service as a **container-image AWS Lambda function** (us-east-1) behind an **IAM-authenticated Function URL**. The service's own alert transitions feed **CloudWatch alarms**, and an optional **EventBridge Scheduler canary** sends one request per minute.
 
-**Status:** the real-data PA model has **not yet been deployed**. An earlier deployment of these scripts served the removed synthetic-claims model; its evidence was deleted with that model. Redeploy, then commit `reports/aws_lambda_validation.json` before describing this deployment anywhere.
+**Status (Oct 27, 2026):** deployed. Image `pa-f21ee17` (digest `sha256:2624016d…`) serves the CI-trained model `529e5e44…`. The 150-request validation replayed real formulary rows: every status was as expected, both service alerts raised and cleared, and the drift and failure-rate CloudWatch alarms went OK → ALARM 48 s and 73 s after the service raised them, each executing its SNS action. Evidence: [`../reports/aws_lambda_validation.json`](../reports/aws_lambda_validation.json).
+
+The separate `pbm-claims-durable-monitor` function and its `pbm-claims-canary` schedule (created Oct 24 in another session, not in this repo) sent synthetic-claims payloads, so the schedule is **paused**. Its `pbm-durable-*` alarms are idle.
 
 ## Architecture
 

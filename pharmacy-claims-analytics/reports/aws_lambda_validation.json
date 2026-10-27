@@ -1,0 +1,97 @@
+{
+  "test": "AWS Lambda deployment validation of the real-data prior-authorization model, replaying real CMS formulary feature rows (Lambda Invoke, Function URL payload v2.0)",
+  "scope": "Test traffic sent by the author, replaying public CMS plan-design rows. Not real users or production workload.",
+  "deployment": {
+    "account_region": "us-east-1",
+    "function": "pbm-claims-scoring",
+    "package": "container image (ECR) + AWS Lambda Web Adapter 0.8.4",
+    "image": "331604528033.dkr.ecr.us-east-1.amazonaws.com/pbm-claims-scoring:pa-f21ee17",
+    "image_digest": "sha256:2624016df71301fc58705280aaca67ef883e445dd1a6974705ba6c0fc29f09d2",
+    "built_by": "CodeBuild project pbm-claims-build from GitHub commit f21ee17 (no overlay files)",
+    "function_url_auth": "AWS_IAM",
+    "model_sha256": "529e5e4494f725ee4603952a87600ae289dfa5fb2b1707bf15c1251398033a71",
+    "model_matches_committed_run": true,
+    "validation_payload": "s3://pbm-claims-scoring-331604528033/validation/reference_pairs.json (sha256 a62dbcc276525acb21d640a672b47a447ce0a55525c3f16b186b346eaed5b892)"
+  },
+  "run": {
+    "started_utc": "2026-10-27T04:52:27.303103+00:00",
+    "finished_utc": "2026-10-27T04:55:15.253450+00:00",
+    "note": "Split across 3 scripted calls because the tool runner caps each script at 100 AWS calls; the service's own counter shows one continuous execution environment (0 -> 150).",
+    "requests": 150,
+    "http_200": 140,
+    "http_400_invalid_payload": 10,
+    "http_5xx": 0,
+    "phases": "20 normal -> 10 invalid -> 20 shift (real pairs that required PA last year, values unaltered) -> 100 normal recovery",
+    "invoke_round_trip_ms": {
+      "p50": 283.4,
+      "p95": 488.3,
+      "p99": 537.1,
+      "note": "Client-side Invoke round trip via the AWS API tool, includes API overhead; server processing p95 was 9.0-9.8 ms (service /monitoring)."
+    },
+    "checks": {
+      "normal_no_drift_alert": true,
+      "failure_rate_alert_fired": true,
+      "drift_alert_fired": true,
+      "alerts_cleared": true,
+      "history_snapshots": 150,
+      "dashboard_http_200": true
+    },
+    "service_monitoring": {
+      "after_normal": {
+        "score_psi": 0.0639,
+        "request_failure_rate": 0.0
+      },
+      "after_invalid": {
+        "request_failure_rate": 0.3333
+      },
+      "after_shift": {
+        "score_psi": 6.2398,
+        "request_failure_rate": 0.2
+      },
+      "after_recovery": {
+        "score_psi": 0.0639,
+        "request_failure_rate": 0.0,
+        "latency_p95_ms": 9.76
+      }
+    },
+    "service_alert_transitions_utc": [
+      {
+        "name": "request_failure_rate",
+        "active": true,
+        "value": 0.0909,
+        "at": "2026-10-27T04:52:35.469676+00:00"
+      },
+      {
+        "name": "score_drift",
+        "active": true,
+        "value": 0.2258,
+        "at": "2026-10-27T04:52:40.021493+00:00"
+      },
+      {
+        "name": "score_drift",
+        "active": false,
+        "value": 0.1921,
+        "at": "2026-10-27T04:54:32.604685+00:00"
+      },
+      {
+        "name": "request_failure_rate",
+        "active": false,
+        "value": 0.05,
+        "at": "2026-10-27T04:55:05.449789+00:00"
+      }
+    ]
+  },
+  "cloudwatch": {
+    "pbm-scoring-score_drift": {
+      "OK->ALARM": "2026-10-27T04:53:28.312Z",
+      "seconds_after_service_raised": 48
+    },
+    "pbm-scoring-request_failure_rate": {
+      "OK->ALARM": "2026-10-27T04:53:48.572Z",
+      "seconds_after_service_raised": 73
+    }
+  },
+  "other_changes": [
+    "Paused EventBridge schedule pbm-claims-canary (target pbm-claims-durable-monitor, created 2026-10-24) because it sent synthetic-claims payloads that the real-data model rejects."
+  ]
+}

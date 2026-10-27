@@ -59,7 +59,9 @@ Unit: formulary × RXCUI (PA = any NDC under the RXCUI flagged). Formularies get
 
 The loopback integration test ([`reports/service_validation.json`](reports/service_validation.json)) sends 145 HTTP requests replaying real 2026 feature rows. A shift phase replays only pairs that required PA last year (real rows, unaltered values), which raised the drift alert; invalid payloads raised the failure-rate alert; both cleared on recovery.
 
-**AWS:** [`aws/`](aws/README.md) deploys the service as a container on Lambda with CloudWatch alarms. The earlier deployment served the removed synthetic model, so its evidence was deleted; the real-data model has **not yet been redeployed**.
+**AWS (deployed Oct 27, 2026):** the service runs as a container image on AWS Lambda behind an IAM-authenticated Function URL, built by CodeBuild from commit `f21ee17` with the CI-trained model (fingerprint `529e5e44…`). A 150-request validation replaying real 2026 formulary rows returned every expected status (140 × 200, 10 × 400, 0 × 5xx). The drift and failure-rate alerts raised and cleared, and both CloudWatch alarms fired and sent their SNS notifications 48 s and 73 s after the service raised them. Evidence: [`reports/aws_lambda_validation.json`](reports/aws_lambda_validation.json).
+
+**Dashboard:** `/dashboard` on the service (screenshots: [desktop](reports/dashboard_desktop.png), [dark](reports/dashboard_dark.png), [phone](reports/dashboard_mobile.png), rendered in headless Chromium by [`dashboard-screenshot.yml`](../.github/workflows/dashboard-screenshot.yml)).
 
 ## Real healthcare-data analyses
 
