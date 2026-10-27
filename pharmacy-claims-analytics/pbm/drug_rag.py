@@ -18,6 +18,7 @@ retrieval hit rate, answer accuracy, abstention, citation precision, and a drug-
 """
 from pathlib import Path
 import argparse
+import difflib
 import hashlib
 import json
 import math
@@ -213,6 +214,33 @@ def build(labels, cov):
     return corpus, questions
 
 
+def misspell(name):
+    """Deterministic typo: swap the 3rd and 4th letters of the first word (e.g. Eliquis -> Elqiuis)."""
+    w = name.split()
+    if len(w[0]) < 5:
+        return None
+    x = w[0]
+    w[0] = x[:2] + x[3] + x[2] + x[4:]
+    return ' '.join(w) if ' '.join(w).lower() != name.lower() else None
+
+
+def variants(labels, qs):
+    """Robustness set built from the same real gold answers: misspelled brand, and generic name
+    in place of brand, for every route and boxed-warning question."""
+    by = {l['generic']: l for l in labels}
+    out = []
+    for q in qs:
+        if q['type'] not in ('route', 'boxed'):
+            continue
+        brand = by[q['drug']]['brand']
+        typo = misspell(brand)
+        if typo:
+            out.append({**q, 'variant': 'misspelled_brand', 'question': q['question'].replace(brand, typo)})
+        if brand.lower() != q['drug']:
+            out.append({**q, 'variant': 'generic_name', 'question': q['question'].replace(brand, q['drug'])})
+    return out
+
+
 # ---------------------------------------------------------------- retrieval
 
 def tokens(s):
@@ -269,21 +297,58 @@ class Retriever:
         return sorted(rrf, key=lambda i: (-rrf[i], i))
 
     def drugs_in(self, q):
+        """Drugs named in the question: exact brand/generic match, then fuzzy match for misspellings."""
         t, found = q.lower(), set()
         for name, generic in self.names:
             if re.search(r'(?<![a-z0-9])' + re.escape(name) + r'(?![a-z0-9])', t):
                 found.add(generic)
-        return found
+        if found:
+            return found, 'exact'
+        words = tokens(q)
+        grams = {' '.join(words[i:i + n]) for n in (1, 2, 3) for i in range(len(words) - n + 1)}
+        best = {}
+        for g in grams:
+            if len(g) < 5:
+                continue
+            for name, generic in self.names:
+                if abs(len(name) - len(g)) > 2:
+                    continue
+                r = difflib.SequenceMatcher(None, g, name).ratio()
+                if r >= 0.85 and r > best.get(generic, 0):
+                    best[generic] = r
+        if best:
+            top = max(best.values())
+            return {d for d, r in best.items() if r == top}, 'fuzzy'
+        return set(), 'none'
+
+    def infer_drug(self, q, depth=10, share=0.5):
+        """No name recognised: if one drug dominates the top hybrid results, restrict to it."""
+        ranked = self.rank(q, 'hybrid')[:depth]
+        w = {}
+        for r, i in enumerate(ranked):
+            d = self.corpus[i].get('drug')
+            w[d] = w.get(d, 0) + 1 / (r + 1)
+        if not w:
+            return set()
+        d, v = max(w.items(), key=lambda kv: kv[1])
+        return {d} if v / sum(w.values()) >= share else set()
+
+    def resolve(self, q):
+        drugs, how = self.drugs_in(q)
+        if not drugs:
+            drugs = self.infer_drug(q)
+            how = 'inferred' if drugs else 'unfiltered'
+        return drugs, how
 
     def top(self, q, method, k=TOP_K):
         if method == 'hybrid_drug_filter':
-            drugs = self.drugs_in(q)
+            drugs, _ = self.resolve(q)
             ranked = self.rank(q, 'hybrid')
-            if drugs:  # no recognised drug name -> fall back to unfiltered hybrid
+            if drugs:
                 ranked = [i for i in ranked if self.corpus[i].get('drug') in drugs]
                 if len(ranked) < k:  # RRF lists cover only the top 50 of each ranker
-                    rest = [i for i in range(len(self.corpus)) if self.corpus[i].get('drug') in drugs and i not in set(ranked)]
-                    ranked += rest
+                    seen = set(ranked)
+                    ranked += [i for i in range(len(self.corpus)) if self.corpus[i].get('drug') in drugs and i not in seen]
             return [self.corpus[i] for i in ranked[:k]]
         return [self.corpus[i] for i in self.rank(q, method)[:k]]
 
@@ -455,7 +520,24 @@ def run(out, spend_csv, n_drugs=80, raw_dir=None, model_path=None, labels_cache=
     for method in ['hybrid', 'hybrid_drug_filter']:
         retrieval[f'other_drug_boxed_passage_in_top5_{method}'] = float(np.mean(
             [any(c['section'] == 'boxed_warning' and c['doc'] != q['doc'] for c in ret.top(q['question'], method)) for q in no_box])) if no_box else None
+    var = variants(labels, qs)
+    robustness = {'questions': len(var), 'construction': 'misspelled brand (3rd/4th letters swapped) and generic name in place of brand'}
+    for v in ('misspelled_brand', 'generic_name'):
+        vq = [q for q in var if q['variant'] == v]
+        if not vq:
+            continue
+        row = {'n': len(vq), 'resolution': {}}
+        for q in vq:
+            how = ret.resolve(q['question'])[1]
+            row['resolution'][how] = row['resolution'].get(how, 0) + 1
+        for method in ('hybrid', 'hybrid_drug_filter'):
+            row[f'hit_at_5_{method}'] = float(np.mean([any(c['doc'] == q['doc'] for c in ret.top(q['question'], method)) for q in vq]))
+            nb = [q for q in vq if q['type'] == 'boxed' and not q['gold']]
+            row[f'other_drug_boxed_in_top5_{method}'] = float(np.mean(
+                [any(c['section'] == 'boxed_warning' and c['doc'] != q['doc'] for c in ret.top(q['question'], method)) for q in nb])) if nb else None
+        robustness[v] = row
     log('retrieval', json.dumps(retrieval))
+    log('robustness', json.dumps(robustness))
 
     if qa is None:
         qa = LlamaQA(model_path)
@@ -485,6 +567,16 @@ def run(out, spend_csv, n_drugs=80, raw_dir=None, model_path=None, labels_cache=
         if i % 20 == 0:
             log('qa', i, len(qs), f'{(time.time() - t0) / (i + 1):.1f}s/question (both modes)')
 
+    typo_boxed = [q for q in var if q['variant'] == 'misspelled_brand' and q['type'] == 'boxed']
+    tb = []
+    for q in typo_boxed:
+        fp, _ = qa(messages(q['question'], ret.top(q['question'], 'hybrid_drug_filter')))
+        up, _ = qa(messages(q['question'], ret.top(q['question'], 'hybrid')))
+        tb.append({'gold': q['gold'], 'drug': q['drug'], 'filtered_ok': correct(q, fp), 'unfiltered_ok': correct(q, up),
+                   'filtered_said_yes': parse_yes_no((fp or {}).get('answer', '')) is True,
+                   'unfiltered_said_yes': parse_yes_no((up or {}).get('answer', '')) is True, 'unfiltered_answer': up})
+    robustness['misspelled_boxed_answers'] = boxed_ablation(tb)
+    log('robustness answers', json.dumps(robustness['misspelled_boxed_answers']))
     answered = [c for c, p in zip(cite, rag_p) if p and not p.get('abstain')]
     citation = {'rag_answers': len(answered),
                 'with_valid_citation': int(sum(1 for c in answered if c['cited'])),
@@ -503,6 +595,7 @@ def run(out, spend_csv, n_drugs=80, raw_dir=None, model_path=None, labels_cache=
         'retrieval_hit_at_5': retrieval,
         'answer_accuracy': {'closed_book': summarize(qs, closed_ok, closed_p), 'rag_hybrid_drug_filter': summarize(qs, rag_ok, rag_p)},
         'boxed_warning_ablation': boxed_ablation(ablation),
+        'robustness': robustness,
         'rag_minus_closed_book': {t: drug_bootstrap([d for d, q in zip(drugs, qs) if t == 'ALL' or q['type'] == t],
                                                     [o for o, q in zip(closed_ok, qs) if t == 'ALL' or q['type'] == t],
                                                     [o for o, q in zip(rag_ok, qs) if t == 'ALL' or q['type'] == t], reps=boot)
@@ -511,11 +604,12 @@ def run(out, spend_csv, n_drugs=80, raw_dir=None, model_path=None, labels_cache=
         'base_rates': {'boxed_true_share': float(np.mean([q['gold'] for q in qs if q['type'] == 'boxed'])) if any(q['type'] == 'boxed' for q in qs) else None},
         'generator': {'model_file': Path(model_path).name if model_path else 'injected',
                       'decoding': 'temperature 0, JSON-schema constrained', 'top_k': TOP_K,
-                      'rag_retrieval': 'hybrid (BM25 + bge-small, RRF) restricted to drugs named in the question; unfiltered hybrid if none'},
+                      'rag_retrieval': 'hybrid (BM25 + bge-small, RRF) restricted to drugs named in the question (exact, then fuzzy >= 0.85), else to a drug that dominates the top-10 hybrid results (>= 50% of rank weight), else unfiltered'},
         'limitations': ['Question templates are simple; they test retrieval and grounding, not clinical reasoning.',
                         'Boxed-warning "no" must be inferred from the absence of a boxed-warning passage.',
                         'Label sections are capped at 600 words each, so late details can be missing.',
-                        'Coverage shares are computed from formulary rules, not claims or utilization.'],
+                        'Coverage shares are computed from formulary rules, not claims or utilization.',
+                        'The drug filter relies on the question naming or strongly implying one drug; misspellings are synthetic (letter swap).'],
     }
     (out / 'drug_rag.json').write_text(json.dumps(result, indent=2, default=float))
     with open(out / 'drug_rag_predictions.jsonl', 'w') as f:

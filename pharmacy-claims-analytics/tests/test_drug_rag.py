@@ -86,15 +86,41 @@ class DrugFilter(unittest.TestCase):
         names = {k: l['generic'] for l in LABELS for k in (l['generic'], l['brand'].lower())}
         ret = R.Retriever(corpus, hash_embed, names)
         q = 'Does the Xalatan prescribing information carry a boxed warning?'
-        self.assertEqual(ret.drugs_in(q), {'latanoprost'})
+        self.assertEqual(ret.drugs_in(q), ({'latanoprost'}, 'exact'))
         self.assertTrue(any(c['section'] == 'boxed_warning' for c in ret.top(q, 'hybrid')))
         got = ret.top(q, 'hybrid_drug_filter')
         self.assertTrue(got and all(c['drug'] == 'latanoprost' for c in got))
 
-    def test_no_name_falls_back(self):
+    def test_misspelling_and_variants(self):
+        corpus, qs = R.build(LABELS, COV)
+        names = {k: l['generic'] for l in LABELS for k in (l['generic'], l['brand'].lower())}
+        ret = R.Retriever(corpus, hash_embed, names)
+        self.assertEqual(R.misspell('Eliquis'), 'Elqiuis')
+        self.assertEqual(ret.drugs_in('Does the Elqiuis label carry a boxed warning?'), ({'apixaban'}, 'fuzzy'))
+        got = ret.top('Does the Xaltaan prescribing information carry a boxed warning?', 'hybrid_drug_filter')
+        self.assertTrue(all(c['drug'] == 'latanoprost' for c in got))
+        v = R.variants(LABELS, qs)
+        self.assertEqual({x['variant'] for x in v}, {'misspelled_brand', 'generic_name'})
+        self.assertTrue(all(x['gold'] == next(q['gold'] for q in qs if q['type'] == x['type'] and q['drug'] == x['drug']) for x in v))
+
+    def test_inferred_drug_without_name(self):
+        corpus, _ = R.build(LABELS, COV)
+        ret = R.Retriever(corpus, hash_embed, {})
+        drugs, how = ret.resolve('one drop in the affected eye in the evening')
+        self.assertEqual((drugs, how), ({'latanoprost'}, 'inferred'))
+
+    def test_no_name_never_errors(self):
         corpus, _ = R.build(LABELS, COV)
         ret = R.Retriever(corpus, hash_embed, {'eliquis': 'apixaban'})
-        self.assertEqual(len(ret.top('which drug is taken once weekly?', 'hybrid_drug_filter')), R.TOP_K)
+        q = 'which drug is taken once weekly?'
+        drugs, how = ret.resolve(q)
+        got = ret.top(q, 'hybrid_drug_filter')
+        self.assertIn(how, ('inferred', 'unfiltered'))
+        self.assertTrue(1 <= len(got) <= R.TOP_K)
+        if how == 'unfiltered':
+            self.assertEqual(len(got), R.TOP_K)
+        else:
+            self.assertTrue(all(c['drug'] in drugs for c in got))
 
 
 class EndToEnd(unittest.TestCase):
@@ -105,10 +131,11 @@ class EndToEnd(unittest.TestCase):
                 return {'answer': 'I am not sure.', 'citations': [], 'abstain': True}, 'raw'
             first = user.split('[', 2)[1].split(']')[0]
             q = user.split('Question: ')[1]
+            ctx = user.split('Question: ')[0]
             if 'route' in q:
-                a = 'Orally.' if 'Eliquis' in q else 'Subcutaneously.' if 'Ozempic' in q else 'Into the eye.'
+                a = 'Orally.' if 'Eliquis' in ctx[:200] else 'Subcutaneously.' if 'Ozempic' in ctx[:200] else 'Into the eye.'
             elif 'boxed' in q:
-                a = 'No.' if 'Xalatan' in q else 'Yes.'
+                a = 'Yes.' if 'Boxed warning:' in ctx else 'No.'
             else:
                 a = '87.3%' if 'semaglutide' in q else '0%'
             return {'answer': a, 'citations': [first, 'C9999'], 'abstain': False}, 'raw'
@@ -118,8 +145,10 @@ class EndToEnd(unittest.TestCase):
             r = R.run(t, p, labels=LABELS, cov=COV, qa=qa, embed=hash_embed, boot=50)
             self.assertEqual(r['answer_accuracy']['rag_hybrid_drug_filter']['ALL']['accuracy'], 1.0)
             self.assertEqual(r['boxed_warning_ablation']['questions'], 3)
+            self.assertGreater(r['robustness']['questions'], 0)
             self.assertEqual(r['answer_accuracy']['closed_book']['ALL']['abstained'], 8)
             self.assertEqual(r['citations']['answers_citing_unknown_ids'], 8)
+            self.assertEqual(r['robustness']['misspelled_boxed_answers']['filtered']['false_yes_on_no_boxed_drugs'], 0)
             rows = [json.loads(l) for l in (Path(t) / 'drug_rag_predictions.jsonl').read_text().splitlines()]
             self.assertEqual(len(rows), 8)
 
