@@ -1,0 +1,188 @@
+4
+llama-cpp-python 0.3.36
+model bartowski/Qwen2.5-7B-Instruct-GGUF/Qwen2.5-7B-Instruct-Q4_K_M.gguf
+04:12:31 rows 5511 unparseable 9 train 4411 test 1081 masked test excluded 19
+04:12:32 baseline {"gold": 902, "predicted": 935, "tp": 804, "precision": 0.8598930481283422, "recall": 0.8913525498891353, "f1": 0.8753402286336418, "lenient_recall": 0.8980044345898004}
+04:13:04 llm 0 1081 29.61s/sentence
+04:18:58 llm 100 1081 3.80s/sentence
+04:25:20 llm 200 1081 3.81s/sentence
+04:30:53 llm 300 1081 3.65s/sentence
+04:35:54 llm 400 1081 3.49s/sentence
+04:41:01 llm 500 1081 3.41s/sentence
+04:46:29 llm 600 1081 3.39s/sentence
+04:51:38 llm 700 1081 3.34s/sentence
+04:57:10 llm 800 1081 3.34s/sentence
+05:02:48 llm 900 1081 3.35s/sentence
+05:09:02 llm 1000 1081 3.39s/sentence
+05:13:39 downloading https://data.cms.gov/sites/default/files/2026-01/5942aa7e-a0c4-4e65-bd56-32608c33649f/SPUF_2026_20260107.zip
+05:14:21 link latanoprost exact_or_normalized {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:14:28 link timolol exact_or_normalized {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:14:35 link brimonidine exact_or_normalized {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:14:42 link cosopt exact_or_normalized {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:14:49 link dorzolamide exact_or_normalized {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:14:56 link prednisolone exact_or_normalized {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:15:03 link lumigan exact_or_normalized {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:15:11 link ats approximate {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:15:18 link dorzolamide/timolol exact_or_normalized {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:15:25 link travatan exact_or_normalized {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:15:32 link restasis exact_or_normalized {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:15:39 link azopt exact_or_normalized {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:15:46 link pred approximate {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:15:54 link at's approximate {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:16:01 link combigan exact_or_normalized {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:16:08 link pfats approximate {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:16:15 link alphagan exact_or_normalized {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:16:23 link at approximate {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:16:30 link systane approximate {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:16:37 link artificial tears approximate {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:16:44 link rhopressa exact_or_normalized {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:16:52 link refresh approximate {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:16:59 link travatan z approximate {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:17:07 link lubrication approximate {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:17:07 link pfat unmapped {'formularies_listing': 0, 'share_of_formularies': 0.0, 'pa_share': None, 'step_therapy_share': None, 'quantity_limit_share': None}
+05:17:07 {
+ "lexicon_baseline": {
+  "DRUG": {
+   "gold": 338,
+   "predicted": 323,
+   "tp": 315,
+   "precision": 0.9752321981424149,
+   "recall": 0.9319526627218935,
+   "f1": 0.9531013615733738,
+   "lenient_recall": 0.9497041420118343
+  },
+  "FREQUENCY": {
+   "gold": 286,
+   "predicted": 277,
+   "tp": 271,
+   "precision": 0.9783393501805054,
+   "recall": 0.9475524475524476,
+   "f1": 0.9626998223801067,
+   "lenient_recall": 0.9475524475524476
+  },
+  "ROUTE": {
+   "gold": 278,
+   "predicted": 335,
+   "tp": 218,
+   "precision": 0.6507462686567164,
+   "recall": 0.7841726618705036,
+   "f1": 0.7112561174551387,
+   "lenient_recall": 0.7841726618705036
+  },
+  "ALL": {
+   "gold": 902,
+   "predicted": 935,
+   "tp": 804,
+   "precision": 0.8598930481283422,
+   "recall": 0.8913525498891353,
+   "f1": 0.8753402286336418,
+   "lenient_recall": 0.8980044345898004
+  }
+ },
+ "json_format_ceiling": {
+  "DRUG": {
+   "gold": 338,
+   "predicted": 338,
+   "tp": 337,
+   "precision": 0.9970414201183432,
+   "recall": 0.9970414201183432,
+   "f1": 0.9970414201183432,
+   "lenient_recall": 0.9970414201183432
+  },
+  "FREQUENCY": {
+   "gold": 286,
+   "predicted": 280,
+   "tp": 280,
+   "precision": 1.0,
+   "recall": 0.9790209790209791,
+   "f1": 0.989399293286219,
+   "lenient_recall": 0.9790209790209791
+  },
+  "ROUTE": {
+   "gold": 278,
+   "predicted": 267,
+   "tp": 256,
+   "precision": 0.9588014981273408,
+   "recall": 0.920863309352518,
+   "f1": 0.9394495412844037,
+   "lenient_recall": 0.920863309352518
+  },
+  "ALL": {
+   "gold": 902,
+   "predicted": 885,
+   "tp": 873,
+   "precision": 0.9864406779661017,
+   "recall": 0.967849223946785,
+   "f1": 0.9770565193060996,
+   "lenient_recall": 0.967849223946785
+  }
+ },
+ "llm": {
+  "DRUG": {
+   "gold": 338,
+   "predicted": 350,
+   "tp": 320,
+   "precision": 0.9142857142857143,
+   "recall": 0.9467455621301775,
+   "f1": 0.9302325581395349,
+   "lenient_recall": 0.9615384615384616
+  },
+  "FREQUENCY": {
+   "gold": 286,
+   "predicted": 289,
+   "tp": 276,
+   "precision": 0.9550173010380623,
+   "recall": 0.965034965034965,
+   "f1": 0.96,
+   "lenient_recall": 0.972027972027972
+  },
+  "ROUTE": {
+   "gold": 278,
+   "predicted": 281,
+   "tp": 254,
+   "precision": 0.9039145907473309,
+   "recall": 0.9136690647482014,
+   "f1": 0.9087656529516993,
+   "lenient_recall": 0.9136690647482014
+  },
+  "ALL": {
+   "gold": 902,
+   "predicted": 920,
+   "tp": 850,
+   "precision": 0.9239130434782609,
+   "recall": 0.9423503325942351,
+   "f1": 0.9330406147091109,
+   "lenient_recall": 0.950110864745011
+  }
+ },
+ "llm_minus_baseline_f1": {
+  "DRUG": {
+   "point": -0.02286880343383879,
+   "ci95": [
+    -0.04554253625337625,
+    -0.0007127031098604407
+   ]
+  },
+  "FREQUENCY": {
+   "point": -0.0026998223801065757,
+   "ci95": [
+    -0.023516492841625845,
+    0.017040443190222944
+   ]
+  },
+  "ROUTE": {
+   "point": 0.1975095354965608,
+   "ci95": [
+    0.13424832654244329,
+    0.2550099341416874
+   ]
+  },
+  "ALL": {
+   "point": 0.05770038607546901,
+   "ci95": [
+    0.03343351394302955,
+    0.07966754714211859
+   ]
+  }
+ }
+}

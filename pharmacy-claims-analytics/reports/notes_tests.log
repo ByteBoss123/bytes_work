@@ -1,0 +1,11 @@
+test_gold_json_round_trip (tests.test_notes_extraction.Extraction.test_gold_json_round_trip) ... ok
+test_lexicon_learns_from_train_and_filters_ambiguous (tests.test_notes_extraction.Extraction.test_lexicon_learns_from_train_and_filters_ambiguous) ... ok
+test_llm_strings_mapped_and_hallucinations_counted (tests.test_notes_extraction.Extraction.test_llm_strings_mapped_and_hallucinations_counted) ... ok
+test_score_strict_and_lenient (tests.test_notes_extraction.Extraction.test_score_strict_and_lenient) ... ok
+test_masked_ids_restored_and_spans_trimmed (tests.test_notes_extraction.Loading.test_masked_ids_restored_and_spans_trimmed) ... ok
+test_split_cuts_at_note_start (tests.test_notes_extraction.Loading.test_split_cuts_at_note_start) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.001s
+
+OK

@@ -1,0 +1,972 @@
+{
+  "data": {
+    "source": "https://github.com/jche253/Glaucoma_Med_Dataset",
+    "commit": "15e67ea86ed0678425ec0948032f3fe9f77f30db",
+    "license": "BSD-3-Clause",
+    "description": "480 de-identified ophthalmology visit notes (OHSU Casey Eye Institute, 2019-2020) with clinician sentence-level medication labels",
+    "annotation_sha256": "040e5361f1466999eea1cadd339e29d6d2aa78bb46fab3a67d777e9b2aec2744",
+    "sentences_parsed": 5511,
+    "lines_unparseable": 9,
+    "gold_entities_all": {
+      "DRUG": 2005,
+      "FREQUENCY": 1578,
+      "ROUTE": 1574
+    }
+  },
+  "split": {
+    "cut_index": 4411,
+    "note_starts": 340,
+    "train_sentences": 4411,
+    "test_sentences": 1100,
+    "test_sentences_masked_excluded": 19,
+    "test_sentences_evaluated": 1081,
+    "test_notes": 74,
+    "rule": "cut at first note start after 80% of sentences"
+  },
+  "evaluated_types": [
+    "DRUG",
+    "FREQUENCY",
+    "ROUTE"
+  ],
+  "lexicon": {
+    "DRUG": {
+      "candidates": 167,
+      "kept": 153
+    },
+    "FREQUENCY": {
+      "candidates": 95,
+      "kept": 79
+    },
+    "ROUTE": {
+      "candidates": 17,
+      "kept": 10
+    }
+  },
+  "results": {
+    "lexicon_baseline": {
+      "DRUG": {
+        "gold": 338,
+        "predicted": 323,
+        "tp": 315,
+        "precision": 0.9752321981424149,
+        "recall": 0.9319526627218935,
+        "f1": 0.9531013615733738,
+        "lenient_recall": 0.9497041420118343
+      },
+      "FREQUENCY": {
+        "gold": 286,
+        "predicted": 277,
+        "tp": 271,
+        "precision": 0.9783393501805054,
+        "recall": 0.9475524475524476,
+        "f1": 0.9626998223801067,
+        "lenient_recall": 0.9475524475524476
+      },
+      "ROUTE": {
+        "gold": 278,
+        "predicted": 335,
+        "tp": 218,
+        "precision": 0.6507462686567164,
+        "recall": 0.7841726618705036,
+        "f1": 0.7112561174551387,
+        "lenient_recall": 0.7841726618705036
+      },
+      "ALL": {
+        "gold": 902,
+        "predicted": 935,
+        "tp": 804,
+        "precision": 0.8598930481283422,
+        "recall": 0.8913525498891353,
+        "f1": 0.8753402286336418,
+        "lenient_recall": 0.8980044345898004
+      }
+    },
+    "json_format_ceiling": {
+      "DRUG": {
+        "gold": 338,
+        "predicted": 338,
+        "tp": 337,
+        "precision": 0.9970414201183432,
+        "recall": 0.9970414201183432,
+        "f1": 0.9970414201183432,
+        "lenient_recall": 0.9970414201183432
+      },
+      "FREQUENCY": {
+        "gold": 286,
+        "predicted": 280,
+        "tp": 280,
+        "precision": 1.0,
+        "recall": 0.9790209790209791,
+        "f1": 0.989399293286219,
+        "lenient_recall": 0.9790209790209791
+      },
+      "ROUTE": {
+        "gold": 278,
+        "predicted": 267,
+        "tp": 256,
+        "precision": 0.9588014981273408,
+        "recall": 0.920863309352518,
+        "f1": 0.9394495412844037,
+        "lenient_recall": 0.920863309352518
+      },
+      "ALL": {
+        "gold": 902,
+        "predicted": 885,
+        "tp": 873,
+        "precision": 0.9864406779661017,
+        "recall": 0.967849223946785,
+        "f1": 0.9770565193060996,
+        "lenient_recall": 0.967849223946785
+      }
+    },
+    "llm": {
+      "DRUG": {
+        "gold": 338,
+        "predicted": 350,
+        "tp": 320,
+        "precision": 0.9142857142857143,
+        "recall": 0.9467455621301775,
+        "f1": 0.9302325581395349,
+        "lenient_recall": 0.9615384615384616
+      },
+      "FREQUENCY": {
+        "gold": 286,
+        "predicted": 289,
+        "tp": 276,
+        "precision": 0.9550173010380623,
+        "recall": 0.965034965034965,
+        "f1": 0.96,
+        "lenient_recall": 0.972027972027972
+      },
+      "ROUTE": {
+        "gold": 278,
+        "predicted": 281,
+        "tp": 254,
+        "precision": 0.9039145907473309,
+        "recall": 0.9136690647482014,
+        "f1": 0.9087656529516993,
+        "lenient_recall": 0.9136690647482014
+      },
+      "ALL": {
+        "gold": 902,
+        "predicted": 920,
+        "tp": 850,
+        "precision": 0.9239130434782609,
+        "recall": 0.9423503325942351,
+        "f1": 0.9330406147091109,
+        "lenient_recall": 0.950110864745011
+      }
+    },
+    "llm_minus_baseline_f1": {
+      "DRUG": {
+        "point": -0.02286880343383879,
+        "ci95": [
+          -0.04554253625337625,
+          -0.0007127031098604407
+        ]
+      },
+      "FREQUENCY": {
+        "point": -0.0026998223801065757,
+        "ci95": [
+          -0.023516492841625845,
+          0.017040443190222944
+        ]
+      },
+      "ROUTE": {
+        "point": 0.1975095354965608,
+        "ci95": [
+          0.13424832654244329,
+          0.2550099341416874
+        ]
+      },
+      "ALL": {
+        "point": 0.05770038607546901,
+        "ci95": [
+          0.03343351394302955,
+          0.07966754714211859
+        ]
+      }
+    }
+  },
+  "llm": {
+    "model_file": "Qwen2.5-7B-Instruct-Q4_K_M.gguf",
+    "model_sha256": "65b8fcd92af6b4fefa935c625d1ac27ea29dcb6ee14589c55a8f115ceaaa1423",
+    "few_shot_examples": 7,
+    "decoding": "temperature 0, JSON-schema constrained",
+    "invalid_json": 0,
+    "strings_returned": 980,
+    "strings_not_in_sentence": 60,
+    "not_in_sentence_rate": 0.061224489795918366,
+    "seconds_per_sentence_mean": 3.3860421215161933,
+    "seconds_per_sentence_p95": 6.369838120000168
+  },
+  "bootstrap_note": "1000 note-level bootstrap replicates of the F1 difference",
+  "top_errors": {
+    "DRUG": {
+      "baseline": {
+        "false_positives": [
+          [
+            "systane",
+            1
+          ],
+          [
+            "betoptic s",
+            1
+          ],
+          [
+            "simbrinza",
+            1
+          ],
+          [
+            "timoptic",
+            1
+          ],
+          [
+            "avastin",
+            1
+          ],
+          [
+            "artificial tear",
+            1
+          ],
+          [
+            "pf at",
+            1
+          ],
+          [
+            "soothe",
+            1
+          ]
+        ],
+        "false_negatives": [
+          [
+            "patched",
+            2
+          ],
+          [
+            "at",
+            2
+          ],
+          [
+            "refresh",
+            2
+          ],
+          [
+            "systane gel",
+            1
+          ],
+          [
+            "betoptic",
+            1
+          ],
+          [
+            "travoprost",
+            1
+          ],
+          [
+            "pf timoptic",
+            1
+          ],
+          [
+            "gabapentin",
+            1
+          ],
+          [
+            "preservative artificial tear",
+            1
+          ],
+          [
+            "pf/regular at",
+            1
+          ]
+        ]
+      },
+      "llm": {
+        "false_positives": [
+          [
+            "at",
+            2
+          ],
+          [
+            "drops",
+            2
+          ],
+          [
+            "ntg",
+            2
+          ],
+          [
+            "poag",
+            2
+          ],
+          [
+            "iop drops",
+            1
+          ],
+          [
+            "betoptic s",
+            1
+          ],
+          [
+            "flomax",
+            1
+          ],
+          [
+            "simbrinza",
+            1
+          ],
+          [
+            "patch/shield",
+            1
+          ],
+          [
+            "timoptic",
+            1
+          ]
+        ],
+        "false_negatives": [
+          [
+            "pred",
+            2
+          ],
+          [
+            "patched",
+            2
+          ],
+          [
+            "at's",
+            2
+          ],
+          [
+            "at",
+            2
+          ],
+          [
+            "pfat",
+            1
+          ],
+          [
+            "betoptic",
+            1
+          ],
+          [
+            "pf timoptic",
+            1
+          ],
+          [
+            "lid hygiene",
+            1
+          ],
+          [
+            "pf at's",
+            1
+          ],
+          [
+            "timolol",
+            1
+          ]
+        ]
+      }
+    },
+    "FREQUENCY": {
+      "baseline": {
+        "false_positives": [
+          [
+            "prn",
+            1
+          ],
+          [
+            "at bedtime",
+            1
+          ],
+          [
+            "once a day",
+            1
+          ],
+          [
+            "bid",
+            1
+          ],
+          [
+            "tid",
+            1
+          ],
+          [
+            "qid",
+            1
+          ]
+        ],
+        "false_negatives": [
+          [
+            "daily",
+            8
+          ],
+          [
+            "2x",
+            2
+          ],
+          [
+            "3 x a day",
+            1
+          ],
+          [
+            "in the morning",
+            1
+          ],
+          [
+            "every morning",
+            1
+          ],
+          [
+            "q30 minutes",
+            1
+          ],
+          [
+            "at night",
+            1
+          ]
+        ]
+      },
+      "llm": {
+        "false_positives": [
+          [
+            "y",
+            1
+          ],
+          [
+            "one **** into both eyes every morning",
+            1
+          ],
+          [
+            "today",
+            1
+          ],
+          [
+            "po bid",
+            1
+          ],
+          [
+            "last night",
+            1
+          ],
+          [
+            "around 12pm",
+            1
+          ],
+          [
+            "around 6am",
+            1
+          ],
+          [
+            "off",
+            1
+          ],
+          [
+            "bid",
+            1
+          ],
+          [
+            "tid",
+            1
+          ]
+        ],
+        "false_negatives": [
+          [
+            "6x daily",
+            2
+          ],
+          [
+            "bid",
+            2
+          ],
+          [
+            "3 x a day",
+            1
+          ],
+          [
+            "every morning",
+            1
+          ],
+          [
+            "once daily",
+            1
+          ],
+          [
+            "prn",
+            1
+          ],
+          [
+            "qhs",
+            1
+          ],
+          [
+            "q am",
+            1
+          ]
+        ]
+      }
+    },
+    "ROUTE": {
+      "baseline": {
+        "false_positives": [
+          [
+            "os",
+            54
+          ],
+          [
+            "ou",
+            37
+          ],
+          [
+            "both eyes",
+            24
+          ],
+          [
+            "oral",
+            1
+          ],
+          [
+            "fbs",
+            1
+          ]
+        ],
+        "false_negatives": [
+          [
+            "od",
+            55
+          ],
+          [
+            "left eye",
+            3
+          ],
+          [
+            "right eye",
+            2
+          ]
+        ]
+      },
+      "llm": {
+        "false_positives": [
+          [
+            "os",
+            13
+          ],
+          [
+            "ou",
+            7
+          ],
+          [
+            "po",
+            3
+          ],
+          [
+            "both eyes",
+            1
+          ],
+          [
+            "instill",
+            1
+          ],
+          [
+            "tears",
+            1
+          ],
+          [
+            "os>od",
+            1
+          ]
+        ],
+        "false_negatives": [
+          [
+            "os",
+            12
+          ],
+          [
+            "oral",
+            3
+          ],
+          [
+            "od",
+            3
+          ],
+          [
+            "right eye",
+            2
+          ],
+          [
+            "both eyes",
+            2
+          ],
+          [
+            "po",
+            1
+          ],
+          [
+            "ou",
+            1
+          ]
+        ]
+      }
+    }
+  },
+  "formulary_link": [
+    {
+      "note_term": "latanoprost",
+      "mentions": 471,
+      "rxnorm_match": "exact_or_normalized",
+      "rxnorm_ids": [
+        "43611"
+      ],
+      "product_rxcuis": 0,
+      "formularies_listing": 0,
+      "share_of_formularies": 0.0,
+      "pa_share": null,
+      "step_therapy_share": null,
+      "quantity_limit_share": null
+    },
+    {
+      "note_term": "timolol",
+      "mentions": 204,
+      "rxnorm_match": "exact_or_normalized",
+      "rxnorm_ids": [
+        "10600"
+      ],
+      "product_rxcuis": 0,
+      "formularies_listing": 0,
+      "share_of_formularies": 0.0,
+      "pa_share": null,
+      "step_therapy_share": null,
+      "quantity_limit_share": null
+    },
+    {
+      "note_term": "brimonidine",
+      "mentions": 148,
+      "rxnorm_match": "exact_or_normalized",
+      "rxnorm_ids": [
+        "134615"
+      ],
+      "product_rxcuis": 0,
+      "formularies_listing": 0,
+      "share_of_formularies": 0.0,
+      "pa_share": null,
+      "step_therapy_share": null,
+      "quantity_limit_share": null
+    },
+    {
+      "note_term": "cosopt",
+      "mentions": 138,
+      "rxnorm_match": "exact_or_normalized",
+      "rxnorm_ids": [
+        "216253"
+      ],
+      "product_rxcuis": 0,
+      "formularies_listing": 0,
+      "share_of_formularies": 0.0,
+      "pa_share": null,
+      "step_therapy_share": null,
+      "quantity_limit_share": null
+    },
+    {
+      "note_term": "dorzolamide",
+      "mentions": 86,
+      "rxnorm_match": "exact_or_normalized",
+      "rxnorm_ids": [
+        "60207"
+      ],
+      "product_rxcuis": 0,
+      "formularies_listing": 0,
+      "share_of_formularies": 0.0,
+      "pa_share": null,
+      "step_therapy_share": null,
+      "quantity_limit_share": null
+    },
+    {
+      "note_term": "prednisolone",
+      "mentions": 56,
+      "rxnorm_match": "exact_or_normalized",
+      "rxnorm_ids": [
+        "8638"
+      ],
+      "product_rxcuis": 0,
+      "formularies_listing": 0,
+      "share_of_formularies": 0.0,
+      "pa_share": null,
+      "step_therapy_share": null,
+      "quantity_limit_share": null
+    },
+    {
+      "note_term": "lumigan",
+      "mentions": 41,
+      "rxnorm_match": "exact_or_normalized",
+      "rxnorm_ids": [
+        "284771"
+      ],
+      "product_rxcuis": 0,
+      "formularies_listing": 0,
+      "share_of_formularies": 0.0,
+      "pa_share": null,
+      "step_therapy_share": null,
+      "quantity_limit_share": null
+    },
+    {
+      "note_term": "ats",
+      "mentions": 34,
+      "rxnorm_match": "approximate",
+      "rxnorm_ids": [
+        "151386"
+      ],
+      "product_rxcuis": 0,
+      "formularies_listing": 0,
+      "share_of_formularies": 0.0,
+      "pa_share": null,
+      "step_therapy_share": null,
+      "quantity_limit_share": null
+    },
+    {
+      "note_term": "dorzolamide/timolol",
+      "mentions": 32,
+      "rxnorm_match": "exact_or_normalized",
+      "rxnorm_ids": [
+        "662263"
+      ],
+      "product_rxcuis": 0,
+      "formularies_listing": 0,
+      "share_of_formularies": 0.0,
+      "pa_share": null,
+      "step_therapy_share": null,
+      "quantity_limit_share": null
+    },
+    {
+      "note_term": "travatan",
+      "mentions": 29,
+      "rxnorm_match": "exact_or_normalized",
+      "rxnorm_ids": [
+        "284896"
+      ],
+      "product_rxcuis": 0,
+      "formularies_listing": 0,
+      "share_of_formularies": 0.0,
+      "pa_share": null,
+      "step_therapy_share": null,
+      "quantity_limit_share": null
+    },
+    {
+      "note_term": "restasis",
+      "mentions": 28,
+      "rxnorm_match": "exact_or_normalized",
+      "rxnorm_ids": [
+        "352951"
+      ],
+      "product_rxcuis": 0,
+      "formularies_listing": 0,
+      "share_of_formularies": 0.0,
+      "pa_share": null,
+      "step_therapy_share": null,
+      "quantity_limit_share": null
+    },
+    {
+      "note_term": "azopt",
+      "mentions": 28,
+      "rxnorm_match": "exact_or_normalized",
+      "rxnorm_ids": [
+        "194882"
+      ],
+      "product_rxcuis": 0,
+      "formularies_listing": 0,
+      "share_of_formularies": 0.0,
+      "pa_share": null,
+      "step_therapy_share": null,
+      "quantity_limit_share": null
+    },
+    {
+      "note_term": "pred",
+      "mentions": 27,
+      "rxnorm_match": "approximate",
+      "rxnorm_ids": [
+        "224927"
+      ],
+      "product_rxcuis": 0,
+      "formularies_listing": 0,
+      "share_of_formularies": 0.0,
+      "pa_share": null,
+      "step_therapy_share": null,
+      "quantity_limit_share": null
+    },
+    {
+      "note_term": "at's",
+      "mentions": 26,
+      "rxnorm_match": "approximate",
+      "rxnorm_ids": [
+        "151386"
+      ],
+      "product_rxcuis": 0,
+      "formularies_listing": 0,
+      "share_of_formularies": 0.0,
+      "pa_share": null,
+      "step_therapy_share": null,
+      "quantity_limit_share": null
+    },
+    {
+      "note_term": "combigan",
+      "mentions": 24,
+      "rxnorm_match": "exact_or_normalized",
+      "rxnorm_ids": [
+        "746962"
+      ],
+      "product_rxcuis": 0,
+      "formularies_listing": 0,
+      "share_of_formularies": 0.0,
+      "pa_share": null,
+      "step_therapy_share": null,
+      "quantity_limit_share": null
+    },
+    {
+      "note_term": "pfats",
+      "mentions": 23,
+      "rxnorm_match": "approximate",
+      "rxnorm_ids": [
+        "4293"
+      ],
+      "product_rxcuis": 0,
+      "formularies_listing": 0,
+      "share_of_formularies": 0.0,
+      "pa_share": null,
+      "step_therapy_share": null,
+      "quantity_limit_share": null
+    },
+    {
+      "note_term": "alphagan",
+      "mentions": 23,
+      "rxnorm_match": "exact_or_normalized",
+      "rxnorm_ids": [
+        "153358"
+      ],
+      "product_rxcuis": 0,
+      "formularies_listing": 0,
+      "share_of_formularies": 0.0,
+      "pa_share": null,
+      "step_therapy_share": null,
+      "quantity_limit_share": null
+    },
+    {
+      "note_term": "at",
+      "mentions": 18,
+      "rxnorm_match": "approximate",
+      "rxnorm_ids": [
+        "151386"
+      ],
+      "product_rxcuis": 0,
+      "formularies_listing": 0,
+      "share_of_formularies": 0.0,
+      "pa_share": null,
+      "step_therapy_share": null,
+      "quantity_limit_share": null
+    },
+    {
+      "note_term": "systane",
+      "mentions": 17,
+      "rxnorm_match": "approximate",
+      "rxnorm_ids": [
+        "2599288"
+      ],
+      "product_rxcuis": 0,
+      "formularies_listing": 0,
+      "share_of_formularies": 0.0,
+      "pa_share": null,
+      "step_therapy_share": null,
+      "quantity_limit_share": null
+    },
+    {
+      "note_term": "artificial tears",
+      "mentions": 16,
+      "rxnorm_match": "approximate",
+      "rxnorm_ids": [
+        "1609231"
+      ],
+      "product_rxcuis": 0,
+      "formularies_listing": 0,
+      "share_of_formularies": 0.0,
+      "pa_share": null,
+      "step_therapy_share": null,
+      "quantity_limit_share": null
+    },
+    {
+      "note_term": "rhopressa",
+      "mentions": 16,
+      "rxnorm_match": "exact_or_normalized",
+      "rxnorm_ids": [
+        "1992869"
+      ],
+      "product_rxcuis": 0,
+      "formularies_listing": 0,
+      "share_of_formularies": 0.0,
+      "pa_share": null,
+      "step_therapy_share": null,
+      "quantity_limit_share": null
+    },
+    {
+      "note_term": "refresh",
+      "mentions": 15,
+      "rxnorm_match": "approximate",
+      "rxnorm_ids": [
+        "219599"
+      ],
+      "product_rxcuis": 0,
+      "formularies_listing": 0,
+      "share_of_formularies": 0.0,
+      "pa_share": null,
+      "step_therapy_share": null,
+      "quantity_limit_share": null
+    },
+    {
+      "note_term": "travatan z",
+      "mentions": 14,
+      "rxnorm_match": "approximate",
+      "rxnorm_ids": [
+        "669680"
+      ],
+      "product_rxcuis": 0,
+      "formularies_listing": 0,
+      "share_of_formularies": 0.0,
+      "pa_share": null,
+      "step_therapy_share": null,
+      "quantity_limit_share": null
+    },
+    {
+      "note_term": "lubrication",
+      "mentions": 14,
+      "rxnorm_match": "approximate",
+      "rxnorm_ids": [
+        "82039"
+      ],
+      "product_rxcuis": 0,
+      "formularies_listing": 0,
+      "share_of_formularies": 0.0,
+      "pa_share": null,
+      "step_therapy_share": null,
+      "quantity_limit_share": null
+    },
+    {
+      "note_term": "pfat",
+      "mentions": 13,
+      "rxnorm_match": "unmapped",
+      "rxnorm_ids": [],
+      "product_rxcuis": 0,
+      "formularies_listing": 0,
+      "share_of_formularies": 0.0,
+      "pa_share": null,
+      "step_therapy_share": null,
+      "quantity_limit_share": null
+    }
+  ],
+  "formulary_link_meta": {
+    "formularies_2026": 331,
+    "source_sha256": "9d8d60ca09e4a72ca8329a75228cfb36613131053af4dd67b667087d80837088"
+  },
+  "limitations": [
+    "Ophthalmology notes from one institution; not representative of all clinical text.",
+    "Gold labels cover ophthalmic medications; extracting other drugs counts as a false positive.",
+    "Some gold labels are inconsistent (e.g. qhs labeled DOSAGE); scores inherit that noise.",
+    "Strict scoring needs exact character offsets; lenient recall counts any overlap."
+  ]
+}
