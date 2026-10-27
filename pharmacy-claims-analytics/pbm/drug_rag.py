@@ -401,6 +401,50 @@ class LlamaQA:
             return None, raw
 
 
+class BedrockQA:
+    """Amazon Bedrock Converse API with a forced tool call so the output always matches SCHEMA.
+    `batch` answers many prompts concurrently (adaptive retries absorb throttling); results are
+    cached so the sequential evaluation loop reads them back in order."""
+
+    def __init__(self, model_id, region='us-east-1', workers=8):
+        import boto3
+        from botocore.config import Config
+        self.client = boto3.client('bedrock-runtime', region_name=region,
+                                   config=Config(retries={'mode': 'adaptive', 'max_attempts': 12}, read_timeout=120))
+        self.model_id, self.workers, self.cache = model_id, workers, {}
+
+    def _call(self, msgs):
+        system = [{'text': m['content']} for m in msgs if m['role'] == 'system']
+        conv = [{'role': m['role'], 'content': [{'text': m['content']}]} for m in msgs if m['role'] != 'system']
+        r = self.client.converse(
+            modelId=self.model_id, system=system, messages=conv,
+            inferenceConfig={'temperature': 0.0, 'maxTokens': 300},
+            toolConfig={'tools': [{'toolSpec': {'name': 'answer', 'description': 'Return the answer.',
+                                                'inputSchema': {'json': SCHEMA}}}],
+                        'toolChoice': {'tool': {'name': 'answer'}}})
+        for block in r['output']['message']['content']:
+            if 'toolUse' in block:
+                out = block['toolUse']['input']
+                ok = isinstance(out, dict) and {'answer', 'citations', 'abstain'} <= set(out)
+                return (out if ok else None), json.dumps(out)
+        return None, json.dumps(r['output']['message'])
+
+    def batch(self, all_msgs):
+        from concurrent.futures import ThreadPoolExecutor
+        todo = {json.dumps(m, sort_keys=True): m for m in all_msgs}
+        todo = {k: m for k, m in todo.items() if k not in self.cache}
+        with ThreadPoolExecutor(self.workers) as ex:
+            for k, res in zip(todo, ex.map(self._call, todo.values())):
+                self.cache[k] = res
+        log('bedrock batch', len(todo), 'prompts')
+
+    def __call__(self, msgs):
+        k = json.dumps(msgs, sort_keys=True)
+        if k not in self.cache:
+            self.cache[k] = self._call(msgs)
+        return self.cache[k]
+
+
 # ---------------------------------------------------------------- scoring
 
 def parse_routes(text):
@@ -487,7 +531,7 @@ def summarize(qs, ok, preds=None):
 
 # ---------------------------------------------------------------- run
 
-def run(out, spend_csv, n_drugs=80, raw_dir=None, model_path=None, labels_cache=None,
+def run(out, spend_csv, n_drugs=80, raw_dir=None, model_path=None, labels_cache=None, bedrock_model=None,
         labels=None, cov=None, qa=None, embed=None, boot=2000):
     out = Path(out)
     out.mkdir(parents=True, exist_ok=True)
@@ -540,7 +584,17 @@ def run(out, spend_csv, n_drugs=80, raw_dir=None, model_path=None, labels_cache=
     log('robustness', json.dumps(robustness))
 
     if qa is None:
-        qa = LlamaQA(model_path)
+        qa = BedrockQA(bedrock_model) if bedrock_model else LlamaQA(model_path)
+    if hasattr(qa, 'batch'):  # answer every prompt the loops below will ask, concurrently
+        pre = []
+        for q in qs:
+            pre += [messages(q['question']), messages(q['question'], ret.top(q['question'], 'hybrid_drug_filter'))]
+            if q['type'] == 'boxed':
+                pre.append(messages(q['question'], ret.top(q['question'], 'hybrid')))
+        for q in var:
+            if q['variant'] == 'misspelled_brand' and q['type'] == 'boxed':
+                pre += [messages(q['question'], ret.top(q['question'], m)) for m in ('hybrid_drug_filter', 'hybrid')]
+        qa.batch(pre)
     rows, closed_ok, rag_ok, closed_p, rag_p, cite, ablation = [], [], [], [], [], [], []
     t0 = time.time()
     for i, q in enumerate(qs):
@@ -602,7 +656,8 @@ def run(out, spend_csv, n_drugs=80, raw_dir=None, model_path=None, labels_cache=
                                   for t in ['route', 'boxed', 'pa_share', 'ALL'] if any(t == 'ALL' or q['type'] == t for q in qs)},
         'citations': citation,
         'base_rates': {'boxed_true_share': float(np.mean([q['gold'] for q in qs if q['type'] == 'boxed'])) if any(q['type'] == 'boxed' for q in qs) else None},
-        'generator': {'model_file': Path(model_path).name if model_path else 'injected',
+        'generator': {'model_file': bedrock_model or (Path(model_path).name if model_path else 'injected'),
+                      'backend': 'Amazon Bedrock Converse (forced tool call)' if bedrock_model else 'llama.cpp' if model_path else 'injected',
                       'decoding': 'temperature 0, JSON-schema constrained', 'top_k': TOP_K,
                       'rag_retrieval': 'hybrid (BM25 + bge-small, RRF) restricted to drugs named in the question (exact, then fuzzy >= 0.85), else to a drug that dominates the top-10 hybrid results (>= 50% of rank weight), else unfiltered'},
         'limitations': ['Question templates are simple; they test retrieval and grounding, not clinical reasoning.',
@@ -625,7 +680,10 @@ if __name__ == '__main__':
     ap.add_argument('--spend', type=Path, default=ROOT / 'reports' / 'cms_spend_by_generic.csv')
     ap.add_argument('--n', type=int, default=80)
     ap.add_argument('--raw', type=Path, default=None)
-    ap.add_argument('--model', type=Path, required=True)
+    ap.add_argument('--model', type=Path, default=None, help='GGUF file for llama.cpp')
+    ap.add_argument('--bedrock-model', default=None, help='Bedrock model or inference-profile id')
     ap.add_argument('--labels-cache', type=Path, default=None)
     a = ap.parse_args()
-    run(a.out, a.spend, a.n, a.raw, a.model, a.labels_cache)
+    if not (a.model or a.bedrock_model):
+        ap.error('give --model or --bedrock-model')
+    run(a.out, a.spend, a.n, a.raw, a.model, a.labels_cache, a.bedrock_model)

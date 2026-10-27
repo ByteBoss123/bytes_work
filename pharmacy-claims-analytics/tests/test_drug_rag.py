@@ -123,6 +123,32 @@ class DrugFilter(unittest.TestCase):
             self.assertTrue(all(c['drug'] in drugs for c in got))
 
 
+class Batching(unittest.TestCase):
+    def test_batch_prefetch_matches_sequential(self):
+        calls = []
+
+        class FakeBatch:
+            def __init__(self): self.cache = {}
+            def _call(self, msgs):
+                calls.append(1)
+                return {'answer': 'No.', 'citations': [], 'abstain': False}, 'raw'
+            def batch(self, all_msgs):
+                for m in all_msgs:
+                    k = json.dumps(m, sort_keys=True)
+                    if k not in self.cache:
+                        self.cache[k] = self._call(m)
+            def __call__(self, msgs):
+                k = json.dumps(msgs, sort_keys=True)
+                if k not in self.cache:
+                    raise AssertionError('prompt was not prefetched')
+                return self.cache[k]
+        with tempfile.TemporaryDirectory() as t:
+            p = Path(t) / 's.csv'
+            p.write_text('generic_name,drug_cost\nApixaban,9\nSemaglutide,8\nLatanoprost,7\n')
+            R.run(t, p, labels=LABELS, cov=COV, qa=FakeBatch(), embed=hash_embed, boot=20)
+        self.assertGreater(len(calls), 0)
+
+
 class EndToEnd(unittest.TestCase):
     def test_run_with_injected_components(self):
         def qa(msgs):
