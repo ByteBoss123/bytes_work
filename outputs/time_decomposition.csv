@@ -1,0 +1,5 @@
+component,share_of_elapsed,share_of_cases_with_any,median_h_if_any
+waiting in a queue for assignment,0.2524751440954516,0.4631925610228594,0.7941666666666667
+status 'Wait - User',0.37802889504438236,0.18326230143355288,20.865277777777777
+"other wait statuses (vendor, implementation, ...)",0.15717534976603412,0.12301433552886479,3.3561111111111113
+in an active status (In Progress / Assigned),0.21232061109413203,0.997675319643549,0.20333333333333334

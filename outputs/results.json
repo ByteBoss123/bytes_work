@@ -1,0 +1,453 @@
+{
+  "data_quality": {
+    "events": 65533,
+    "cases": 7554,
+    "duplicate_events": 0,
+    "out_of_order_timestamps": 0,
+    "cases_never_resolved": 8,
+    "unmatched_status_events": 5,
+    "impact_changes_within_case": 0,
+    "product_changes_within_case": 0,
+    "missing_group": 0,
+    "earliest_last_event": "2012-04-30 23:05:19+00:00",
+    "latest_last_event": "2012-05-22 23:22:25+00:00",
+    "earliest_open": "2010-03-31 14:59:42+00:00",
+    "share_opened_2012_04_or_later": 0.9568440561292031,
+    "max_abs_component_sum_error_h": 1.8189894035458565e-12
+  },
+  "selection_diagnostic": [
+    {
+      "band": "opened 1-30 April",
+      "n_cases": 2039,
+      "median_resolution_h": 215.24555555555557,
+      "share_not_resolved_7d": 0.6233447768513978,
+      "reopen_rate": 0.13634134379597843
+    },
+    {
+      "band": "opened 1-4 May (analysis cohort)",
+      "n_cases": 5168,
+      "median_resolution_h": 0.5765277777777778,
+      "share_not_resolved_7d": 0.03444272445820434,
+      "reopen_rate": 0.03444272445820434
+    },
+    {
+      "band": "opened 5-6 May",
+      "n_cases": 21,
+      "median_resolution_h": 0.15333333333333332,
+      "share_not_resolved_7d": 0.0,
+      "reopen_rate": 0.0
+    },
+    {
+      "band": "opened before April",
+      "n_cases": 326,
+      "median_resolution_h": 1459.162638888889,
+      "share_not_resolved_7d": 0.8987730061349694,
+      "reopen_rate": 0.17791411042944785
+    }
+  ],
+  "population": {
+    "resolved_incidents": 7546,
+    "analysis_cohort": 5162,
+    "cohort_rule": "resolved, opened 2012-05-01 to before 2012-05-05",
+    "slow_definition_h": 24,
+    "slow_rate": 0.20127857419604805,
+    "slow_7d_rate": 0.034482758620689655,
+    "unresolved_in_cohort_excluded": 6,
+    "median_resolution_h": 0.5765277777777778
+  },
+  "privacy": {
+    "dropped_columns": [
+      "org:resource",
+      "resource country",
+      "org:role"
+    ],
+    "min_contributors": 5,
+    "min_cell_n": 20,
+    "reportable_orgs": [
+      "Org line A2",
+      "Org line B",
+      "Org line C",
+      "Org line G4",
+      "Org line V2",
+      "Other"
+    ],
+    "suppressed_cells": {
+      "org_by_impact": 6,
+      "transfers": 0,
+      "reopen_by_resolution_time": 0
+    },
+    "total_cells": {
+      "org_by_impact": 19
+    }
+  },
+  "time_decomposition": [
+    {
+      "component": "waiting in a queue for assignment",
+      "share_of_elapsed": 0.2524751440954516,
+      "share_of_cases_with_any": 0.4631925610228594,
+      "median_h_if_any": 0.7941666666666667
+    },
+    {
+      "component": "status 'Wait - User'",
+      "share_of_elapsed": 0.37802889504438236,
+      "share_of_cases_with_any": 0.18326230143355288,
+      "median_h_if_any": 20.865277777777777
+    },
+    {
+      "component": "other wait statuses (vendor, implementation, ...)",
+      "share_of_elapsed": 0.15717534976603412,
+      "share_of_cases_with_any": 0.12301433552886479,
+      "median_h_if_any": 3.3561111111111113
+    },
+    {
+      "component": "in an active status (In Progress / Assigned)",
+      "share_of_elapsed": 0.21232061109413203,
+      "share_of_cases_with_any": 0.997675319643549,
+      "median_h_if_any": 0.20333333333333334
+    }
+  ],
+  "transfers": {
+    "ping_pong_share": 0.08310732274312282,
+    "rr_ping_pong_raw": {
+      "rr": 3.532685865590902,
+      "ci_low": 2.804776946664084,
+      "ci_high": 4.449505134370458,
+      "p_value": 8.155890183062375e-27,
+      "n": 5162
+    },
+    "rr_ping_pong_adjusted": {
+      "rr": 3.2354722064109818,
+      "ci_low": 2.751354023409028,
+      "ci_high": 3.804774052845211,
+      "p_value": 9.340384316666608e-46,
+      "n": 5162
+    },
+    "rr_ping_pong_adjusted_7d_outcome": {
+      "rr": 3.073751138992427,
+      "ci_low": 2.565486243121172,
+      "ci_high": 3.6827116457123807,
+      "p_value": 4.166550005865592e-34,
+      "n": 5162
+    },
+    "landmark": {
+      "population": "incidents still open at 4h",
+      "n": 1684,
+      "early_ping_pong_share": 0.06175771971496437,
+      "slow_rate_early_pp": 0.6442307692307693,
+      "slow_rate_no_early_pp": 0.6151898734177215,
+      "rr_raw": {
+        "rr": 1.047206394428616,
+        "ci_low": 0.8658546316396579,
+        "ci_high": 1.2665419718960063,
+        "p_value": 0.6344971048686392,
+        "n": 1684
+      },
+      "rr_adjusted": {
+        "rr": 1.1117739021585256,
+        "ci_low": 0.9170025149801312,
+        "ci_high": 1.3479147432300949,
+        "p_value": 0.28092545663392576,
+        "n": 1684
+      },
+      "e_value": {
+        "point": 1.4642895860114136,
+        "ci_bound": 1.0
+      },
+      "replication_halves": {
+        "opened_first_half": {
+          "rr": 1.217754616407819,
+          "ci_low": 0.7761237532116814,
+          "ci_high": 1.910682799806152,
+          "p_value": 0.3913313093280282,
+          "n": 842
+        },
+        "opened_second_half": {
+          "rr": 0.9887329900588355,
+          "ci_low": 0.8778965182080115,
+          "ci_high": 1.1135628235844663,
+          "p_value": 0.8518267831319523,
+          "n": 842
+        }
+      }
+    },
+    "queue_h_per_transfer": {
+      "estimate": 6.134201200928231,
+      "ci": [
+        4.733912717957578,
+        7.534489683898885
+      ]
+    },
+    "by_transfers": [
+      {
+        "transfers_bin": "0",
+        "n_cases": 3311,
+        "slow_rate": 0.07550588945937783,
+        "median_resolution_h": 0.17666666666666667,
+        "median_queue_h": 0.0
+      },
+      {
+        "transfers_bin": "1",
+        "n_cases": 1044,
+        "slow_rate": 0.35153256704980845,
+        "median_resolution_h": 8.594305555555556,
+        "median_queue_h": 0.6411111111111112
+      },
+      {
+        "transfers_bin": "2",
+        "n_cases": 494,
+        "slow_rate": 0.42105263157894735,
+        "median_resolution_h": 22.681805555555556,
+        "median_queue_h": 2.221805555555556
+      },
+      {
+        "transfers_bin": "3+",
+        "n_cases": 313,
+        "slow_rate": 0.6837060702875399,
+        "median_resolution_h": 68.22833333333334,
+        "median_queue_h": 15.967222222222222
+      }
+    ]
+  },
+  "wait_user": {
+    "lr_test_org_terms": {
+      "chi2": 91.66637389787138,
+      "df": 6,
+      "p_value": 1.3651337655010464e-17
+    },
+    "overall_usage": 0.18326230143355288,
+    "share_of_elapsed_excluded_by_wait_clock": 0.5352042448104165,
+    "org_table": [
+      {
+        "org": "Org line A2",
+        "n_cases": 445,
+        "used_wait_user_raw": 0.18651685393258427,
+        "used_wait_user_adjusted": 0.17974672127736022,
+        "median_elapsed_h": 2.7005555555555554,
+        "median_excl_wait_h": 1.2852777777777777,
+        "slow_rate_elapsed": 0.2651685393258427,
+        "slow_rate_excl_wait": 0.14831460674157304
+      },
+      {
+        "org": "Org line B",
+        "n_cases": 201,
+        "used_wait_user_raw": 0.19900497512437812,
+        "used_wait_user_adjusted": 0.19801269252619152,
+        "median_elapsed_h": 4.6194444444444445,
+        "median_excl_wait_h": 1.7325,
+        "slow_rate_elapsed": 0.2835820895522388,
+        "slow_rate_excl_wait": 0.15920398009950248
+      },
+      {
+        "org": "Org line C",
+        "n_cases": 4100,
+        "used_wait_user_raw": 0.17585365853658536,
+        "used_wait_user_adjusted": 0.17710345138195613,
+        "median_elapsed_h": 0.39236111111111116,
+        "median_excl_wait_h": 0.28847222222222224,
+        "slow_rate_elapsed": 0.18146341463414634,
+        "slow_rate_excl_wait": 0.08682926829268292
+      },
+      {
+        "org": "Org line G4",
+        "n_cases": 136,
+        "used_wait_user_raw": 0.014705882352941176,
+        "used_wait_user_adjusted": 0.01562471008372161,
+        "median_elapsed_h": 0.018472222222222223,
+        "median_excl_wait_h": 0.018472222222222223,
+        "slow_rate_elapsed": 0.058823529411764705,
+        "slow_rate_excl_wait": 0.051470588235294115
+      },
+      {
+        "org": "Org line V2",
+        "n_cases": 26,
+        "used_wait_user_raw": 0.4230769230769231,
+        "used_wait_user_adjusted": 0.37812100065951626,
+        "median_elapsed_h": 16.996388888888887,
+        "median_excl_wait_h": 3.275555555555556,
+        "slow_rate_elapsed": 0.4230769230769231,
+        "slow_rate_excl_wait": 0.23076923076923078
+      },
+      {
+        "org": "Other",
+        "n_cases": 193,
+        "used_wait_user_raw": 0.39378238341968913,
+        "used_wait_user_adjusted": 0.38658114995548964,
+        "median_elapsed_h": 8.080833333333333,
+        "median_excl_wait_h": 1.9569444444444457,
+        "slow_rate_elapsed": 0.39896373056994816,
+        "slow_rate_excl_wait": 0.21243523316062177
+      }
+    ],
+    "spearman_slow_rate_elapsed_vs_excl_wait": {
+      "rho": 1.0,
+      "p_value": 0.0,
+      "n_orgs": 6
+    },
+    "after_wait_user_spell": {
+      "resolved next": 0.44894651539708263,
+      "back to active work": 0.3727714748784441,
+      "re-queued": 0.1094003241491086,
+      "another wait / other": 0.06888168557536467
+    },
+    "n_wait_user_spells": 1234,
+    "median_wait_user_spell_h": 13.674722222222222
+  },
+  "reopen": {
+    "overall_reopen_rate": 0.034482758620689655,
+    "by_resolution_time": [
+      {
+        "res_bin": "<1h",
+        "n_cases": 2841,
+        "reopen_rate": 0.04083069341781063
+      },
+      {
+        "res_bin": "1-24h",
+        "n_cases": 1282,
+        "reopen_rate": 0.031201248049921998
+      },
+      {
+        "res_bin": "1-7d",
+        "n_cases": 861,
+        "reopen_rate": 0.022067363530778164
+      },
+      {
+        "res_bin": ">7d",
+        "n_cases": 178,
+        "reopen_rate": 0.016853932584269662
+      }
+    ],
+    "rr_fast_close_adjusted": {
+      "rr": 1.3776874335023634,
+      "ci_low": 1.0560959355965696,
+      "ci_high": 1.7972066745604605,
+      "p_value": 0.018158060953309425,
+      "n": 5162
+    }
+  },
+  "pilot_minimum_detectable_effect": {
+    "baseline_slow_rate_wait_user_cases": 0.5898520084566596,
+    "wait_user_incidents_per_weekday_in_cohort": 236.5,
+    "designs": [
+      {
+        "incidents_per_arm": 500,
+        "detectable_p_treatment": 0.501748929867173,
+        "detectable_reduction_pp": 8.810307858948663,
+        "weekdays_of_volume_needed": 4.2283298097251585
+      },
+      {
+        "incidents_per_arm": 1000,
+        "detectable_p_treatment": 0.5276834447851849,
+        "detectable_reduction_pp": 6.2168563671474715,
+        "weekdays_of_volume_needed": 8.456659619450317
+      },
+      {
+        "incidents_per_arm": 2000,
+        "detectable_p_treatment": 0.5459807998218887,
+        "detectable_reduction_pp": 4.38712086347709,
+        "weekdays_of_volume_needed": 16.913319238900634
+      },
+      {
+        "incidents_per_arm": 4000,
+        "detectable_p_treatment": 0.5588819887397475,
+        "detectable_reduction_pp": 3.0970019716912156,
+        "weekdays_of_volume_needed": 33.82663847780127
+      }
+    ]
+  },
+  "queues": {
+    "queue_entries": 4505,
+    "share_entries_off_hours": 0.2397336293007769,
+    "share_queue_time_from_off_hours_entries": 0.35871851711464753,
+    "mean_wait_ratio_off_hours": {
+      "ratio": 1.8214388311257712,
+      "ci_low": 1.5547113632810312,
+      "ci_high": 2.1339262668868244,
+      "p_value": 1.149759956967466e-13
+    },
+    "mean_wait_ratio_backlog_1_5": {
+      "ratio": 1.8316433357339454,
+      "ci_low": 1.5613429860429036,
+      "ci_high": 2.1487381948288884,
+      "p_value": 1.092716686678681e-13
+    },
+    "mean_wait_ratio_backlog_6plus": {
+      "ratio": 2.183315403465077,
+      "ci_low": 1.7257315113723664,
+      "ci_high": 2.7622293036864582,
+      "p_value": 7.661668082711607e-11
+    },
+    "rr_wait_over_1h_off_hours": {
+      "rr": 1.6148401644558432,
+      "ci_low": 1.5348458221517967,
+      "ci_high": 1.6990037169230878,
+      "p_value": 2.5954583329917532e-76,
+      "n": 4505
+    },
+    "what_if_off_hours_like_business_hours": {
+      "queue_hours_saved_per_1000_incidents": 965.5297414449697,
+      "range_from_ratio_ci": [
+        763.8750193444946,
+        1137.6545927171444
+      ],
+      "share_of_all_elapsed_time": 0.040844450938781605
+    },
+    "table": [
+      {
+        "off_hours": 0,
+        "backlog_bin": "0",
+        "n_cases": 1666,
+        "median_wait_h": 0.13624999999999998,
+        "share_wait_over_1h": 0.19627851140456182
+      },
+      {
+        "off_hours": 0,
+        "backlog_bin": "1-5",
+        "n_cases": 1151,
+        "median_wait_h": 0.39916666666666667,
+        "share_wait_over_1h": 0.34317984361424847
+      },
+      {
+        "off_hours": 0,
+        "backlog_bin": "6+",
+        "n_cases": 608,
+        "median_wait_h": 0.6718055555555555,
+        "share_wait_over_1h": 0.4407894736842105
+      },
+      {
+        "off_hours": 1,
+        "backlog_bin": "0",
+        "n_cases": 512,
+        "median_wait_h": 0.39361111111111113,
+        "share_wait_over_1h": 0.373046875
+      },
+      {
+        "off_hours": 1,
+        "backlog_bin": "1-5",
+        "n_cases": 372,
+        "median_wait_h": 1.0651388888888889,
+        "share_wait_over_1h": 0.510752688172043
+      },
+      {
+        "off_hours": 1,
+        "backlog_bin": "6+",
+        "n_cases": 196,
+        "median_wait_h": 5.016388888888889,
+        "share_wait_over_1h": 0.7142857142857143
+      }
+    ]
+  },
+  "landmark_power": {
+    "exposed": 104,
+    "unexposed": 1580,
+    "baseline": 0.6151898734177215,
+    "min_detectable_rr": 1.2138335752053677
+  },
+  "holm_adjusted_p": {
+    "ping_pong_adjusted": 5.604230589999965e-45,
+    "wait_user_org_variation": 6.825668827505232e-17,
+    "queue_off_hours": 4.599039827869864e-13,
+    "queue_backlog_6plus": 2.2985004248134818e-10,
+    "reopen_fast_close": 0.03631612190661885,
+    "landmark_early_ping_pong": 0.28092545663392576
+  }
+}

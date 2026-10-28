@@ -1,0 +1,8 @@
+numpy
+pandas>=2.2
+pyarrow
+duckdb>=1.0
+statsmodels>=0.14
+scipy
+matplotlib
+pytest

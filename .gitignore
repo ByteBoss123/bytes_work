@@ -1,0 +1,4 @@
+data/*
+!data/raw/
+__pycache__/
+.pytest_cache/
