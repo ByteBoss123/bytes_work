@@ -45,7 +45,7 @@ def _env(base, srv):
 
     return dict(os.environ, no_proxy="127.0.0.1,localhost", NO_PROXY="127.0.0.1,localhost",
                 SLURP_URL=f"{base}/slurp_real.tar.gz", SLURP_GIT=str(srv / "slurp_git"),
-                VOX1_URL=f"{base}/vox1_test_wav.zip", VERI_URL=f"{base}/veri_test2.txt",
+                VOX1_URL=f"{base}/missing.zip", VOX1_URL2=f"{base}/vox1_test_wav.zip", VERI_URL=f"{base}/veri_test2.txt",
                 VERI_URL2=f"{base}/missing.txt", LIBRI_BASE=f"{base}/nope", LIBRI_BASE2=base)
 
 

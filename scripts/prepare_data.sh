@@ -13,8 +13,10 @@ WANT=${*:-"slurp vox1test libri_test libri_train100"}
 SLURP_URL=${SLURP_URL:-https://zenodo.org/record/4274930/files/slurp_real.tar.gz}
 SLURP_GIT=${SLURP_GIT:-https://github.com/pswietojanski/slurp.git}
 VOX1_URL=${VOX1_URL:-https://huggingface.co/datasets/ProgramComputer/voxceleb/resolve/main/vox1/vox1_test_wav.zip}
+# official VGG host used by torchaudio.datasets.VoxCeleb1 (fallback)
+VOX1_URL2=${VOX1_URL2:-https://thor.robots.ox.ac.uk/~vgg/data/voxceleb/vox1a/vox1_test_wav.zip}
 VERI_URL=${VERI_URL:-https://www.robots.ox.ac.uk/~vgg/data/voxceleb/meta/veri_test2.txt}
-VERI_URL2=${VERI_URL2:-https://mm.kaist.ac.kr/datasets/voxceleb/meta/veri_test2.txt}
+VERI_URL2=${VERI_URL2:-https://thor.robots.ox.ac.uk/~vgg/data/voxceleb/meta/veri_test2.txt}
 LIBRI_BASE=${LIBRI_BASE:-https://www.openslr.org/resources/12}
 LIBRI_BASE2=${LIBRI_BASE2:-https://us.openslr.org/resources/12}
 mkdir -p "$ROOT"
@@ -74,7 +76,10 @@ if have vox1test; then
   mkdir -p vox1
   if [ ! -e vox1/wav ]; then
     need_gb 3
-    wget -q -O vox1/vox1_test_wav.zip "$VOX1_URL" || die "VoxCeleb1 test download failed"
+    wget -q -O vox1/vox1_test_wav.zip "$VOX1_URL" || { echo "  mirror failed: $VOX1_URL"; wget -q -O vox1/vox1_test_wav.zip "$VOX1_URL2"; } \
+      || die "VoxCeleb1 test download failed from both hosts"
+    python3 -c "import zipfile,sys; zipfile.ZipFile(sys.argv[1]).testzip()" vox1/vox1_test_wav.zip \
+      || die "VoxCeleb1 zip is corrupt or not a zip"
     (cd vox1 && mkdir -p _extract && { if command -v unzip >/dev/null; then unzip -q vox1_test_wav.zip -d _extract; \
       else python3 -m zipfile -e vox1_test_wav.zip _extract; fi; } && rm vox1_test_wav.zip)
     # speaker folders look like id10270/<video>/<clip>.wav; link vox1/wav to their parent
