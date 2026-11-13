@@ -11,7 +11,7 @@ cd "$(dirname "$0")/.."
 DATA=${DATA:?set DATA to a large local disk path}
 NGPU=${NGPU:-$(nvidia-smi -L 2>/dev/null | wc -l)}
 [ "$NGPU" -ge 1 ] || { echo "no GPUs found (set NGPU to override)"; exit 1; }
-STAGES=${*:-"sv sllm slu ddsd scale"}
+STAGES=${*:-${RUN_STAGES:-"sv sllm slu ddsd scale"}}
 SLLM_STEPS=${SLLM_STEPS:-3000}
 SCALE_STEPS=${SCALE_STEPS:-1500}
 # caps for a smoke test (empty = full run)
