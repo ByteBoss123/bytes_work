@@ -82,17 +82,9 @@ feats = {i: a for i, a in zip(z["ids"], z["acoustic"])}
 rows = [json.loads(line) for line in open(d / "rows.jsonl")]
 kept = [r for r in rows if ddsd.keep_utterance(r["duration"], r["hyp"])]
 present = {r["corpus"] for r in kept}
-FOLDS = [
-    {"name": "train slurp+ami -> test minds14+vox1", "train": ["slurp", "ami"], "test": ["minds14", "vox1"]},
-    {"name": "train slurp+vox1 -> test minds14+ami", "train": ["slurp", "vox1"], "test": ["minds14", "ami"]},
-    {"name": "train minds14+ami -> test slurp+vox1", "train": ["minds14", "ami"], "test": ["slurp", "vox1"]},
-    {"name": "train minds14+vox1 -> test slurp+ami", "train": ["minds14", "vox1"], "test": ["slurp", "ami"]},
-]
 res = {"backend": f"jax {jax.__version__} ({jax.default_backend()}), optax {optax.__version__}",
        "model": f"MLP {args.hidden} hidden, GELU, AdamW, early stopping", "folds": {}}
-for f in FOLDS:
-    if not set(f["train"] + f["test"]) <= present:
-        continue
+for f in ddsd.make_folds(present):
     tr_all = ddsd.balanced_sample([r for r in kept if r["corpus"] in f["train"]], args.per_corpus, args.seed)
     te = ddsd.balanced_sample([r for r in kept if r["corpus"] in f["test"]], args.per_corpus, args.seed)
     tr, te_in = ddsd.group_split(tr_all, 0.2, args.seed)       # same splits as ddsd_eval.py

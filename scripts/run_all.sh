@@ -63,7 +63,7 @@ stage data "bash scripts/prepare_data.sh $DATA $DATASETS"
 
 for st in $STAGES; do case $st in
 sv)
-  stage sv_vox "python scripts/sv_vox.py --vox_root $DATA/vox1 --out results/sv_vox1o.json"
+  stage sv_vox "[ ! -d $DATA/vox1/wav ] && echo VoxCeleb1 unavailable, skipped || python scripts/sv_vox.py --vox_root $DATA/vox1 --out results/sv_vox1o.json"
   stage sv_split "python scripts/sv_slurp.py split $S --out_dir results/sv"
   stage sv_eval "python scripts/sv_slurp.py eval $S $A --out_dir results/sv --tag pretrained $([ -n "$SV_MAX_TEST" ] && echo --max_test_per_speaker $SV_MAX_TEST) && \
                  python scripts/sv_slurp.py noise $S $A --out_dir results/sv --tag pretrained $([ -n "$SV_MAX_TEST" ] && echo --max_test_per_speaker $SV_MAX_TEST)"
@@ -74,7 +74,7 @@ sv)
   stage sv_ft "$TR scripts/sv_finetune_ddp.py $S $A $C $SV_FT_ARGS --tag main"
   stage sv_ft_eval "python scripts/sv_slurp.py eval $S $A --out_dir results/sv --ckpt runs/ecapa_ft/embedding_model_main.pt --tag finetuned $([ -n "$SV_MAX_TEST" ] && echo --max_test_per_speaker $SV_MAX_TEST) && \
                     python scripts/sv_slurp.py noise $S $A --out_dir results/sv --ckpt runs/ecapa_ft/embedding_model_main.pt --tag finetuned $([ -n "$SV_MAX_TEST" ] && echo --max_test_per_speaker $SV_MAX_TEST) && \
-                    python scripts/sv_vox.py --vox_root $DATA/vox1 --ckpt runs/ecapa_ft/embedding_model_main.pt --out results/sv_vox1o_finetuned.json"
+                    { [ ! -d $DATA/vox1/wav ] || python scripts/sv_vox.py --vox_root $DATA/vox1 --ckpt runs/ecapa_ft/embedding_model_main.pt --out results/sv_vox1o_finetuned.json; }"
   ;;
 sllm)
   stage asr_libri "python scripts/asr_whisper.py --data_root $DATA --set librispeech_test_clean --out results/asr"

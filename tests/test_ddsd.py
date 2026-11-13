@@ -112,3 +112,12 @@ def test_prepare_and_features_end_to_end(tmp_path):
     assert out.returncode == 0, out.stderr[-3000:]
     z = np.load(tmp_path / "res" / "features.npz")
     assert z["acoustic"].shape == (24, 32) and z["channel"].shape == (24, 162)
+
+
+def test_make_folds_uses_present_corpora_only():
+    f = ddsd.make_folds({"slurp", "minds14", "ami", "libri"})
+    assert len(f) == 4
+    for x in f:
+        assert not set(x["train"]) & set(x["test"])
+        assert "vox1" not in x["train"] + x["test"]
+    assert ddsd.make_folds({"slurp", "ami"}) == []

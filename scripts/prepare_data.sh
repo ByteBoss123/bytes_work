@@ -72,7 +72,7 @@ if len(missing) > 0.01 * len(want):
 PY
 fi
 
-if have vox1test; then
+if have vox1test; then ( set -e
   mkdir -p vox1
   if [ ! -e vox1/wav ]; then
     need_gb 3
@@ -102,7 +102,7 @@ print(f"Vox1-O: {len(rows)} trials (cleaned list = 37611), {len(files) - len(mis
 if missing:
     raise SystemExit(f"ERROR: {len(missing)} trial files missing, e.g. {missing[:3]}")
 PY
-fi
+) || echo "WARNING: VoxCeleb1 unavailable; continuing without it"; fi
 
 for part in test-clean train-clean-100; do
   key=libri_test; gb=2

@@ -148,3 +148,19 @@ def run_folds(rows: list[dict], feats: dict, folds: list[dict], per_corpus: int,
             }
         res[f["name"]] = fold
     return res
+
+
+def make_folds(present):
+    """Leave-corpus-out folds: every (directed, non-directed) train pair is
+    tested on the other directed corpus plus a different non-directed one."""
+    D = [c for c in ("slurp", "minds14") if c in present]
+    N = [c for c in ("ami", "vox1", "libri") if c in present]
+    folds = []
+    for d_tr in D:
+        for n_tr in N:
+            for d_te in D:
+                for n_te in N:
+                    if d_te != d_tr and n_te != n_tr:
+                        folds.append({"name": f"train {d_tr}+{n_tr} -> test {d_te}+{n_te}",
+                                      "train": [d_tr, n_tr], "test": [d_te, n_te]})
+    return folds

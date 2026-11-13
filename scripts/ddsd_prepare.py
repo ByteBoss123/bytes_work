@@ -5,7 +5,8 @@ plus one manifest.
                           MInDS-14 en-US/en-GB/en-AU (PolyAI; spoken to an e-banking voice
                           assistant over the phone, CC BY 4.0)
   non-directed (label 0): AMI ihm test (people talking to people in meetings, CC BY 4.0)
-                          VoxCeleb1 test (interviews)
+                          VoxCeleb1 test (interviews; used only if it could be downloaded)
+                          LibriSpeech test-clean (read audiobooks, CC BY 4.0)
 
   python scripts/ddsd_prepare.py --data_root /tmp/data --out /tmp/data/ddsd
 """
@@ -27,7 +28,7 @@ ap.add_argument("--data_root", required=True)
 ap.add_argument("--out", required=True)
 ap.add_argument("--max_per_corpus", type=int, default=5000, help="raw cap before the ASR-based filter")
 ap.add_argument("--seed", type=int, default=0)
-ap.add_argument("--corpora", default="slurp,minds14,ami,vox1")
+ap.add_argument("--corpora", default="slurp,minds14,ami,vox1,libri")
 ap.add_argument("--ami_repo", default="edinburghcstr/ami")
 ap.add_argument("--minds_repo", default="PolyAI/minds14")
 args = ap.parse_args()
@@ -102,13 +103,25 @@ if "slurp" in want:
         write("slurp", Path(r.file).stem, load_audio(root / "slurp_audio" / "slurp_real" / r.file), 1, r.speaker,
               sid_text[r.slurp_id])
 
-if "vox1" in want:
+if "vox1" in want and (root / "vox1" / "wav").exists():
     files = sorted((root / "vox1" / "wav").rglob("*.wav"))
     pick = rng.permutation(len(files))[: args.max_per_corpus]
     for i in sorted(pick):
         f = files[i]
         rel = f.relative_to(root / "vox1" / "wav")
         write("vox1", "_".join(rel.with_suffix("").parts), load_audio(f), 0, rel.parts[0])
+
+if "libri" in want and (root / "LibriSpeech" / "test-clean").exists():
+    trans = {}
+    for tr in sorted((root / "LibriSpeech" / "test-clean").rglob("*.trans.txt")):
+        for line in open(tr):
+            uid, text = line.strip().split(" ", 1)
+            trans[uid] = (tr.parent / f"{uid}.flac", text.lower())
+    uids = sorted(trans)
+    pick = rng.permutation(len(uids))[: args.max_per_corpus]
+    for i in sorted(pick):
+        f, text = trans[uids[i]]
+        write("libri", uids[i], load_audio(f), 0, uids[i].split("-")[0], text)
 
 if "ami" in want:
     n = 0

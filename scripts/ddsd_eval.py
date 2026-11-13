@@ -30,14 +30,8 @@ for r in kept:
     counts[r["corpus"]] = counts.get(r["corpus"], 0) + 1
 print("after the shared filter (ASR >= 4 words, 1.5-15 s):", counts)
 
-FOLDS = [
-    {"name": "train slurp+ami -> test minds14+vox1", "train": ["slurp", "ami"], "test": ["minds14", "vox1"]},
-    {"name": "train slurp+vox1 -> test minds14+ami", "train": ["slurp", "vox1"], "test": ["minds14", "ami"]},
-    {"name": "train minds14+ami -> test slurp+vox1", "train": ["minds14", "ami"], "test": ["slurp", "vox1"]},
-    {"name": "train minds14+vox1 -> test slurp+ami", "train": ["minds14", "vox1"], "test": ["slurp", "ami"]},
-]
 present = set(counts)
-folds = [f for f in FOLDS if set(f["train"] + f["test"]) <= present]
+folds = ddsd.make_folds(present)
 res = {"filtered_counts": counts, "per_corpus_cap": args.per_corpus,
        "folds": ddsd.run_folds(kept, feats, folds, args.per_corpus, args.seed)}
 json.dump(res, open(d / "ddsd_eval.json", "w"), indent=2)

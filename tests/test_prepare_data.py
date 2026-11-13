@@ -96,4 +96,6 @@ def test_prepare_data_fails_on_missing_trial_files(tmp_path, server):
     (srv / "veri_test2.txt").write_text("1 id10270/a/00001.wav id10270/a/99999.wav\n")
     out = subprocess.run(["bash", str(ROOT / "scripts" / "prepare_data.sh"), str(tmp_path / "d"), "vox1test"],
                          capture_output=True, text=True, env=_env(base, srv))
-    assert out.returncode != 0 and "trial files missing" in out.stderr + out.stdout
+    # VoxCeleb problems are reported but must not abort the other datasets
+    assert out.returncode == 0, out.stderr
+    assert "trial files missing" in out.stderr + out.stdout and "VoxCeleb1 unavailable" in out.stdout
