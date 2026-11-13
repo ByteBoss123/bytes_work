@@ -121,3 +121,19 @@ def test_make_folds_uses_present_corpora_only():
         assert not set(x["train"]) & set(x["test"])
         assert "vox1" not in x["train"] + x["test"]
     assert ddsd.make_folds({"slurp", "ami"}) == []
+
+
+def test_corpus_standardize_removes_corpus_offsets():
+    rows = [{"corpus": "A"}] * 50 + [{"corpus": "B"}] * 50
+    rng = np.random.default_rng(0)
+    X = np.r_[rng.normal(5, 1, (50, 3)), rng.normal(-5, 2, (50, 3))]
+    Z = ddsd.corpus_standardize(rows, X)
+    assert np.allclose(Z[:50].mean(0), 0, atol=1e-6) and np.allclose(Z[50:].std(0), 1, atol=1e-3)
+
+
+def test_corpus_norm_folds_run():
+    rows, feats = _synthetic([("A", 1), ("B", 0), ("C", 1), ("D", 0)])
+    res = ddsd.run_folds(rows, feats, [{"name": "f", "train": ["A", "B"], "test": ["C", "D"]}], per_corpus=300,
+                         corpus_norm=True)
+    # after per-corpus z-scoring the corpus fingerprint carries no label information
+    assert abs(res["f"]["models"]["channel_only"]["in_domain"]["auc"] - 0.5) < 0.2

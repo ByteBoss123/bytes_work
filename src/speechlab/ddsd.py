@@ -104,7 +104,18 @@ def _text_model():
 FEATURE_SETS = ("length_only", "channel_only", "text", "acoustic", "fusion")
 
 
-def fit_predict(train: list[dict], test: list[dict], feats: dict) -> dict[str, np.ndarray]:
+def corpus_standardize(rows: list[dict], X: np.ndarray) -> np.ndarray:
+    """Z-score features within each corpus using only that corpus's own
+    unlabelled statistics (per-domain normalisation; no labels involved)."""
+    X = X.astype(np.float64).copy()
+    corp = np.array([r["corpus"] for r in rows])
+    for c in np.unique(corp):
+        m = corp == c
+        X[m] = (X[m] - X[m].mean(0)) / (X[m].std(0) + 1e-6)
+    return X
+
+
+def fit_predict(train: list[dict], test: list[dict], feats: dict, corpus_norm: bool = False) -> dict[str, np.ndarray]:
     """feats[id] -> {'channel','length','acoustic'} arrays; rows carry 'hyp'.
     Returns P(directed) on the test rows for every feature set."""
     y = np.array([r["label"] for r in train])
@@ -112,6 +123,8 @@ def fit_predict(train: list[dict], test: list[dict], feats: dict) -> dict[str, n
     for name, key in (("length_only", "length"), ("channel_only", "channel"), ("acoustic", "acoustic")):
         Xtr = np.stack([feats[r["id"]][key] for r in train])
         Xte = np.stack([feats[r["id"]][key] for r in test])
+        if corpus_norm:
+            Xtr, Xte = corpus_standardize(train, Xtr), corpus_standardize(test, Xte)
         out[name] = _dense_model().fit(Xtr, y).predict_proba(Xte)[:, 1]
     tm = _text_model().fit([r["hyp"] for r in train], y)
     out["text"] = tm.predict_proba([r["hyp"] for r in test])[:, 1]
@@ -128,7 +141,8 @@ def score(labels, probs) -> dict:
             "n": int(len(labels)), "n_directed": int(labels.sum())}
 
 
-def run_folds(rows: list[dict], feats: dict, folds: list[dict], per_corpus: int, seed: int = 0) -> dict:
+def run_folds(rows: list[dict], feats: dict, folds: list[dict], per_corpus: int, seed: int = 0,
+              corpus_norm: bool = False) -> dict:
     """folds: [{'name', 'train': [corpora], 'test': [corpora]}] (disjoint corpora).
     Reports in-domain (speaker-held-out within the train corpora) and
     cross-corpus scores for every feature set."""
@@ -138,8 +152,8 @@ def run_folds(rows: list[dict], feats: dict, folds: list[dict], per_corpus: int,
         tr_all = balanced_sample([r for r in rows if r["corpus"] in f["train"]], per_corpus, seed)
         te = balanced_sample([r for r in rows if r["corpus"] in f["test"]], per_corpus, seed)
         tr, te_in = group_split(tr_all, 0.2, seed)
-        p_in = fit_predict(tr, te_in, feats)
-        p_x = fit_predict(tr, te, feats)
+        p_in = fit_predict(tr, te_in, feats, corpus_norm)
+        p_x = fit_predict(tr, te, feats, corpus_norm)
         fold = {"train_corpora": f["train"], "test_corpora": f["test"], "n_train": len(tr), "models": {}}
         for name in FEATURE_SETS:
             fold["models"][name] = {

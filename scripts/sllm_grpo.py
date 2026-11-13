@@ -43,6 +43,8 @@ ap.add_argument("--eval_every", type=int, default=50)
 ap.add_argument("--eval_n", type=int, default=300)
 ap.add_argument("--eval_batch", type=int, default=16)
 ap.add_argument("--seed", type=int, default=0)
+ap.add_argument("--dynamic_sampling", type=int, default=0, help="skip/mask groups with identical rewards (DAPO)")
+ap.add_argument("--token_level", type=int, default=0, help="token-level loss normalisation (DAPO)")
 args = ap.parse_args()
 
 random.seed(args.seed)
@@ -110,7 +112,8 @@ for step in range(1, args.steps + 1):
     st = G.sllm_grpo_step(model, tok, feats.to(device, dtype=enc_dtype), n, pieces,
                           [golds[train[i]["slurp_id"]] for i in idx], S.slu_reward, opt, device,
                           group=args.group, beta=args.beta, temperature=args.temperature,
-                          scaler=scaler if cuda else None, autocast=cuda)
+                          scaler=scaler if cuda else None, autocast=cuda,
+                          dynamic_sampling=bool(args.dynamic_sampling), token_level=bool(args.token_level))
     rec = {"step": step, **{k: round(v, 4) for k, v in st.__dict__.items()}}
     if step % args.eval_every == 0 or step == args.steps:
         r, pr = dev_reward()
@@ -123,6 +126,7 @@ for step in range(1, args.steps + 1):
 out = Path(args.out_dir)
 out.mkdir(parents=True, exist_ok=True)
 model.llm.save_pretrained(out / "lora")
-json.dump({"sft_dir": args.sft_dir, "steps": args.steps, "prompts_per_step": args.prompts, "group": args.group,
+json.dump({"sft_dir": args.sft_dir, "dynamic_sampling": args.dynamic_sampling, "token_level": args.token_level,
+           "temperature": args.temperature, "steps": args.steps, "prompts_per_step": args.prompts, "group": args.group,
            "beta": args.beta, "lr": args.lr, "train_recordings": len(train), "dev_recordings": len(dev),
            "minutes": round((time.time() - t0) / 60, 1), "log": log}, open(out / "grpo_stats.json", "w"), indent=2)

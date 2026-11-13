@@ -171,7 +171,8 @@ def test_sv_slurp_pipeline_end_to_end(tmp_path):
     _run(base + ["eval"] + common + ["--audio_dir", str(audio), "--device", "cpu", "--cohort_size", "20",
                                      "--num_workers", "0"])
     res = json.load(open(od / "sv_slurp_pretrained.json"))
-    assert set(res["conditions"]) == {"headset->headset", "headset->farfield", "farfield->farfield", "farfield->headset"}
+    assert set(res["conditions"]) == {"headset->headset", "headset->farfield", "farfield->farfield", "farfield->headset",
+                                      "mixed->farfield"}
     assert res["conditions"]["headset->farfield"]["same_take_trials_excluded"] == 9
     _run(base + ["noise"] + common + ["--audio_dir", str(audio), "--device", "cpu", "--cohort_size", "20",
                                       "--num_workers", "0", "--snrs", "10,0"])
@@ -214,3 +215,31 @@ def test_duration_batches_cap_padded_audio(tmp_path):
     for b in batches:
         assert len(b) <= 3
         assert len(b) == 1 or max(lens[i] for i in b) * len(b) <= 100
+
+
+def test_mixed_enrollment_has_both_mics_and_no_twins(tmp_path):
+    ann, _ = make_slurp(tmp_path, n_speakers=6, utts_per_speaker=10)
+    recs = S.load_recordings(ann)
+    _, test = S.speaker_disjoint_split(recs, n_test_speakers=3, min_per_condition=5)
+    tr = S.build_trials(recs, test, enroll_farfield="mixed", test_farfield=True, n_enroll=3)
+    info = {r.file: r for r in recs}
+    for files in tr.enroll_files:
+        far = [info[f].farfield for f in files]
+        assert far.count(False) == 2 and far.count(True) == 1
+        assert len({info[f].recid for f in files}) == 3  # no headset/far-field twin pair inside one enrollment
+
+
+def test_sv_libri_script(tmp_path):
+    import soundfile as sf
+
+    for spk in ("11", "22", "33"):
+        d = tmp_path / "LibriSpeech" / "test-clean" / spk / "1"
+        d.mkdir(parents=True)
+        for k in range(3):
+            t = np.arange(16000) / 16000
+            sf.write(d / f"{spk}-1-{k:04d}.flac", (0.3 * np.sin(2 * np.pi * (100 + int(spk)) * t)).astype(np.float32), 16000)
+    out = tmp_path / "r.json"
+    r = _run([sys.executable, "scripts/sv_libri.py", "--libri_root", str(tmp_path / "LibriSpeech"), "--parts", "test-clean",
+              "--out", str(out), "--device", "cpu", "--num_workers", "0"])
+    res = json.load(open(out))["parts"]["test-clean"]
+    assert res["trials"] == 36 and res["target_trials"] == 9

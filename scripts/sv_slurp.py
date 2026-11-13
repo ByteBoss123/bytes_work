@@ -31,6 +31,7 @@ CONDITIONS = [  # (name, enroll_farfield, test_farfield)
     ("headset->farfield", False, True),
     ("farfield->farfield", True, True),
     ("farfield->headset", True, False),
+    ("mixed->farfield", "mixed", True),   # enroll on 2 headset + 1 far-field take
 ]
 
 

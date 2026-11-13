@@ -132,7 +132,7 @@ class TrialSet:
 def build_trials(
     recs: list[Recording],
     test_speakers: set[str],
-    enroll_farfield: bool,
+    enroll_farfield,
     test_farfield: bool,
     n_enroll: int = 3,
     max_test_per_speaker: int | None = None,
@@ -155,8 +155,15 @@ def build_trials(
 
     enroll_speakers, enroll_files, enroll_recids = [], [], []
     for s in sorted(by_spk):
-        pool = by_spk[s][enroll_farfield]
-        chosen = rng.sample(pool, n_enroll)
+        if enroll_farfield == "mixed":  # multi-condition enrollment: headset + far-field takes
+            n_far = n_enroll // 2
+            head = rng.sample(by_spk[s][False], n_enroll - n_far)
+            used = {r.recid for r in head}
+            far_pool = [r for r in by_spk[s][True] if r.recid not in used]  # never a twin of a headset pick
+            chosen = head + rng.sample(far_pool, n_far)
+        else:
+            pool = by_spk[s][bool(enroll_farfield)]
+            chosen = rng.sample(pool, n_enroll)
         enroll_speakers.append(s)
         enroll_files.append([r.file for r in chosen])
         enroll_recids.append({r.recid for r in chosen})

@@ -104,11 +104,20 @@ def completion_mask(comp: torch.Tensor, eos: int):
     return (ar <= first[:, None]).long(), first
 
 
-def policy_update(score, peft_model, c_mask, rewards, group, beta, opt, scaler, autocast) -> GRPOStats:
+def policy_update(score, peft_model, c_mask, rewards, group, beta, opt, scaler, autocast,
+                  dynamic_sampling: bool = False, token_level: bool = False) -> GRPOStats:
     """Shared GRPO update. score() -> per-token log-probs of the sampled
     completions under the current network; the reference is the same call
     inside peft_model.disable_adapter()."""
     adv = group_advantages(rewards, group)
+    rg = rewards.view(-1, group)
+    informative = (rg.std(1, unbiased=False) > 1e-6).repeat_interleave(group)
+    if dynamic_sampling and not bool(informative.any()):
+        # DAPO-style dynamic sampling: groups whose samples all scored the same
+        # carry no advantage signal, so the step is skipped instead of letting
+        # the KL term alone move the policy
+        return GRPOStats(loss=0.0, reward_mean=float(rewards.mean()), reward_std=float(rewards.std(unbiased=False)),
+                         zero_var_groups=1.0, kl=0.0, completion_len=float(c_mask.float().sum(1).mean()))
     with torch.autocast("cuda", dtype=torch.float16, enabled=autocast):
         with torch.no_grad(), peft_model.disable_adapter():
             ref_lp = score()
@@ -118,7 +127,14 @@ def policy_update(score, peft_model, c_mask, rewards, group, beta, opt, scaler, 
     pg = -(ratio * adv[:, None])
     d = ref_lp - lp
     kl = torch.exp(d) - d - 1                               # k3 estimator
-    loss = (((pg + beta * kl) * m).sum(1) / m.sum(1).clamp(min=1)).mean()
+    if dynamic_sampling:  # drop uninformative groups from the loss
+        m = m * informative.float()[:, None]
+    per_tok = (pg + beta * kl) * m
+    if token_level:  # DAPO token-level normalisation: long answers are not down-weighted
+        loss = per_tok.sum() / m.sum().clamp(min=1)
+    else:
+        rows = m.sum(1) > 0
+        loss = (per_tok.sum(1)[rows] / m.sum(1)[rows]).mean()
     params = [p for g in opt.param_groups for p in g["params"]]
     opt.zero_grad(set_to_none=True)
     if scaler is not None:
@@ -131,13 +147,12 @@ def policy_update(score, peft_model, c_mask, rewards, group, beta, opt, scaler, 
         loss.backward()
         torch.nn.utils.clip_grad_norm_(params, 1.0)
         opt.step()
-    rg = rewards.view(-1, group)
     return GRPOStats(
         loss=float(loss.item()),
         reward_mean=float(rewards.mean()),
         reward_std=float(rewards.std(unbiased=False)),
         zero_var_groups=float((rg.std(1, unbiased=False) < 1e-6).float().mean()),
-        kl=float(((kl.detach() * m).sum() / m.sum()).item()),
+        kl=float(((kl.detach() * m).sum() / m.sum().clamp(min=1)).item()),
         completion_len=float(m.sum(1).mean()),
     )
 
@@ -180,7 +195,8 @@ def embeds_logprobs(llm, prompt_emb, prompt_mask, comp, c_mask):
 
 def sllm_grpo_step(sllm, tok, input_features, n_samples, pieces, golds: list, reward_fn, opt, device,
                    group: int = 4, beta: float = 0.04, temperature: float = 1.0, max_new_tokens: int = 96,
-                   scaler=None, autocast: bool = False) -> GRPOStats:
+                   scaler=None, autocast: bool = False, dynamic_sampling: bool = False,
+                   token_level: bool = False) -> GRPOStats:
     """GRPO step for the end-to-end speech LLM (audio -> JSON). The audio
     path (frozen encoder + frozen projector) is computed once per prompt and
     shared by policy and reference; only the LLM's GRPO LoRA is updated."""
@@ -201,4 +217,4 @@ def sllm_grpo_step(sllm, tok, input_features, n_samples, pieces, golds: list, re
     rewards = torch.tensor([reward_fn(t, g) for t, g in zip(texts, gold_rep)], device=device, dtype=torch.float32)
     sllm.llm.train()
     return policy_update(lambda: embeds_logprobs(sllm.llm, emb, mask, comp, c_mask), sllm.llm, c_mask, rewards,
-                         group, beta, opt, scaler, autocast)
+                         group, beta, opt, scaler, autocast, dynamic_sampling, token_level)

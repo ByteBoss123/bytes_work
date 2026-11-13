@@ -183,3 +183,22 @@ def test_speech_llm_scoring_matches_generation_and_grpo_runs():
     assert np.isfinite(st.loss)
     changed = {k for k, v in m.named_parameters() if not torch.equal(v, before[k])}
     assert changed and all("lora_" in k for k in changed), changed
+
+
+def test_dynamic_sampling_skips_uninformative_groups():
+    import torch
+    from peft import LoraConfig, get_peft_model
+
+    os.environ["SPEECHLAB_TEST_TINY"] = "1"
+    from speechlab import grpo as G
+    from speechlab.speechllm import tiny_llm
+
+    llm, tok = tiny_llm()
+    model = get_peft_model(llm, LoraConfig(r=4, lora_alpha=8, lora_dropout=0.0, target_modules=["q_proj", "v_proj"]))
+    opt = torch.optim.Adam([p for p in model.parameters() if p.requires_grad], lr=1e-2)
+    before = {k: v.clone() for k, v in model.named_parameters() if v.requires_grad}
+    c_mask = torch.ones(4, 3, dtype=torch.long)
+    st = G.policy_update(lambda: torch.zeros(4, 3, requires_grad=True), model, c_mask,
+                         torch.tensor([1.0, 1.0, 0.0, 0.0]), 2, 0.04, opt, None, False, dynamic_sampling=True)
+    assert st.zero_var_groups == 1.0 and st.loss == 0.0
+    assert all(torch.equal(v, before[k]) for k, v in model.named_parameters() if v.requires_grad)

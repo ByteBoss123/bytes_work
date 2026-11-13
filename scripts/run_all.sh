@@ -113,6 +113,30 @@ scale)
                     --max_per_set $SCALE_EVAL_MAX --out results/sllm_scale_$1"
   done
   ;;
+sllm_big)  # weakness 1: bigger LLM, all of train-clean-100, 2x steps
+  stage sllm3b_train "$TR scripts/sllm_train.py --data_root $DATA --llm Qwen/Qwen2.5-3B-Instruct --out_dir runs/sllm3b \
+                      --batch 4 --grad_accum $(accum 4) --max_steps ${SLLM_BIG_STEPS:-6000} --libri_max 0"
+  stage sllm3b_eval "python scripts/sllm_eval.py --data_root $DATA --llm Qwen/Qwen2.5-3B-Instruct --run_dir runs/sllm3b --out results/sllm3b"
+  ;;
+sllm_grpo2)  # weakness 2: DAPO-style dynamic sampling, token-level loss, larger groups
+  stage sllm_grpo2 "python scripts/sllm_grpo.py --data_root $DATA --sft_dir runs/sllm --out_dir runs/sllm_grpo2 \
+                    --steps ${GRPO2_STEPS:-400} --prompts 4 --group 8 --temperature 1.2 --lr 5e-5 \
+                    --dynamic_sampling 1 --token_level 1"
+  stage sllm_grpo2_eval "python scripts/sllm_eval.py --data_root $DATA --run_dir runs/sllm --grpo_dir runs/sllm_grpo2 --out results/sllm_grpo2"
+  ;;
+sv2)  # weakness 3 + 6: gentler fine-tune, mixed enrollment, LibriSpeech SV check
+  stage sv2_eval_mixed "python scripts/sv_slurp.py eval $S $A --out_dir results/sv --tag pretrained"
+  stage sv2_ft_gentle "$TR scripts/sv_finetune_ddp.py $S $A $C --freeze_blocks 3 --lr 2e-5 --epochs 1 --p_babble 0.8 --tag gentle"
+  stage sv2_eval_gentle "python scripts/sv_slurp.py eval $S $A --out_dir results/sv --ckpt runs/ecapa_ft/embedding_model_gentle.pt --tag finetuned_gentle && \
+                         python scripts/sv_slurp.py noise $S $A --out_dir results/sv --ckpt runs/ecapa_ft/embedding_model_gentle.pt --tag finetuned_gentle"
+  stage sv2_libri "python scripts/sv_libri.py --libri_root $DATA/LibriSpeech --parts test-clean --out results/sv_libri_pretrained.json && \
+                   python scripts/sv_libri.py --libri_root $DATA/LibriSpeech --parts test-clean --ckpt runs/ecapa_ft/embedding_model_gentle.pt --out results/sv_libri_gentle.json"
+  ;;
+ddsd_v2)  # weakness 4 + 5: per-corpus normalisation, JAX model selection
+  stage ddsd_cnorm "python scripts/ddsd_eval.py --feat_dir results/ddsd --corpus_norm 1"
+  stage ddsd_jax_sel "python scripts/ddsd_jax.py --feat_dir results/ddsd --select 1"
+  stage ddsd_jax_cnorm "python scripts/ddsd_jax.py --feat_dir results/ddsd --select 1 --corpus_norm 1"
+  ;;
 *) echo "unknown stage $st" ;;
 esac; done
 
