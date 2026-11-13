@@ -1,0 +1,14 @@
+# torch / torchaudio: use the CUDA build preinstalled on Kaggle
+speechbrain==1.1.2
+transformers==5.22.2
+peft==0.21.2
+tokenizers
+jiwer>=3.0
+soundfile
+tqdm
+tabulate
+progress
+textdistance
+datasets
+pyarrow
+scikit-learn
