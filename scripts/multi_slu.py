@@ -62,27 +62,44 @@ def pick(ex, keys):
     raise KeyError(f"none of {keys} in {sorted(ex)}")
 
 
+def _hf_retry(fn, what, tries=8):
+    """Anonymous Hugging Face requests get HTTP 429 under load: back off and retry."""
+    for k in range(tries):
+        try:
+            return fn()
+        except Exception as e:  # noqa: BLE001
+            msg = str(e)
+            if "429" not in msg and "Too Many Requests" not in msg and k >= 2:
+                raise
+            wait = min(300, 30 * 2 ** k)
+            print(f"{what}: {msg[:120]} -> retry in {wait}s", flush=True)
+            time.sleep(wait)
+    raise RuntimeError(f"{what}: gave up after {tries} tries")
+
+
 def stream(lang, split):
-    """Yield rows of <lang>/<split>-*.parquet. Downloads whole parquet files
-    with huggingface_hub (resumable, timeouts) and reads them with pyarrow,
-    instead of datasets streaming, which stalled on this repo."""
+    """Rows of <lang>/<split>-*.parquet. Lists only that language's folder
+    (one small request, not the whole repo tree), then downloads shards one
+    at a time and only as many as the row cap needs."""
     import pyarrow.parquet as pq
 
     if Path(args.repo).exists():  # local parquet copy (tests)
         files = sorted(str(p) for p in (Path(args.repo) / lang).glob(f"{split}*.parquet"))
+        fetch = lambda f: f  # noqa: E731
     else:
         from huggingface_hub import HfApi, hf_hub_download
 
-        names = [f for f in HfApi().list_repo_files(args.repo, repo_type="dataset")
-                 if f.startswith(f"{lang}/{split}-") and f.endswith(".parquet")]
-        print(f"{lang}/{split}: {len(names)} parquet files", flush=True)
-        files = [hf_hub_download(args.repo, f, repo_type="dataset", etag_timeout=60) for f in sorted(names)]
+        tree = _hf_retry(lambda: list(HfApi().list_repo_tree(args.repo, path_in_repo=lang, repo_type="dataset")),
+                         f"list {lang}")
+        files = sorted(t.path for t in tree if t.path.startswith(f"{lang}/{split}-") and t.path.endswith(".parquet"))
+        fetch = lambda f: _hf_retry(lambda: hf_hub_download(args.repo, f, repo_type="dataset"), f"get {f}")  # noqa: E731
+        print(f"{lang}/{split}: {len(files)} parquet shards", flush=True)
     if not files:
         raise FileNotFoundError(f"no parquet for {lang}/{split}")
 
-    def rows():  # files are resolved eagerly above so missing languages fail at call time
+    def rows():  # shards are fetched lazily, so stopping at the cap skips the rest
         for f in files:
-            for batch in pq.ParquetFile(f).iter_batches(batch_size=64):
+            for batch in pq.ParquetFile(fetch(f)).iter_batches(batch_size=64):
                 yield from batch.to_pylist()
 
     return rows()
