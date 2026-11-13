@@ -45,7 +45,7 @@ stage() {  # stage NAME CMD...
   if [ -f "logs/$name.done" ]; then echo "skip $name (done)"; return 0; fi
   echo "=== $name  $(date -u +%FT%TZ)"
   if [ -n "${DRY_RUN:-}" ]; then echo "  $*" | tr -s ' '; return 0; fi
-  if bash -euo pipefail -c "$*" > "logs/$name.log" 2>&1; then
+  if bash -euo pipefail -c "$*" 2>&1 | tee "logs/$name.log" | sed -u "s/^/[$name] /"; then
     touch "logs/$name.done"; echo "ok $name"
   else
     echo "FAILED $name (see logs/$name.log)"; tail -20 "logs/$name.log"

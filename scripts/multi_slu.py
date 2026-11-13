@@ -63,14 +63,29 @@ def pick(ex, keys):
 
 
 def stream(lang, split):
-    from datasets import Audio, load_dataset
+    """Yield rows of <lang>/<split>-*.parquet. Downloads whole parquet files
+    with huggingface_hub (resumable, timeouts) and reads them with pyarrow,
+    instead of datasets streaming, which stalled on this repo."""
+    import pyarrow.parquet as pq
 
     if Path(args.repo).exists():  # local parquet copy (tests)
-        ds = load_dataset("parquet", data_files=str(Path(args.repo) / lang / f"{split}*.parquet"), split="train",
-                          streaming=True)
+        files = sorted(str(p) for p in (Path(args.repo) / lang).glob(f"{split}*.parquet"))
     else:
-        ds = load_dataset(args.repo, lang, split=split, streaming=True)
-    return ds.cast_column("audio", Audio(decode=False))
+        from huggingface_hub import HfApi, hf_hub_download
+
+        names = [f for f in HfApi().list_repo_files(args.repo, repo_type="dataset")
+                 if f.startswith(f"{lang}/{split}-") and f.endswith(".parquet")]
+        print(f"{lang}/{split}: {len(names)} parquet files", flush=True)
+        files = [hf_hub_download(args.repo, f, repo_type="dataset", etag_timeout=60) for f in sorted(names)]
+    if not files:
+        raise FileNotFoundError(f"no parquet for {lang}/{split}")
+
+    def rows():  # files are resolved eagerly above so missing languages fail at call time
+        for f in files:
+            for batch in pq.ParquetFile(f).iter_batches(batch_size=64):
+                yield from batch.to_pylist()
+
+    return rows()
 
 
 def decode(a):
