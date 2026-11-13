@@ -16,6 +16,7 @@ SYSTEM = "You are a helpful voice assistant."
 TASKS = {
     "asr": "Transcribe the audio exactly, in lower case.",
     "slu": "Parse the voice-assistant request in the audio into JSON with scenario, action and entities.",
+    "intent": "Name the intent of the spoken voice-assistant request. Answer with the intent label only.",
 }
 SAMPLES_PER_ENC_FRAME = 320  # whisper: hop 160 samples, conv stride 2
 MAX_ENC_FRAMES = 1500        # 30 s

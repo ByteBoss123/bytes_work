@@ -7,3 +7,4 @@ results/**/*.npz
 data/
 .pytest_cache/
 .ruff_cache/
+logs/

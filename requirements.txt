@@ -12,3 +12,5 @@ textdistance
 datasets
 pyarrow
 scikit-learn
+jax
+optax

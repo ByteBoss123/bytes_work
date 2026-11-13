@@ -96,6 +96,12 @@ ddsd)
   stage ddsd_prepare "python scripts/ddsd_prepare.py --data_root $DATA --out $DATA/ddsd --max_per_corpus $DDSD_MAX"
   stage ddsd_features "python scripts/ddsd_features.py --ddsd_dir $DATA/ddsd --out results/ddsd"
   stage ddsd_eval "python scripts/ddsd_eval.py --feat_dir results/ddsd"
+  stage ddsd_jax "python scripts/ddsd_jax.py --feat_dir results/ddsd"
+  ;;
+multi)
+  stage multi_prepare "python scripts/multi_slu.py prepare --data $DATA/smassive --train_per_lang ${MULTI_TRAIN_PER_LANG:-6000} --eval_per_lang ${MULTI_EVAL_PER_LANG:-500}"
+  stage multi_train "python scripts/multi_slu.py train --data $DATA/smassive --run_dir runs/multi --steps ${MULTI_STEPS:-1500}"
+  stage multi_eval "python scripts/multi_slu.py eval --data $DATA/smassive --run_dir runs/multi --out results/multi"
   ;;
 scale)
   for spec in "0.5B Qwen/Qwen2.5-0.5B-Instruct 8" "1.5B Qwen/Qwen2.5-1.5B-Instruct 8" "3B Qwen/Qwen2.5-3B-Instruct 4"; do
